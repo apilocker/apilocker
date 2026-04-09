@@ -4,6 +4,44 @@ All notable changes to the `apilocker` CLI are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-04-09 — "Partial OAuth rotation + seamless vault-backed sign-in"
+
+### CLI additions
+
+- **`apilocker rotate <alias> --field <name>`** — partial rotation for OAuth credentials. You can now rotate just the `client_secret` or `refresh_token` field of an OAuth credential without touching `client_id`, `authorize_url`, `token_url`, `scopes`, or `redirect_uri`. The server decrypts the existing blob, merges the new field, re-encrypts, and bumps `rotated_at`. Scoped tokens keep working. Example:
+
+  ```bash
+  apilocker rotate "API Locker - Google" --field client_secret
+  ```
+
+  `--field` accepts `client_secret` or `refresh_token`. Passing `--field` to an `api_key`-type credential is rejected with a clear error.
+
+### API additions (backend, CLI consumer)
+
+- **`POST /v1/keys/:keyId/rotate`** now supports partial OAuth rotation. Body shape for `api_key` stays `{ key: "<new-value>" }`; for `oauth2` credentials the new body is `{ client_secret?: "...", refresh_token?: "..." }`. The response includes `rotated_fields` so the CLI and dashboard can show which fields changed.
+- **Audit log format for OAuth rotations** now records which fields were swapped — e.g. `/rotate:client_secret` vs `/rotate:client_secret,refresh_token` — so the activity feed shows the exact scope of a rotation.
+
+### Vault-backed OAuth sign-in (the big one)
+
+- The API Worker now **reads its own Google and GitHub OAuth credentials from the vault at runtime**, via a new `src/vault-client.ts` helper that decrypts directly from KV + D1 with a 60s in-memory cache. This replaces the previous model of storing those credentials as wrangler-level secrets (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, etc.), which required a manual `wrangler secret put` after every rotation.
+- After this change, rotating the Worker's own OAuth secrets is a one-paste operation: rotate in Google Cloud Console / GitHub, paste into the dashboard Rotate Secret modal, and production picks up the new value within 60 seconds. Zero manual sync. Zero shell pipes. Zero literal-vs-placeholder paste mistakes.
+- **Dynamic OAuth sign-in provider registry** — new `src/oauth-providers.ts` file defines each supported provider (Google, GitHub, LinkedIn, Slack, Microsoft) with authorize URL, token URL, user-info URL, scopes, and user-info mapper. Routes `/v1/auth/:provider` and `/v1/auth/:provider/callback` are now generic — adding a new sign-in provider is (a) one object in `oauth-providers.ts`, (b) storing the credential in the vault under the matching `vault_key_name`, (c) deploy. No HTML edits anywhere — the login, signup, and CLI-auth pages all fetch `GET /v1/auth/providers` and render buttons dynamically.
+- New discovery endpoint: **`GET /v1/auth/providers`** returns only the providers with a matching credential in the vault, so the login page never renders a broken button.
+
+### Dashboard additions
+
+- **Rotate Secret button on OAuth credential cards.** Previously OAuth cards only had Reveal. The new green rotate icon opens a modal with "New client secret" and optional "New refresh token" inputs, and submits a partial rotation via the new API endpoint. Other fields (client_id, authorize_url, etc.) are preserved untouched.
+- **Dynamic login buttons.** `/login`, `/signup`, and `/cli-auth` pages now fetch `/v1/auth/providers` on load and render buttons dynamically. Old hardcoded Google/GitHub buttons removed.
+
+### Packaging + repository
+
+- **Monorepo on GitHub.** Source code now lives at https://github.com/apilocker/apilocker in a monorepo structure (`api/`, `cli/`, `site/`). `cli/package.json` `repository.url` updated to point at the monorepo with `directory: "cli"`. `homepage` and `bugs` links updated to the GitHub repo.
+- **`apilocker get <alias> --field <name>`** is confirmed working for OAuth credentials — prints a single field value to stdout. Previously documented but users on stale CLI installs (<v1.0.0) saw "unknown option" errors; upgrading to v1.0.1 fixes it.
+
+### Notes
+
+- Wrangler secret cleanup: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` are no longer needed as wrangler secrets. They can be deleted (and already have been on production). The only Worker-level OAuth config is now `APILOCKER_SERVICE_USER_ID`, which identifies which vault user owns the sign-in credentials.
+
 ## [1.0.0] — 2026-04-08 — "One vault, three types of credentials"
 
 ### MCP server parity (the three-surface principle, honored)

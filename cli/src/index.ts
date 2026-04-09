@@ -29,7 +29,7 @@ const program = new Command();
 program
   .name('apilocker')
   .description('API Locker — one vault for LLM keys, service API keys, and OAuth credentials')
-  .version('1.0.0');
+  .version('1.0.1');
 
 // Auth / device management
 program.addCommand(registerCommand);
