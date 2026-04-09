@@ -4,6 +4,15 @@ All notable changes to the `apilocker` CLI are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] — 2026-04-09 — "MCP Registry publishing"
+
+### Registry / discoverability
+
+- **Published to the official MCP Registry** at `registry.modelcontextprotocol.io` under the namespace `io.github.apilocker/apilocker`. AI tools and MCP clients can now discover API Locker via the canonical registry.
+- **Added `mcpName` field to `package.json`** — required by the MCP Registry's package ownership verification. No runtime impact; pure metadata.
+
+No other changes. This is a metadata-only release to unlock registry publishing.
+
 ## [1.0.1] — 2026-04-09 — "Partial OAuth rotation + seamless vault-backed sign-in"
 
 ### CLI additions

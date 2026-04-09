@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.apilocker/apilocker",
+  "title": "API Locker",
+  "description": "Encrypted credential vault: LLM, service & OAuth keys. 21-tool MCP server for your AI agent.",
+  "websiteUrl": "https://www.apilocker.app",
+  "repository": {
+    "url": "https://github.com/apilocker/apilocker",
+    "source": "github",
+    "subfolder": "cli"
+  },
+  "version": "1.0.2",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "apilocker",
+      "version": "1.0.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "npx",
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ]
+    }
+  ]
+}
