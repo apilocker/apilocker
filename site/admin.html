@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — API Locker</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      padding: 48px 0 80px;
+    }
+    .admin-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .admin-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .admin-head h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin: 0 0 4px 0;
+    }
+    .admin-head p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+    .admin-refresh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .admin-refresh-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 900px) { .metric-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .metric-grid { grid-template-columns: 1fr; } }
+    .metric-card {
+      padding: 22px 24px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+    .metric-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .panel {
+      padding: 28px 32px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .panel h2 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0 0 16px 0;
+      color: var(--ink);
+    }
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .breakdown-item {
+      padding: 14px 16px;
+      background: var(--card);
+      border-radius: 10px;
+    }
+    .breakdown-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .breakdown-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .provider-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 13px;
+    }
+    .provider-row + .provider-row {
+      border-top: 1px solid var(--line);
+    }
+    .provider-bar {
+      height: 6px;
+      background: var(--card);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .provider-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--blue-deep) 100%);
+      border-radius: 999px;
+    }
+    .provider-count {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+    .admin-error, .admin-loading {
+      padding: 60px 40px;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--muted);
+    }
+    .admin-error h2 {
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .hidden { display: none !important; }
+    .generated-at {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    /* ==================== Launch tracking charts ==================== */
+
+    /* Funnel */
+    .funnel-stage {
+      margin-bottom: 12px;
+    }
+    .funnel-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .funnel-stage-name {
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .funnel-stage-count {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .funnel-bar-track {
+      height: 28px;
+      background: var(--card);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .funnel-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--blue-deep) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      transition: width 0.6s ease-out;
+    }
+
+    /* DAU sparkline */
+    #dau-chart {
+      width: 100%;
+      height: 180px;
+    }
+    #dau-chart svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Pillar adoption bars */
+    .pillar-bar {
+      margin-bottom: 14px;
+    }
+    .pillar-bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .pillar-bar-name {
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .pillar-bar-count {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pillar-bar-track {
+      height: 10px;
+      background: var(--card);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .pillar-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+    .pillar-bar-fill.llm { background: linear-gradient(90deg, #8B5CF6 0%, #6D28D9 100%); }
+    .pillar-bar-fill.service { background: linear-gradient(90deg, #3B82F6 0%, #1E3A8A 100%); }
+    .pillar-bar-fill.oauth { background: linear-gradient(90deg, #10B981 0%, #047857 100%); }
+    .pillar-bar-fill.all { background: linear-gradient(90deg, #F59E0B 0%, #B45309 100%); }
+
+    /* Cohort grid */
+    .cohort-table {
+      border-collapse: collapse;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .cohort-table th, .cohort-table td {
+      padding: 8px 10px;
+      text-align: center;
+      border: 1px solid var(--line);
+      min-width: 56px;
+    }
+    .cohort-table th {
+      background: var(--card);
+      font-weight: 700;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+    }
+    .cohort-cell {
+      color: white;
+      font-weight: 700;
+    }
+    .cohort-cell-empty {
+      background: var(--card);
+      color: var(--muted);
+      opacity: 0.4;
+    }
+    .cohort-row-label {
+      background: var(--card);
+      font-weight: 700;
+      color: var(--ink);
+      text-align: left;
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    /* Heatmap */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: 60px repeat(24, 1fr);
+      gap: 2px;
+      font-size: 10px;
+    }
+    .heatmap-corner {
+      background: transparent;
+    }
+    .heatmap-hour-label {
+      text-align: center;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 9px;
+      padding: 2px 0;
+    }
+    .heatmap-day-label {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 11px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      background: var(--card);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .heatmap-cell:hover {
+      transform: scale(1.15);
+      outline: 1px solid var(--ink);
+    }
+
+    /* Geo */
+    .geo-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 100px;
+      gap: 14px;
+      align-items: center;
+      padding: 8px 0;
+    }
+    .geo-row + .geo-row {
+      border-top: 1px solid var(--line);
+    }
+    .geo-flag {
+      font-size: 18px;
+      text-align: center;
+    }
+    .geo-bar {
+      height: 6px;
+      background: var(--card);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .geo-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--blue-deep) 100%);
+      border-radius: 999px;
+    }
+    .geo-count {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-shell">
+    <div class="admin-head">
+      <div>
+        <h1>Admin</h1>
+        <p>API Locker beta metrics. Refresh anytime.</p>
+      </div>
+      <button class="admin-refresh-btn" id="refresh-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Loading state -->
+    <div class="admin-loading" id="admin-loading">Loading metrics…</div>
+
+    <!-- Error state -->
+    <div class="admin-error hidden" id="admin-error">
+      <h2>Access denied</h2>
+      <p id="admin-error-msg">You don't have permission to view this page.</p>
+    </div>
+
+    <!-- Content -->
+    <div class="hidden" id="admin-content">
+
+      <!-- Top-level stat cards -->
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label">Total users</div>
+          <div class="metric-value" id="stat-users">—</div>
+          <div class="metric-sub" id="stat-users-sub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Credentials stored</div>
+          <div class="metric-value" id="stat-creds">—</div>
+          <div class="metric-sub" id="stat-creds-sub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active tokens</div>
+          <div class="metric-value" id="stat-tokens">—</div>
+          <div class="metric-sub" id="stat-tokens-sub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Activity (24h)</div>
+          <div class="metric-value" id="stat-activity">—</div>
+          <div class="metric-sub" id="stat-activity-sub">—</div>
+        </div>
+      </div>
+
+      <!-- Credentials breakdown -->
+      <div class="panel">
+        <h2>Credentials by category</h2>
+        <div class="breakdown-grid">
+          <div class="breakdown-item">
+            <div class="breakdown-label">LLM keys</div>
+            <div class="breakdown-value" id="cat-llm">0</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Service keys</div>
+            <div class="breakdown-value" id="cat-service">0</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">OAuth credentials</div>
+            <div class="breakdown-value" id="cat-oauth">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top providers -->
+      <div class="panel">
+        <h2>Top providers</h2>
+        <div id="top-providers"></div>
+      </div>
+
+      <!-- Devices -->
+      <div class="panel">
+        <h2>Devices</h2>
+        <div class="breakdown-grid">
+          <div class="breakdown-item">
+            <div class="breakdown-label">Active</div>
+            <div class="breakdown-value" id="dev-active">0</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Revoked</div>
+            <div class="breakdown-value" id="dev-revoked">0</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Total</div>
+            <div class="breakdown-value" id="dev-total">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           LAUNCH TRACKING (v1.0.0 Tier 1)
+           ============================================================ -->
+
+      <h2 style="font-size: 22px; margin: 48px 0 6px 0; letter-spacing: -0.018em;">Launch tracking</h2>
+      <p style="color: var(--muted); font-size: 13px; margin: 0 0 24px 0;">Real product analytics — funnels, retention, time-to-value, geographic distribution.</p>
+
+      <!-- Onboarding funnel -->
+      <div class="panel">
+        <h2>Onboarding funnel</h2>
+        <p style="font-size: 12px; color: var(--muted); margin: -8px 0 16px 0;">Of everyone who signed up, how many completed each stage?</p>
+        <div id="funnel"></div>
+      </div>
+
+      <!-- Time to value -->
+      <div class="panel">
+        <h2>Time to value</h2>
+        <p style="font-size: 12px; color: var(--muted); margin: -8px 0 16px 0;">Average time between funnel stages (computed across users who completed both ends).</p>
+        <div class="breakdown-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="breakdown-item">
+            <div class="breakdown-label">Signup → Register CLI</div>
+            <div class="breakdown-value" id="ttv-1">—</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Register → Store first key</div>
+            <div class="breakdown-value" id="ttv-2">—</div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-label">Store → First usage</div>
+            <div class="breakdown-value" id="ttv-3">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily active users -->
+      <div class="panel">
+        <h2>Daily active users (last 30 days)</h2>
+        <p style="font-size: 12px; color: var(--muted); margin: -8px 0 16px 0;">Distinct users who made a proxy call or revealed a credential each day.</p>
+        <div id="dau-chart"></div>
+      </div>
+
+      <!-- Pillar adoption -->
+      <div class="panel">
+        <h2>Three-pillar adoption</h2>
+        <p style="font-size: 12px; color: var(--muted); margin: -8px 0 16px 0;">Of users with at least one credential stored, how many use each type?</p>
+        <div id="pillar-bars"></div>
+      </div>
+
+      <!-- Retention cohorts -->
+      <div class="panel">
+        <h2>Weekly retention cohorts</h2>
+        <p style="font-size: 12px; color: var(--muted); margin: -8px 0 16px 0;">Of users who signed up week N, how many were still active in subsequent weeks. Each cell shows the retained percentage.</p>
+        <div id="cohort-grid" style="overflow-x: auto;"></div>
+      </div>
+
+      <!-- Activity heatmap -->
+      <div class="panel">
+        <h2>Activity heatmap (UTC, last 7 days)</h2>
+        <p style="font-size: 12px; color: var(--muted); margin: -8px 0 16px 0;">When are users actually using the product? Hours are UTC.</p>
+        <div id="heatmap"></div>
+      </div>
+
+      <!-- Geo distribution -->
+      <div class="panel">
+        <h2>Geographic distribution (last 30 days)</h2>
+        <p style="font-size: 12px; color: var(--muted); margin: -8px 0 16px 0;">Top countries by request volume. Country data captured from CF-IPCountry on every audit log starting v1.0.0.</p>
+        <div id="geo"></div>
+      </div>
+
+      <div class="generated-at" id="generated-at"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://api.apilocker.app';
+    const $ = (id) => document.getElementById(id);
+
+    async function load() {
+      $('admin-loading').classList.remove('hidden');
+      $('admin-content').classList.add('hidden');
+      $('admin-error').classList.add('hidden');
+
+      try {
+        const res = await fetch(`${API}/v1/admin/metrics`, { credentials: 'include' });
+        if (res.status === 401) {
+          showError('You need to sign in first.', 'Go to /login to sign in.');
+          return;
+        }
+        if (res.status === 404) {
+          showError('Not found', 'You do not have admin access. (If you believe this is an error, set the ADMIN_USER_IDS worker secret to include your user ID.)');
+          return;
+        }
+        if (!res.ok) {
+          showError('Could not load metrics', `HTTP ${res.status}`);
+          return;
+        }
+        const data = await res.json();
+        render(data);
+      } catch (e) {
+        showError('Network error', e.message);
+      }
+    }
+
+    function showError(title, msg) {
+      $('admin-loading').classList.add('hidden');
+      $('admin-content').classList.add('hidden');
+      $('admin-error').classList.remove('hidden');
+      $('admin-error').querySelector('h2').textContent = title;
+      $('admin-error-msg').textContent = msg;
+    }
+
+    function render(m) {
+      $('admin-loading').classList.add('hidden');
+      $('admin-content').classList.remove('hidden');
+
+      // Users
+      $('stat-users').textContent = (m.users.total || 0).toLocaleString();
+      $('stat-users-sub').textContent =
+        `${m.users.new_last_7d} new in 7d · ${m.users.logged_in_last_7d} active`;
+
+      // Credentials
+      $('stat-creds').textContent = (m.credentials.total || 0).toLocaleString();
+      const byType = m.credentials.by_credential_type || {};
+      const typeParts = [];
+      if (byType.api_key) typeParts.push(`${byType.api_key} api_key`);
+      if (byType.oauth2) typeParts.push(`${byType.oauth2} oauth2`);
+      if (m.credentials.paused) typeParts.push(`${m.credentials.paused} paused`);
+      $('stat-creds-sub').textContent = typeParts.join(' · ') || '—';
+
+      // Tokens
+      $('stat-tokens').textContent = (m.tokens.active || 0).toLocaleString();
+      $('stat-tokens-sub').textContent =
+        `${m.tokens.total} total · ${m.tokens.revoked} revoked`;
+
+      // Activity
+      $('stat-activity').textContent = (m.activity.last_24h || 0).toLocaleString();
+      $('stat-activity-sub').textContent =
+        `${m.activity.last_7d} in 7d · ${m.activity.last_30d} in 30d`;
+
+      // Categories
+      const cats = m.credentials.by_category || {};
+      $('cat-llm').textContent = cats.llm || 0;
+      $('cat-service').textContent = cats.service || 0;
+      $('cat-oauth').textContent = cats.oauth || 0;
+
+      // Top providers
+      const providers = m.top_providers || [];
+      const maxCount = providers.reduce((max, p) => Math.max(max, p.count || 0), 0);
+      const providersHtml = providers.length
+        ? providers.map(p => {
+            const pct = maxCount ? Math.round((p.count / maxCount) * 100) : 0;
+            return `
+              <div class="provider-row">
+                <div>${escapeHtml(p.provider)}</div>
+                <div class="provider-count">${p.count}</div>
+                <div class="provider-bar"><div class="provider-bar-fill" style="width: ${pct}%"></div></div>
+              </div>
+            `;
+          }).join('')
+        : '<div class="generated-at">No providers yet.</div>';
+      $('top-providers').innerHTML = providersHtml;
+
+      // Devices
+      $('dev-active').textContent = m.devices.active || 0;
+      $('dev-revoked').textContent = m.devices.revoked || 0;
+      $('dev-total').textContent = m.devices.total || 0;
+
+      // ---- Launch tracking renders ----
+      const lt = m.launch_tracking || {};
+      renderFunnel(lt.funnel || {});
+      renderTimeToValue(lt.time_to_value_seconds || {});
+      renderDauChart(lt.dau_series || []);
+      renderPillarBars(lt.pillar_adoption || {});
+      renderCohortGrid(lt.retention_cohorts || []);
+      renderHeatmap(lt.activity_heatmap || []);
+      renderGeo(lt.geo || []);
+
+      $('generated-at').textContent = `Generated ${m.generated_at}`;
+    }
+
+    // ===================== Funnel =====================
+    function renderFunnel(funnel) {
+      const stages = [
+        { key: 'signups', label: 'Signed up' },
+        { key: 'registered_cli', label: 'Registered CLI' },
+        { key: 'stored_credential', label: 'Stored a credential' },
+        { key: 'first_usage', label: 'First usage (proxy or reveal)' },
+      ];
+      const top = funnel.signups || 0;
+      const html = stages.map(s => {
+        const count = funnel[s.key] || 0;
+        const pct = top ? Math.round((count / top) * 100) : 0;
+        const fillPct = top ? Math.max(8, (count / top) * 100) : 0;
+        return `
+          <div class="funnel-stage">
+            <div class="funnel-label">
+              <span class="funnel-stage-name">${s.label}</span>
+              <span class="funnel-stage-count">${count.toLocaleString()} · ${pct}%</span>
+            </div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar-fill" style="width: ${fillPct}%">${pct}%</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      $('funnel').innerHTML = html;
+    }
+
+    // ===================== Time to value =====================
+    function fmtDuration(seconds) {
+      if (seconds == null || seconds < 0) return '—';
+      if (seconds < 60) return `${Math.round(seconds)}s`;
+      if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+      if (seconds < 86400) return `${(seconds / 3600).toFixed(1)}h`;
+      return `${(seconds / 86400).toFixed(1)}d`;
+    }
+    function renderTimeToValue(ttv) {
+      $('ttv-1').textContent = fmtDuration(ttv.signup_to_register);
+      $('ttv-2').textContent = fmtDuration(ttv.register_to_store);
+      $('ttv-3').textContent = fmtDuration(ttv.store_to_use);
+    }
+
+    // ===================== DAU sparkline =====================
+    function renderDauChart(series) {
+      const container = $('dau-chart');
+      if (!series.length) {
+        container.innerHTML = '<div style="color: var(--muted); font-size: 13px; padding: 60px 0; text-align: center;">No activity yet. Once users start making proxy or reveal calls, this chart will populate.</div>';
+        return;
+      }
+
+      // Build a 30-day window with zeros for missing days
+      const days = [];
+      const now = new Date();
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 86400000);
+        const iso = d.toISOString().slice(0, 10);
+        const found = series.find(s => s.date === iso);
+        days.push({ date: iso, active: found ? found.active_users : 0 });
+      }
+
+      const max = Math.max(1, ...days.map(d => d.active));
+      const w = 800, h = 160, padX = 30, padY = 20;
+      const innerW = w - padX * 2;
+      const innerH = h - padY * 2;
+      const stepX = innerW / (days.length - 1);
+      const points = days.map((d, i) => {
+        const x = padX + i * stepX;
+        const y = padY + innerH - (d.active / max) * innerH;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ');
+      const areaPoints = `${padX},${padY + innerH} ${points} ${padX + innerW},${padY + innerH}`;
+
+      // Y-axis labels (max, midway, 0)
+      const yLabels = [
+        { y: padY, label: max },
+        { y: padY + innerH / 2, label: Math.round(max / 2) },
+        { y: padY + innerH, label: 0 },
+      ];
+
+      const svg = `
+        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="dauGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          ${yLabels.map(l => `
+            <line x1="${padX}" y1="${l.y}" x2="${padX + innerW}" y2="${l.y}" stroke="rgba(15,23,42,0.06)" stroke-dasharray="2,4" />
+            <text x="${padX - 6}" y="${l.y + 4}" font-size="10" font-family="'JetBrains Mono', monospace" fill="#94A3B8" text-anchor="end">${l.label}</text>
+          `).join('')}
+          <polygon points="${areaPoints}" fill="url(#dauGrad)" />
+          <polyline points="${points}" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          ${days.map((d, i) => {
+            const x = padX + i * stepX;
+            const y = padY + innerH - (d.active / max) * innerH;
+            return `<circle cx="${x}" cy="${y}" r="2.5" fill="#3B82F6" />`;
+          }).join('')}
+          <text x="${padX}" y="${h - 4}" font-size="9" font-family="'JetBrains Mono', monospace" fill="#94A3B8">${days[0].date}</text>
+          <text x="${padX + innerW}" y="${h - 4}" font-size="9" font-family="'JetBrains Mono', monospace" fill="#94A3B8" text-anchor="end">${days[days.length - 1].date}</text>
+        </svg>
+      `;
+      container.innerHTML = svg;
+    }
+
+    // ===================== Pillar adoption bars =====================
+    function renderPillarBars(pa) {
+      const total = pa.total_users_with_any_credential || 0;
+      const bars = [
+        { key: 'with_llm', name: 'LLM API Keys', cls: 'llm', count: pa.with_llm || 0 },
+        { key: 'with_service', name: 'Service API Keys', cls: 'service', count: pa.with_service || 0 },
+        { key: 'with_oauth', name: 'OAuth Credentials', cls: 'oauth', count: pa.with_oauth || 0 },
+        { key: 'with_all_three', name: 'Users with all three pillars', cls: 'all', count: pa.with_all_three || 0 },
+      ];
+      const html = bars.map(b => {
+        const pct = total ? Math.round((b.count / total) * 100) : 0;
+        return `
+          <div class="pillar-bar">
+            <div class="pillar-bar-label">
+              <span class="pillar-bar-name">${b.name}</span>
+              <span class="pillar-bar-count">${b.count} of ${total} (${pct}%)</span>
+            </div>
+            <div class="pillar-bar-track">
+              <div class="pillar-bar-fill ${b.cls}" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      $('pillar-bars').innerHTML = html || '<div style="color: var(--muted); font-size: 13px;">No credentials stored yet.</div>';
+    }
+
+    // ===================== Cohort grid =====================
+    function renderCohortGrid(rows) {
+      if (!rows.length) {
+        $('cohort-grid').innerHTML = '<div style="color: var(--muted); font-size: 13px; padding: 12px 0;">Not enough data yet. Cohorts populate as users sign up and return in subsequent weeks.</div>';
+        return;
+      }
+
+      // Aggregate into a map: cohort_week -> { cohort_size, weeks: { offset: active } }
+      const cohortMap = {};
+      let maxOffset = 0;
+      for (const r of rows) {
+        if (!cohortMap[r.cohort_week]) {
+          cohortMap[r.cohort_week] = { size: r.cohort_size, weeks: {} };
+        }
+        cohortMap[r.cohort_week].weeks[r.weeks_offset] = r.active;
+        if (r.weeks_offset > maxOffset) maxOffset = r.weeks_offset;
+      }
+
+      const cohortKeys = Object.keys(cohortMap).sort();
+      const offsets = [];
+      for (let i = 0; i <= Math.min(maxOffset, 12); i++) offsets.push(i);
+
+      let html = '<table class="cohort-table"><thead><tr>';
+      html += '<th>Cohort</th>';
+      html += '<th>Size</th>';
+      offsets.forEach(o => { html += `<th>W+${o}</th>`; });
+      html += '</tr></thead><tbody>';
+
+      cohortKeys.forEach(cohort => {
+        const c = cohortMap[cohort];
+        html += `<tr><td class="cohort-row-label">${cohort}</td>`;
+        html += `<td class="cohort-row-label" style="text-align: right;">${c.size}</td>`;
+        offsets.forEach(o => {
+          const active = c.weeks[o];
+          if (active == null) {
+            html += `<td class="cohort-cell-empty">—</td>`;
+          } else {
+            const pct = c.size ? Math.round((active / c.size) * 100) : 0;
+            // Color intensity by retention %
+            const opacity = 0.15 + (pct / 100) * 0.75;
+            html += `<td class="cohort-cell" style="background: rgba(59, 130, 246, ${opacity.toFixed(2)});" title="${active} of ${c.size}">${pct}%</td>`;
+          }
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      $('cohort-grid').innerHTML = html;
+    }
+
+    // ===================== Heatmap =====================
+    function renderHeatmap(rows) {
+      if (!rows.length) {
+        $('heatmap').innerHTML = '<div style="color: var(--muted); font-size: 13px; padding: 12px 0;">No activity in the last 7 days.</div>';
+        return;
+      }
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      // Map (day, hour) → count
+      const grid = {};
+      let max = 0;
+      for (const r of rows) {
+        const k = `${r.day_of_week}-${r.hour_of_day}`;
+        grid[k] = r.calls;
+        if (r.calls > max) max = r.calls;
+      }
+
+      let html = '<div class="heatmap-grid">';
+      // Top row: corner + hours
+      html += '<div class="heatmap-corner"></div>';
+      for (let h = 0; h < 24; h++) {
+        html += `<div class="heatmap-hour-label">${h}</div>`;
+      }
+      // Day rows
+      for (let d = 0; d < 7; d++) {
+        html += `<div class="heatmap-day-label">${dayNames[d]}</div>`;
+        for (let h = 0; h < 24; h++) {
+          const count = grid[`${d}-${h}`] || 0;
+          const opacity = max ? Math.max(0.05, count / max) : 0.05;
+          const bg = count
+            ? `rgba(59, 130, 246, ${opacity.toFixed(2)})`
+            : 'var(--card)';
+          html += `<div class="heatmap-cell" style="background: ${bg};" title="${dayNames[d]} ${h}:00 — ${count} calls"></div>`;
+        }
+      }
+      html += '</div>';
+      $('heatmap').innerHTML = html;
+    }
+
+    // ===================== Geo =====================
+    function countryFlag(code) {
+      // Convert 2-letter ISO code to flag emoji via regional indicators
+      if (!code || code.length !== 2) return '🌐';
+      const upper = code.toUpperCase();
+      const offset = 0x1F1E6 - 0x41;
+      return String.fromCodePoint(upper.charCodeAt(0) + offset, upper.charCodeAt(1) + offset);
+    }
+    function renderGeo(rows) {
+      if (!rows.length) {
+        $('geo').innerHTML = '<div style="color: var(--muted); font-size: 13px; padding: 12px 0;">No geographic data yet. Country tagging on audit logs starts with the v1.0.0 deploy.</div>';
+        return;
+      }
+      const max = Math.max(1, ...rows.map(r => r.calls));
+      const html = rows.map(r => {
+        const pct = (r.calls / max) * 100;
+        return `
+          <div class="geo-row">
+            <div class="geo-flag">${countryFlag(r.country)}</div>
+            <div>
+              <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">${escapeHtml(r.country)}</div>
+              <div class="geo-bar"><div class="geo-bar-fill" style="width: ${pct}%"></div></div>
+            </div>
+            <div class="geo-count">${r.calls.toLocaleString()}</div>
+          </div>
+        `;
+      }).join('');
+      $('geo').innerHTML = html;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    $('refresh-btn').addEventListener('click', load);
+    load();
+  </script>
+</body>
+</html>

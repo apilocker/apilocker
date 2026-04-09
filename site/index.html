@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Locker — One vault for LLM keys, service API keys, and OAuth credentials</title>
+  <meta name="description" content="One encrypted vault, three types of credentials: LLM API keys, service API keys, and OAuth credentials. Replace your .env file with one token. Smart proxy, automatic rotation, and AI-agent access included." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+
+  <style>
+    /* ==================== v1.0.0: THREE PILLARS ==================== */
+    .pillars-section {
+      padding: 80px 0 40px;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+    @media (max-width: 960px) {
+      .pillars-grid { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .pillar-card {
+      padding: 32px 28px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    }
+    .pillar-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .pillar-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: white;
+      margin-bottom: 18px;
+    }
+    .pillar-icon-llm {
+      background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+      box-shadow: 0 10px 28px -10px rgba(139, 92, 246, 0.45);
+    }
+    .pillar-icon-service {
+      background: linear-gradient(135deg, #3B82F6 0%, #1E3A8A 100%);
+      box-shadow: 0 10px 28px -10px rgba(59, 130, 246, 0.45);
+    }
+    .pillar-icon-oauth {
+      background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+      box-shadow: 0 10px 28px -10px rgba(16, 185, 129, 0.45);
+    }
+    .pillar-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin: 0 0 4px 0;
+    }
+    .pillar-sub {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 14px 0;
+    }
+    .pillar-body {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-2);
+      margin: 0 0 16px 0;
+    }
+    .pillar-body code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: var(--card);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .pillar-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .pillar-list li {
+      font-size: 13px;
+      color: var(--ink-2);
+      padding: 5px 0 5px 20px;
+      position: relative;
+    }
+    .pillar-list li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--blue);
+      opacity: 0.35;
+    }
+    .pillar-llm .pillar-list li::before { background: #8B5CF6; }
+    .pillar-service .pillar-list li::before { background: var(--blue); }
+    .pillar-oauth .pillar-list li::before { background: #10B981; }
+  </style>
+
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <span class="logo-mark">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        API Locker
+      </a>
+      <div class="nav-links">
+        <a href="#pillars">What's stored</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/docs/mcp">Docs</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <a href="/login" class="nav-signin">Log in</a>
+        <a href="/signup" class="nav-cta">
+          Sign up
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="container hero-inner">
+      <span class="eyebrow reveal"><span class="eyebrow-dot"></span> Now in public beta</span>
+      <h1 class="h1 reveal delay-1">Replace your <span class="h1-mono">.env</span> file<br>with one token.</h1>
+      <p class="lede reveal delay-2">Encrypted vault, automatic rotation, and a smart proxy for every API your app talks to. One credential in, every provider out — your raw keys never leave the vault.</p>
+      <div class="cta-row reveal delay-3">
+        <a href="/signup" class="btn btn-primary">
+          Get started free
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#features" class="btn btn-secondary">
+          See how it works
+        </a>
+      </div>
+
+      <!-- Before/after .env comparison -->
+      <div class="env-compare reveal delay-4">
+        <div class="env-card env-before">
+          <div class="env-card-head">
+            <span class="env-label">Before</span>
+            <span class="env-count">14 secrets · plain text · scattered</span>
+          </div>
+<pre class="env-body"><span class="env-dim"># .env</span>
+<span class="env-key">OPENAI_API_KEY</span>=<span class="env-val">sk-proj-••••••••••••••</span>
+<span class="env-key">ANTHROPIC_API_KEY</span>=<span class="env-val">sk-ant-••••••••••••••</span>
+<span class="env-key">STRIPE_SECRET_KEY</span>=<span class="env-val">sk_live_•••••••••••••</span>
+<span class="env-key">STRIPE_WEBHOOK_SECRET</span>=<span class="env-val">whsec_••••••••••••</span>
+<span class="env-key">RESEND_API_KEY</span>=<span class="env-val">re_••••••••••••••••••</span>
+<span class="env-key">SUPABASE_SERVICE_ROLE_KEY</span>=<span class="env-val">eyJhb••••••••</span>
+<span class="env-key">SENTRY_DSN</span>=<span class="env-val">https://•••••••••••••••</span>
+<span class="env-key">GITHUB_TOKEN</span>=<span class="env-val">ghp_••••••••••••••••••</span>
+<span class="env-key">POSTHOG_API_KEY</span>=<span class="env-val">phc_••••••••••••••••</span>
+<span class="env-key">CLOUDINARY_API_SECRET</span>=<span class="env-val">••••••••••••</span>
+<span class="env-key">TWILIO_AUTH_TOKEN</span>=<span class="env-val">••••••••••••••••••••</span>
+<span class="env-key">GOOGLE_CLIENT_SECRET</span>=<span class="env-val">GOCSPX-••••••••••••</span>
+<span class="env-key">GROQ_API_KEY</span>=<span class="env-val">gsk_•••••••••••••••••</span>
+<span class="env-key">MUX_TOKEN_SECRET</span>=<span class="env-val">••••••••••••••••••••</span></pre>
+        </div>
+
+        <div class="env-arrow">
+          <div class="env-arrow-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+        <div class="env-card env-after">
+          <div class="env-card-head">
+            <span class="env-label env-label-ok">After</span>
+            <span class="env-count">1 token · encrypted · auto-rotating</span>
+          </div>
+<pre class="env-body"><span class="env-dim"># .env</span>
+<span class="env-key">APILOCKER_REFRESH_TOKEN</span>=<span class="env-val">rtk_••••••••</span>
+
+
+
+
+
+
+
+
+<span class="env-dim"># that's it.</span>
+<span class="env-dim"># every provider above is reachable</span>
+<span class="env-dim"># through one SDK call:</span>
+<span class="env-dim"># </span><span class="env-comment">await apilocker.proxy('openai', ...)</span>
+<span class="env-dim"># </span><span class="env-comment">await apilocker.proxy('stripe', ...)</span>
+<span class="env-dim"># </span><span class="env-comment">await apilocker.proxy('resend', ...)</span></pre>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== THREE PILLARS (v1.0.0) ===================== -->
+  <section class="section pillars-section" id="pillars">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag"><span class="eyebrow-dot"></span> Three pillars</span>
+        <h2 class="h2">One vault, three types of credentials.</h2>
+        <p class="h2-sub">Every secret a developer needs to keep safe, organized into categories that match how real apps are built.</p>
+      </div>
+
+      <div class="pillars-grid">
+
+        <!-- Pillar 1: LLM keys -->
+        <div class="pillar-card pillar-llm reveal">
+          <div class="pillar-icon pillar-icon-llm">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3 3 3 0 0 0-2 5.5A3 3 0 0 0 6.5 14a3 3 0 0 0 2 5.5 3 3 0 0 0 3 2.5 3 3 0 0 0 3-2.5 3 3 0 0 0 2-5.5 3 3 0 0 0 .5-3.5A3 3 0 0 0 15 5a3 3 0 0 0-3-3z"/><path d="M12 9v6"/><path d="M9 12h6"/></svg>
+          </div>
+          <h3 class="pillar-title">LLM API Keys</h3>
+          <p class="pillar-sub">OpenAI, Anthropic, Gemini, Groq, Mistral.</p>
+          <p class="pillar-body">Keep your AI workloads secure while you ship. Inject model keys directly into your code with <code>apilocker run</code> — no more OpenAI keys in <code>.env</code> files or accidentally committed to git.</p>
+          <ul class="pillar-list">
+            <li>Zero-config provider templates for every major LLM</li>
+            <li>Rotate keys without redeploying</li>
+            <li>Per-key usage telemetry and anomaly alerts</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2: Service API keys -->
+        <div class="pillar-card pillar-service reveal delay-1">
+          <div class="pillar-icon pillar-icon-service">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3 class="pillar-title">Service API Keys</h3>
+          <p class="pillar-sub">Stripe, Twilio, Resend, ElevenLabs, Sentry, and everything else.</p>
+          <p class="pillar-body">Replace every <code>.env</code> file in your project with one token. 15+ provider templates come pre-configured; anything else works via "Custom." Your code still reads <code>process.env.STRIPE_SECRET_KEY</code> — just don't put it in a file anymore.</p>
+          <ul class="pillar-list">
+            <li>19+ built-in provider templates, custom for the rest</li>
+            <li>Smart proxy route with audit logs on every call</li>
+            <li>Pause/resume individual keys during incident response</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 3: OAuth credentials -->
+        <div class="pillar-card pillar-oauth reveal delay-2">
+          <div class="pillar-icon pillar-icon-oauth">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h3 class="pillar-title">OAuth Credentials</h3>
+          <p class="pillar-sub">Google, GitHub, Slack, Microsoft, Notion, Spotify, and more.</p>
+          <p class="pillar-body">Store full OAuth credential sets — client ID, client secret, refresh token, scopes — as a single named credential. <code>apilocker run</code> injects every field as its own env var. Nango-quality OAuth management at solo-dev prices.</p>
+          <ul class="pillar-list">
+            <li>14 OAuth provider templates with pre-filled endpoints</li>
+            <li>Multi-field encrypted storage, per-field reveal</li>
+            <li>One-command injection via <code>apilocker run</code></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURES INTRO ===================== -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag"><span class="eyebrow-dot"></span> Features</span>
+        <h2 class="h2">Built for how you ship.</h2>
+        <p class="h2-sub">A quiet layer between your apps and the APIs they call. Encrypted, observable, and invisible by default.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SPLIT 1 : VAULT ===================== -->
+  <section class="section" id="vault" style="padding-top: 0;">
+    <div class="container">
+      <div class="split">
+        <div class="split-text reveal">
+          <span class="label">Encrypted vault</span>
+          <h3>Your keys, locked behind device-bound auth.</h3>
+          <p>Every credential is encrypted at rest with a master token bound to your machine. Rotate on a schedule, issue scoped tokens per project, and revoke instantly — without touching the underlying key.</p>
+          <div class="split-ctas">
+            <a href="https://www.npmjs.com/package/apilocker" class="btn btn-primary btn-sm">Install the CLI</a>
+            <a href="#" class="btn btn-secondary btn-sm">Read the docs</a>
+          </div>
+        </div>
+        <div class="ui-card reveal delay-1">
+          <div class="ui-card-head">
+            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
+            <span class="ui-card-title">vault.enc</span>
+          </div>
+          <div class="vault">
+            <div class="vault-item">
+              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></div>
+              <div>
+                <div class="vault-name">openai</div>
+                <div class="vault-meta">sk-proj-••••</div>
+              </div>
+            </div>
+            <div class="vault-item">
+              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/></svg></div>
+              <div>
+                <div class="vault-name">anthropic</div>
+                <div class="vault-meta">sk-ant-••••</div>
+              </div>
+            </div>
+            <div class="vault-item">
+              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div>
+              <div>
+                <div class="vault-name">stripe</div>
+                <div class="vault-meta">sk_live_••••</div>
+              </div>
+            </div>
+            <div class="vault-item">
+              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+              <div>
+                <div class="vault-name">supabase</div>
+                <div class="vault-meta">eyJhbG••••</div>
+              </div>
+            </div>
+            <div class="vault-item">
+              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l4-8 5 16 4-12 5 8"/></svg></div>
+              <div>
+                <div class="vault-name">resend</div>
+                <div class="vault-meta">re_••••</div>
+              </div>
+            </div>
+            <div class="vault-item">
+              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <div>
+                <div class="vault-name">cloudflare</div>
+                <div class="vault-meta">••••••</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SPLIT 2 : PROXY ===================== -->
+  <section class="section" id="proxy">
+    <div class="container">
+      <div class="split reverse">
+        <div class="split-text reveal delay-1">
+          <span class="label">Smart proxy</span>
+          <h3>Stream responses without exposing the key.</h3>
+          <p>Your app hits the proxy. The proxy injects the real credential, forwards to the provider, and streams the response back — SSE and all. Your raw key never leaves the vault.</p>
+          <div class="split-ctas">
+            <a href="#" class="btn btn-primary btn-sm">See providers</a>
+            <a href="#" class="btn btn-secondary btn-sm">Integration guide</a>
+          </div>
+        </div>
+        <div class="ui-card reveal">
+          <div class="ui-card-head">
+            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
+            <span class="ui-card-title">proxy.request</span>
+          </div>
+          <div class="flow">
+            <div class="flow-row"><span class="flow-num">1</span> Receiving inbound request</div>
+            <div class="flow-row"><span class="flow-num">2</span> Validating <code>scoped_token</code></div>
+            <div class="flow-row"><span class="flow-num">3</span> Injecting <code>api_key</code> from vault</div>
+            <div class="flow-row"><span class="flow-num">4</span> Forwarding to <code>provider</code></div>
+            <div class="flow-row"><span class="flow-num">5</span> Streaming <code>response</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SPLIT 3 : MCP ===================== -->
+  <section class="section">
+    <div class="container">
+      <div class="split">
+        <div class="split-text reveal">
+          <span class="label">MCP ready</span>
+          <h3>Built for AI agents from day one.</h3>
+          <p>Expose your vault to Claude, Cursor, or any MCP-compatible client. Agents call real APIs without ever seeing the underlying credentials — and every call is logged, scoped, and revocable.</p>
+          <div class="split-ctas">
+            <a href="#" class="btn btn-primary btn-sm">MCP setup</a>
+            <a href="#" class="btn btn-secondary btn-sm">Example configs</a>
+          </div>
+        </div>
+        <div class="ui-card reveal delay-1">
+          <div class="ui-card-head">
+            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
+            <span class="ui-card-title">.mcp.json</span>
+          </div>
+          <div class="code-body">
+<span class="c-muted">{</span><br>
+&nbsp;&nbsp;<span class="c-blue">"mcpServers"</span>: <span class="c-muted">{</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"apilocker"</span>: <span class="c-muted">{</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"command"</span>: <span class="c-green">"apilocker"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"args"</span>: <span class="c-muted">[</span><span class="c-green">"mcp"</span>, <span class="c-green">"serve"</span><span class="c-muted">]</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"scope"</span>: <span class="c-green">"openai,anthropic"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-muted">}</span><br>
+&nbsp;&nbsp;<span class="c-muted">}</span><br>
+<span class="c-muted">}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FINAL CTA ===================== -->
+  <section class="container final-cta">
+    <div class="final-cta-inner reveal">
+      <h2>Your keys.<br>Your proxy.<br>Your control.</h2>
+      <p>Free during beta — unlimited keys, unlimited tokens, unlimited calls. Sign up in 10 seconds.</p>
+      <div class="install-cmd">
+        <span class="install-prompt">$</span>
+        <code>npm install -g apilocker</code>
+        <button class="install-copy" id="install-copy-btn" title="Copy">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="cta-row">
+        <a href="/signup" class="btn btn-white">
+          Get started free
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="https://www.npmjs.com/package/apilocker" class="btn btn-white">
+          View on npm
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="container footer-inner">
+      <div class="logo">
+        <span class="logo-mark">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        API Locker
+      </div>
+      <div class="footer-links">
+        <a href="#">Docs</a>
+        <a href="#">GitHub</a>
+        <a href="https://www.npmjs.com/package/apilocker">npm</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </div>
+      <div class="footer-copy">© 2026 API Locker</div>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll state
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if (window.scrollY > 8) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // Copy install command
+    const copyBtn = document.getElementById('install-copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        await navigator.clipboard.writeText('npm install -g apilocker');
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

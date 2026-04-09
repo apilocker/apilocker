@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Changelog — API Locker</title>
+  <meta name="description" content="Every release, every change. API Locker's public changelog." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+
+  <style>
+    body { background: var(--bg); }
+    .changelog-shell {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 140px 32px 100px;
+    }
+    .changelog-head {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .changelog-head h1 {
+      font-size: clamp(36px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.028em;
+      line-height: 1.05;
+      margin: 8px 0 16px;
+      background: linear-gradient(180deg, #0F172A 0%, #334155 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .changelog-head p {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.55;
+    }
+    .release {
+      position: relative;
+      padding: 36px 0 48px;
+      border-top: 1px solid var(--line);
+    }
+    .release:first-of-type {
+      border-top: 0;
+    }
+    .release-head {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .release-version {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      box-shadow: 0 6px 18px -6px var(--glow);
+    }
+    .release-version.minor { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); box-shadow: 0 6px 18px -6px rgba(139, 92, 246, 0.4); }
+    .release-version.patch { background: var(--card); color: var(--ink); box-shadow: none; }
+    .release-date {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .release-tagline {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.018em;
+      color: var(--ink);
+      margin-top: 6px;
+    }
+    .release-section {
+      margin-bottom: 20px;
+    }
+    .release-section h3 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 10px 0;
+    }
+    .release-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .release-section li {
+      padding: 6px 0 6px 20px;
+      position: relative;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-2);
+    }
+    .release-section li::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 15px;
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--blue);
+    }
+    .release-section li strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .release-section code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: var(--card);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+      color: var(--ink-2);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--blue); }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-mark">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        API Locker
+      </a>
+      <div class="nav-links">
+        <a href="/#pillars">What's stored</a>
+        <a href="/#features">Features</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="/changelog" style="color: var(--ink);">Changelog</a>
+      </div>
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <a href="/login" class="nav-signin">Log in</a>
+        <a href="/signup" class="nav-cta">
+          Sign up
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="changelog-shell">
+
+    <div class="changelog-head">
+      <span class="eyebrow"><span class="eyebrow-dot"></span> Release notes</span>
+      <h1>Changelog</h1>
+      <p>Every release, every change. We ship in the open — see what's new, what's improved, and what's coming next.</p>
+    </div>
+
+    <!-- =============================================================
+         v1.0.0
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version">v1.0.0</span>
+        <span class="release-date">2026-04-08</span>
+      </div>
+      <div class="release-tagline">One vault, three types of credentials.</div>
+
+      <div class="release-section">
+        <h3>The 1.0 release</h3>
+        <ul>
+          <li><strong>Three credential types</strong> now first-class: LLM API keys, service API keys, and OAuth credentials. 34 provider templates total.</li>
+          <li><strong>OAuth credentials</strong> as a full multi-field type. Store <code>client_id</code>, <code>client_secret</code>, <code>refresh_token</code>, <code>scopes</code>, and endpoints as a single named credential. 14 pre-configured templates: Google, GitHub App, Slack, Microsoft, Notion, Spotify, Twitter/X, LinkedIn, Discord, Zoom, Dropbox, Salesforce, HubSpot, plus Custom OAuth.</li>
+          <li><strong><code>apilocker run</code> injects OAuth credentials as multiple env vars.</strong> A credential named <code>google-oauth</code> contributes <code>GOOGLE_OAUTH_CLIENT_ID</code>, <code>GOOGLE_OAUTH_CLIENT_SECRET</code>, <code>GOOGLE_OAUTH_REFRESH_TOKEN</code>, etc. — one env var per non-empty field.</li>
+          <li><strong>Three-bucket dashboard.</strong> Keys panel now shows LLM / Service / OAuth as three distinct sections, each with its own "+ Add" button that pre-selects the right tab in the Add Key modal.</li>
+          <li><strong>Homepage rewritten</strong> with three-pillar positioning: <em>"One vault, three types of credentials."</em></li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>New credential operations</h3>
+        <ul>
+          <li><strong><code>apilocker rename &lt;old&gt; &lt;new&gt;</code></strong> — lossless rename. Old names are remembered forever via a <code>previous_names</code> fallback, so existing <code>.apilockerrc</code> files and app code that reference the old name keep working. The CLI prints a gentle nudge whenever a legacy alias is used.</li>
+          <li><strong><code>apilocker pause &lt;alias&gt;</code> / <code>resume</code></strong> — freeze proxy access without deleting. Reveal / run / get / env still work on paused credentials, so you can still rotate or inspect during incident response.</li>
+          <li><strong>ElevenLabs provider template</strong> with the non-standard <code>xi-api-key</code> header correctly supported end-to-end through the proxy.</li>
+          <li><strong>Custom header name support</strong> in provider templates for any service with a non-standard auth header.</li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>Security + operations</h3>
+        <ul>
+          <li><strong>OAuth CSRF protection</strong>: the GitHub/Google OAuth callbacks now require a valid state parameter bound to a 10-minute KV window. Stale callbacks are rejected with HTTP 400.</li>
+          <li><strong>Per-device master tokens</strong> with independent revocation. Revoking a device takes effect instantly and only affects that device.</li>
+          <li><strong>Open-redirect protection</strong> on OAuth <code>return_to</code> parameters (same-origin validation).</li>
+          <li><strong>Vault-only credentials are now first-class</strong>: <code>base_url</code> is optional. Credentials stored without one work with <code>apilocker run/get/env</code> but are not proxyable — a clear error message explains how to enable proxy access if you want it.</li>
+          <li><strong>Cleanup cron</strong> for expired device authorization codes.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =============================================================
+         v0.5.0
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version minor">v0.5.0</span>
+        <span class="release-date">2026-04-08</span>
+      </div>
+      <div class="release-tagline">The trust layer.</div>
+      <div class="release-section">
+        <ul>
+          <li><strong><code>apilocker doctor</code></strong> — security health report. Flags stale rotations, unused keys, expiring tokens, stale devices, and insecure local config permissions. Every warning comes with a concrete remedy command.</li>
+          <li><strong><code>apilocker activity --follow</code></strong> — stream new proxy calls live, like <code>tail -f</code>. Poll every 2 seconds, deduped by ID. Perfect for debugging during development.</li>
+          <li><strong><code>apilocker update</code></strong> — check the npm registry for a newer version and show the upgrade command.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =============================================================
+         v0.4.0
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version minor">v0.4.0</span>
+        <span class="release-date">2026-04-08</span>
+      </div>
+      <div class="release-tagline">Onboarding + organization + hygiene.</div>
+      <div class="release-section">
+        <ul>
+          <li><strong><code>apilocker import .env</code></strong> — migrate an existing project in 30 seconds. Reads a <code>.env</code> file, auto-detects providers from variable name prefixes, stores each secret, and offers to replace the <code>.env</code> with a committable <code>.apilockerrc</code>.</li>
+          <li><strong><code>apilocker rotate &lt;alias&gt;</code></strong> — replace a credential's value in place with a masked-input prompt. Scoped tokens that reference the key continue working without reissue.</li>
+          <li><strong>Tags and filters</strong> on <code>apilocker list</code>: filter by tag, provider, or substring search. Also added <code>--tag</code> as a repeatable flag on <code>apilocker store</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =============================================================
+         v0.3.0
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version minor">v0.3.0</span>
+        <span class="release-date">2026-04-08</span>
+      </div>
+      <div class="release-tagline">The ".env replacement" trio.</div>
+      <div class="release-section">
+        <ul>
+          <li><strong><code>apilocker run -- &lt;command&gt;</code></strong> — the killer feature. Run any subprocess with vault secrets injected as environment variables. Raw secrets never touch disk, never hit shell history, never get committed to git. Ctrl+C, SIGTERM, and SIGHUP are forwarded to the child cleanly.</li>
+          <li><strong><code>apilocker get &lt;alias&gt;</code></strong> — print a single secret to stdout for scripting.</li>
+          <li><strong><code>apilocker env</code></strong> — emit shell-eval-able export statements. Supports sh / bash / zsh / fish / PowerShell formats.</li>
+          <li><strong><code>apilocker init</code></strong> + <strong><code>.apilockerrc</code></strong> support — pin a project to a specific set of credentials with a committable config file. After <code>apilocker init</code>, running <code>apilocker run</code> in that directory automatically picks up the right keys.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =============================================================
+         v0.2.0
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version minor">v0.2.0</span>
+        <span class="release-date">2026-04-08</span>
+      </div>
+      <div class="release-tagline">Browser-based device authorization.</div>
+      <div class="release-section">
+        <ul>
+          <li><strong><code>apilocker register</code></strong> rewritten to use the RFC 8628 device authorization flow. No more pasted master tokens. Opens your browser for a one-click confirmation, same pattern as <code>gh</code>, <code>vercel</code>, <code>wrangler</code>.</li>
+          <li><strong><code>apilocker devices list</code> / <code>revoke</code></strong> — manage devices registered to your account directly from the CLI.</li>
+          <li>Dashboard gets a Devices tab with matching list + revoke.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version patch">v0.1.x</span>
+        <span class="release-date">2026-04-08</span>
+      </div>
+      <div class="release-tagline">Initial public beta.</div>
+      <div class="release-section">
+        <ul>
+          <li>First public release. Encrypted credential vault with CLI <code>register</code>, <code>store</code>, <code>list</code>, <code>delete</code>, <code>token</code>, <code>activity</code>. 19 provider templates for major API services. Published to npm as <code>apilocker</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p style="text-align: center; margin-top: 48px;">
+      <a href="/" class="back-link">← Back to homepage</a>
+    </p>
+
+  </div>
+
+  <script>
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if (window.scrollY > 8) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terms of Service — API Locker</title>
+  <meta name="description" content="Terms of use for API Locker." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <div class="auth-shell">
+
+    <nav class="nav" id="nav">
+      <div class="container nav-inner">
+        <a href="/" class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </a>
+        <div class="nav-links">
+          <a href="/#features">Features</a>
+          <a href="/#vault">Vault</a>
+          <a href="/#proxy">Proxy</a>
+          <a href="/#pricing">Pricing</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 18px;">
+          <a href="/login" class="nav-signin">Log in</a>
+          <a href="/signup" class="nav-cta">
+            Sign up
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="legal-main">
+      <div class="legal-container">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> Legal</span>
+        <h1 class="legal-h1">Terms of Service</h1>
+        <p class="legal-updated">Last updated: April 8, 2026</p>
+
+        <div class="legal-prose">
+          <p class="legal-lede">These terms describe the deal between you and API Locker. By creating an account or using the service, you agree to them. If you don't agree, don't use the service.</p>
+
+          <h2>1. What the service is</h2>
+          <p>API Locker is a credential vault and proxy. You store API keys and other secrets with us; we encrypt them; your apps and agents proxy requests through our service to the underlying API providers, and we inject your credentials into those requests automatically. You can manage, rotate, pause, and revoke credentials through your dashboard.</p>
+
+          <h2>2. Your account</h2>
+          <p>You must sign in with a supported OAuth provider (currently Google or GitHub). You are responsible for all activity under your account. Keep your refresh tokens and master tokens safe — if they leak, the attacker can reach anything your tokens are scoped to until you revoke them. We provide tools for rotation, pausing, revocation, and hard deletion; use them.</p>
+
+          <h2>3. Acceptable use</h2>
+          <p>Don't use API Locker to:</p>
+          <ul>
+            <li>Store credentials you don't have the right to use</li>
+            <li>Proxy traffic that violates the terms of the downstream provider (e.g. using a Stripe key you don't own, or abusing an OpenAI API against its usage policies)</li>
+            <li>Generate, distribute, or facilitate illegal content</li>
+            <li>Attempt to compromise the service, bypass rate limits, or extract credentials other than your own</li>
+            <li>Resell the service to third parties without a reseller agreement</li>
+          </ul>
+
+          <h2>4. Pricing and billing</h2>
+          <p>API Locker is free during public beta. We will notify you in advance of any move to paid plans, and you'll have the option to export your data or close your account before any charges apply.</p>
+
+          <h2>5. Service availability</h2>
+          <p>We do our best to keep the service running, but during beta there is no uptime SLA. API Locker runs on Cloudflare's global edge network. If Cloudflare has an incident, we probably do too. We recommend monitoring the health of your critical workflows independently.</p>
+
+          <h2>6. Downstream providers</h2>
+          <p>When you proxy a request, API Locker forwards it to the provider you chose (OpenAI, Stripe, etc.). We are not responsible for the availability, pricing, accuracy, or conduct of those providers. Their terms apply to the portion of your workflow that lives on their infrastructure.</p>
+
+          <h2>7. Data</h2>
+          <p>You own your data. We process it on your behalf to provide the service. See our <a href="/privacy">Privacy Policy</a> for details on what we collect, how we store it, and your rights. You can delete your data through the dashboard or by contacting us.</p>
+
+          <h2>8. Termination</h2>
+          <p>You can close your account at any time. We can suspend or terminate accounts that violate these terms, abuse the service, or put other users at risk. In an emergency we may suspend first and investigate after.</p>
+
+          <h2>9. Warranties and liability</h2>
+          <p>API Locker is provided "as is" during beta. We make no warranties beyond what's legally required. To the maximum extent allowed by law, our liability for any claim arising from your use of the service is limited to the amount you paid us in the 12 months preceding the claim (which during beta is zero).</p>
+          <p>API Locker stores and proxies credentials, and the security properties we provide depend on the secrets you store with us being handled correctly on your end. Don't paste your refresh token into public code or unsafe environments.</p>
+
+          <h2>10. Changes</h2>
+          <p>We may update these terms as the service evolves. We'll notify signed-in users about material changes via email or in the dashboard before they take effect. Continued use after an update means you accept the new terms.</p>
+
+          <h2>11. Contact</h2>
+          <p>Questions? Reach out at <a href="mailto:legal@apilocker.app">legal@apilocker.app</a>.</p>
+
+          <p class="legal-note">These terms are a starting point for a credential-vault product in public beta. If you need a custom agreement (DPA, MSA, vendor assessment, etc.), contact us before rolling API Locker out across your organization.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </div>
+        <div class="footer-links">
+          <a href="#">Docs</a>
+          <a href="#">GitHub</a>
+          <a href="https://www.npmjs.com/package/apilocker">npm</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+        </div>
+        <div class="footer-copy">© 2026 API Locker</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if (window.scrollY > 8) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+</body>
+</html>

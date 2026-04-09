@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy — API Locker</title>
+  <meta name="description" content="How API Locker handles your data, credentials, and traffic." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <div class="auth-shell">
+
+    <!-- ===================== NAV ===================== -->
+    <nav class="nav" id="nav">
+      <div class="container nav-inner">
+        <a href="/" class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </a>
+        <div class="nav-links">
+          <a href="/#features">Features</a>
+          <a href="/#vault">Vault</a>
+          <a href="/#proxy">Proxy</a>
+          <a href="/#pricing">Pricing</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 18px;">
+          <a href="/login" class="nav-signin">Log in</a>
+          <a href="/signup" class="nav-cta">
+            Sign up
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="legal-main">
+      <div class="legal-container">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> Legal</span>
+        <h1 class="legal-h1">Privacy Policy</h1>
+        <p class="legal-updated">Last updated: April 8, 2026</p>
+
+        <div class="legal-prose">
+          <p class="legal-lede">API Locker is a credential vault and proxy. Our entire product exists to keep sensitive data secure, so we take privacy seriously. This page explains what we collect, what we do with it, and what we never touch.</p>
+
+          <h2>TL;DR</h2>
+          <ul>
+            <li>We store your encrypted API keys and proxy requests to the providers you choose.</li>
+            <li>Your raw credentials are encrypted with AES-256-GCM before they hit our database, and the encryption key never leaves our server-side runtime.</li>
+            <li>We do not read, sell, or share the contents of your API calls or responses.</li>
+            <li>We collect the minimum data needed to run the service: your email, your OAuth provider ID, and request metadata for audit logging.</li>
+            <li>You can delete your account and all associated data at any time.</li>
+          </ul>
+
+          <h2>1. What we collect</h2>
+          <p>When you sign up with Google or GitHub, we receive and store:</p>
+          <ul>
+            <li>Your email address</li>
+            <li>Your display name and avatar URL</li>
+            <li>A unique identifier from the OAuth provider</li>
+          </ul>
+          <p>When you store a credential, we collect:</p>
+          <ul>
+            <li>The friendly name you give it</li>
+            <li>The provider type (OpenAI, Stripe, etc.) so we know how to inject it</li>
+            <li>The encrypted ciphertext of the credential itself</li>
+          </ul>
+          <p>When your apps or agents proxy a request through API Locker, we record:</p>
+          <ul>
+            <li>The key and token used</li>
+            <li>The target provider and path</li>
+            <li>The HTTP status code and latency</li>
+            <li>The timestamp and source IP</li>
+          </ul>
+
+          <h2>2. What we do NOT collect</h2>
+          <ul>
+            <li>We do not log the request body you send to providers.</li>
+            <li>We do not log the response body from providers.</li>
+            <li>We do not decrypt or inspect your stored credentials for any purpose other than injecting them into the outbound request you authorized.</li>
+            <li>We do not sell any data to third parties.</li>
+            <li>We do not use your data to train machine learning models.</li>
+          </ul>
+
+          <h2>3. How we store it</h2>
+          <p>Encrypted credential blobs live in Cloudflare Workers KV, encrypted at rest with AES-256-GCM. The encryption key is stored as an environment secret on Cloudflare Workers and is never exposed to the database or logs. Metadata (your user record, token records, audit logs) lives in Cloudflare D1.</p>
+          <p>All data in transit is protected by TLS 1.3 via Cloudflare's edge.</p>
+
+          <h2>4. How we use it</h2>
+          <ul>
+            <li>To authenticate you when you sign in</li>
+            <li>To proxy requests to the providers you have stored credentials for</li>
+            <li>To enforce token scopes, rotation policies, and revocations</li>
+            <li>To detect anomalous traffic patterns (refresh-token reuse, abnormal request volume)</li>
+            <li>To generate audit logs you can review in your own dashboard</li>
+          </ul>
+
+          <h2>5. Third parties</h2>
+          <p>API Locker itself uses the following third-party services:</p>
+          <ul>
+            <li><strong>Cloudflare</strong> — hosting, DNS, edge compute, database, and key-value storage</li>
+            <li><strong>Google and GitHub</strong> — OAuth sign-in only (we never access data beyond your email and profile)</li>
+          </ul>
+          <p>When you proxy a request through API Locker, that request is forwarded to the API provider you chose (OpenAI, Stripe, Anthropic, etc.). Those providers have their own privacy policies and terms that apply to your usage of their services.</p>
+
+          <h2>6. Your rights</h2>
+          <ul>
+            <li><strong>Access:</strong> you can view all your stored keys, tokens, and activity logs in the dashboard.</li>
+            <li><strong>Deletion:</strong> you can delete individual keys and tokens from the dashboard. To delete your entire account, contact us.</li>
+            <li><strong>Export:</strong> activity logs are queryable via the dashboard and API.</li>
+          </ul>
+
+          <h2>7. Retention</h2>
+          <p>We retain your data as long as your account is active. Audit logs are retained for up to 12 months. Deleted keys and tokens are removed from the database immediately; audit log entries referencing deleted resources remain for the retention window.</p>
+
+          <h2>8. Contact</h2>
+          <p>Questions about this policy? Reach out at <a href="mailto:privacy@apilocker.app">privacy@apilocker.app</a>.</p>
+
+          <p class="legal-note">This policy is a starting point for a credential-vault product in public beta. If you're planning to use API Locker for regulated data (PCI, HIPAA, GDPR-sensitive data, etc.), contact us before you do — we want to make sure the service fits your compliance needs.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </div>
+        <div class="footer-links">
+          <a href="#">Docs</a>
+          <a href="#">GitHub</a>
+          <a href="https://www.npmjs.com/package/apilocker">npm</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+        </div>
+        <div class="footer-copy">© 2026 API Locker</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if (window.scrollY > 8) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+</body>
+</html>

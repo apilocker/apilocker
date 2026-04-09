@@ -1,0 +1,4428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard — API Locker</title>
+  <meta name="description" content="Your API Locker vault." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+
+  <style>
+    /* Dashboard-page-specific layout (everything else lives in /styles.css) */
+    .dash-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .dash-shell::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(15,23,42,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: radial-gradient(ellipse 90% 50% at 50% 0%, black 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 90% 50% at 50% 0%, black 30%, transparent 75%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .dash-shell::after {
+      content: "";
+      position: absolute;
+      top: -10%; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 60%);
+      pointer-events: none;
+      filter: blur(60px);
+      z-index: 0;
+    }
+    .dash-main {
+      flex: 1;
+      padding: 140px 0 100px;
+      position: relative;
+      z-index: 1;
+    }
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 56px;
+      flex-wrap: wrap;
+    }
+    .dash-greeting h1 {
+      font-size: clamp(32px, 4.4vw, 44px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.028em;
+      margin: 6px 0 8px;
+      background: linear-gradient(180deg, #0F172A 0%, #334155 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .dash-greeting p {
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 14px 8px 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+    }
+    .user-chip img {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--card);
+      object-fit: cover;
+    }
+    .user-chip .uc-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .user-chip .uc-email {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .signout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--ink-2);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--ease);
+      cursor: pointer;
+    }
+    .signout-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--line-strong);
+    }
+
+    /* Stat row */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+    .stat-card::after {
+      content: "";
+      position: absolute; inset: 0;
+      border-radius: 18px;
+      pointer-events: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+    }
+    .stat-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      display: grid; place-items: center;
+      color: white;
+      box-shadow: 0 6px 16px -6px var(--glow);
+      margin-bottom: 16px;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    @media (max-width: 900px) {
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Section block */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .panel::after {
+      content: "";
+      position: absolute; inset: 0;
+      border-radius: 22px;
+      pointer-events: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .panel-head h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .panel-head p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .panel-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px -8px var(--glow), inset 0 1px 0 rgba(255,255,255,0.22);
+      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+      cursor: pointer;
+      border: none;
+    }
+    .panel-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,0.28);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      border: 1.5px dashed var(--line-strong);
+      border-radius: 16px;
+      background: var(--card);
+      position: relative;
+      z-index: 1;
+    }
+    .empty-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      display: grid; place-items: center;
+      color: var(--blue);
+      margin: 0 auto 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .empty-state h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .empty-state p {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 380px;
+      margin: 0 auto 20px;
+      line-height: 1.55;
+    }
+
+    /* Loading state */
+    .loading-shell {
+      min-height: 60vh;
+      display: grid;
+      place-items: center;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 3px solid rgba(59, 130, 246, 0.18);
+      border-top-color: var(--blue);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+
+    /* ==================== PHASE D: filter row ==================== */
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    .filter-input, .filter-select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      min-width: 140px;
+    }
+    .filter-input:focus, .filter-select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .filter-input { flex: 1; min-width: 180px; }
+    .filter-count {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+      font-weight: 500;
+    }
+
+    /* ==================== PHASE D: row enhancements ==================== */
+    .row-tags {
+      display: inline-flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .row-tag-chip {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.1);
+      color: var(--blue);
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+    .row-rotated {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .row-rotated.stale { color: #d97706; }
+
+    /* ==================== PHASE D: rotate modal extras ==================== */
+    .rotate-target {
+      padding: 14px 16px;
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+    .rotate-target-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+    .rotate-target-meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ==================== PHASE D: doctor panel ==================== */
+    .doctor-loading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .spinner-sm {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2.5px solid rgba(59, 130, 246, 0.18);
+      border-top-color: var(--blue);
+      animation: spin 0.9s linear infinite;
+    }
+    .doctor-findings {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .doctor-finding {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 14px;
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .doctor-finding.severity-warn {
+      border-color: rgba(217, 119, 6, 0.35);
+      background: linear-gradient(135deg, rgba(254, 243, 199, 0.35) 0%, var(--surface) 70%);
+    }
+    .doctor-finding.severity-info {
+      border-color: rgba(59, 130, 246, 0.28);
+      background: linear-gradient(135deg, rgba(219, 234, 254, 0.45) 0%, var(--surface) 70%);
+    }
+    .doctor-finding.severity-ok {
+      border-color: rgba(16, 185, 129, 0.28);
+      background: linear-gradient(135deg, rgba(209, 250, 229, 0.4) 0%, var(--surface) 70%);
+    }
+    .doctor-finding-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .severity-warn .doctor-finding-icon {
+      background: rgba(217,119,6,0.14); color: #d97706;
+    }
+    .severity-info .doctor-finding-icon {
+      background: rgba(59,130,246,0.14); color: var(--blue);
+    }
+    .severity-ok .doctor-finding-icon {
+      background: rgba(16,185,129,0.14); color: #059669;
+    }
+    .doctor-finding-body h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .doctor-finding-body p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .doctor-finding-details {
+      font-size: 12px;
+      color: var(--ink-2);
+      padding-left: 14px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+    .doctor-finding-details li {
+      padding: 2px 0;
+    }
+    .doctor-finding-remedy {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 4px 10px;
+      background: var(--card);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--ink-2);
+    }
+    .doctor-summary {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: var(--card);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ==================== PHASE D: CLI nudge card ==================== */
+    .cli-nudge {
+      margin-top: 28px;
+      padding: 22px 26px;
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      border-radius: 18px;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 18px;
+      color: #F8FAFC;
+      box-shadow: var(--shadow-lg);
+    }
+    .cli-nudge-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      display: grid;
+      place-items: center;
+      color: white;
+      box-shadow: 0 10px 24px -8px var(--glow);
+    }
+    .cli-nudge h3 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin-bottom: 6px;
+      color: #F8FAFC;
+    }
+    .cli-nudge p {
+      font-size: 13px;
+      color: rgba(248,250,252,0.72);
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+    .cli-nudge p code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: rgba(255,255,255,0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .cli-nudge-cmds {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 14px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .cli-cmd {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .cli-prompt { color: var(--blue); }
+    .cli-text { color: rgba(248,250,252,0.9); }
+    @media (max-width: 600px) {
+      .cli-nudge { grid-template-columns: 1fr; }
+    }
+
+    /* ==================== v1.0.0: three-bucket Keys panel ==================== */
+    #keys-buckets {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .key-bucket {
+      background: transparent;
+    }
+    .bucket-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .bucket-head-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .bucket-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    .bucket-icon-llm {
+      background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+      box-shadow: 0 8px 20px -8px rgba(139, 92, 246, 0.4);
+    }
+    .bucket-icon-service {
+      background: linear-gradient(135deg, #3B82F6 0%, #1E3A8A 100%);
+      box-shadow: 0 8px 20px -8px rgba(59, 130, 246, 0.4);
+    }
+    .bucket-icon-oauth {
+      background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+      box-shadow: 0 8px 20px -8px rgba(16, 185, 129, 0.4);
+    }
+    .bucket-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin: 0;
+    }
+    .bucket-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 2px 0 0 0;
+    }
+    .bucket-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    .bucket-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+    }
+    .bucket-add:hover {
+      background: var(--card);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .bucket-empty {
+      padding: 22px 18px;
+      text-align: center;
+      background: var(--card);
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Paused key styling */
+    .row.paused {
+      opacity: 0.68;
+    }
+    .row.paused .row-title::after {
+      content: "paused";
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(217, 119, 6, 0.14);
+      color: #b45309;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+
+    /* OAuth credential row */
+    .row-oauth .row-title::before {
+      content: "OAuth";
+      display: inline-block;
+      margin-right: 8px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+
+    /* ==================== v1.0.0: Add Key tabs ==================== */
+    .add-key-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .add-key-tab {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 9px;
+      background: transparent;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      text-align: left;
+    }
+    .add-key-tab:hover {
+      color: var(--ink);
+    }
+    .add-key-tab.active {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
+    }
+    .add-key-tab-label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .add-key-tab-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .add-key-tab.active .add-key-tab-sub {
+      color: var(--muted);
+    }
+
+    .field-optional {
+      display: inline-block;
+      margin-left: 6px;
+      font-weight: 500;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* ==================== v1.0.0: MCP panel ==================== */
+    .mcp-panel { }
+
+    .mcp-status-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .mcp-status-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .mcp-status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #10B981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+      animation: mcpPulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes mcpPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    .mcp-status-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #047857;
+      margin-bottom: 2px;
+    }
+    .mcp-status-url {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--ink-2);
+      user-select: all;
+    }
+    .mcp-status-actions { display: flex; gap: 8px; }
+    .mcp-test-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+    }
+    .mcp-test-btn:hover {
+      background: #10B981;
+      color: white;
+      border-color: #10B981;
+    }
+    .mcp-test-btn[disabled] {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .mcp-test-result {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .mcp-test-result.ok {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #047857;
+    }
+    .mcp-test-result.err {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #b91c1c;
+    }
+
+    .mcp-section-head {
+      margin: 28px 0 14px 0;
+    }
+    .mcp-section-head h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 4px 0;
+      letter-spacing: -0.01em;
+    }
+    .mcp-section-head p {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .mcp-tabs {
+      display: flex;
+      gap: 2px;
+      padding: 4px;
+      background: var(--card);
+      border-radius: 10px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+    }
+    .mcp-tab {
+      flex: 1;
+      min-width: 100px;
+      padding: 9px 14px;
+      border-radius: 7px;
+      background: transparent;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      white-space: nowrap;
+    }
+    .mcp-tab:hover { color: var(--ink); }
+    .mcp-tab.active {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mcp-tab-panel {
+      display: none;
+    }
+    .mcp-tab-panel.active {
+      display: block;
+    }
+    .mcp-tab-intro {
+      font-size: 13px;
+      color: var(--ink-2);
+      line-height: 1.6;
+      margin: 0 0 12px 0;
+    }
+    .mcp-tab-intro code, .mcp-tab-hint code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: var(--card);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .mcp-tab-hint {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 12px 0 0 0;
+    }
+
+    .mcp-code-block {
+      position: relative;
+      background: #0F172A;
+      border-radius: 10px;
+      padding: 16px 18px;
+      overflow-x: auto;
+    }
+    .mcp-code-block pre {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #F8FAFC;
+      margin: 0;
+      white-space: pre;
+      padding-right: 80px;
+    }
+    .mcp-copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(248, 250, 252, 0.1);
+      border: 1px solid rgba(248, 250, 252, 0.2);
+      color: rgba(248, 250, 252, 0.9);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s var(--ease);
+    }
+    .mcp-copy-btn:hover {
+      background: rgba(248, 250, 252, 0.18);
+      border-color: rgba(248, 250, 252, 0.35);
+    }
+    .mcp-copy-btn.copied {
+      background: #10B981;
+      border-color: #10B981;
+      color: white;
+    }
+
+    .mcp-activity-feed {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 8px 14px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .mcp-activity-empty {
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .mcp-activity-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 4px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .mcp-activity-row + .mcp-activity-row {
+      border-top: 1px solid var(--line);
+    }
+    .mcp-activity-time {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .mcp-activity-op {
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .mcp-activity-provider {
+      color: var(--blue);
+      font-size: 11px;
+    }
+    .mcp-activity-status {
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .mcp-activity-status.ok { color: #059669; }
+    .mcp-activity-status.err { color: #dc2626; }
+
+    .mcp-prereq-note {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 10px;
+      margin-top: 24px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--ink-2);
+    }
+    .mcp-prereq-note svg {
+      color: var(--blue);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .mcp-prereq-note strong { color: var(--ink); }
+    .mcp-prereq-note code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: var(--card);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* ==================== v1.0.0: Welcome modal (first-run) ==================== */
+    .welcome-modal {
+      max-width: 540px;
+    }
+    .welcome-head {
+      text-align: center;
+      padding: 36px 32px 24px !important;
+    }
+    .welcome-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 18px -6px var(--glow);
+    }
+    .welcome-title {
+      font-size: 26px !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.025em !important;
+      background: linear-gradient(180deg, #0F172A 0%, #334155 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px !important;
+    }
+    .welcome-sub {
+      font-size: 14px !important;
+      color: var(--muted) !important;
+      margin: 0 !important;
+    }
+    .welcome-pillars {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .welcome-pillar {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--card);
+      border-radius: 12px;
+    }
+    .welcome-pillar-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    .welcome-pillar-llm { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); box-shadow: 0 6px 18px -8px rgba(139, 92, 246, 0.4); }
+    .welcome-pillar-service { background: linear-gradient(135deg, #3B82F6 0%, #1E3A8A 100%); box-shadow: 0 6px 18px -8px rgba(59, 130, 246, 0.4); }
+    .welcome-pillar-oauth { background: linear-gradient(135deg, #10B981 0%, #047857 100%); box-shadow: 0 6px 18px -8px rgba(16, 185, 129, 0.4); }
+    .welcome-pillar-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+    .welcome-pillar-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .welcome-cli {
+      padding: 18px 20px;
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      border-radius: 14px;
+      color: rgba(248, 250, 252, 0.92);
+    }
+    .welcome-cli-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(248, 250, 252, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .welcome-cli-code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #F8FAFC;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 0 0 10px 0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .welcome-cli-sub {
+      font-size: 11px;
+      color: rgba(248, 250, 252, 0.6);
+      line-height: 1.5;
+    }
+    .welcome-cli-sub code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    /* Rename info box — lossless rename reassurance (v1.0.0) */
+    .rename-info {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--ink-2);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .rename-info svg {
+      color: var(--blue);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .rename-info code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: var(--card);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* OAuth reveal modal */
+    .oauth-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .oauth-field {
+      display: grid;
+      grid-template-columns: 120px 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--card);
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+    }
+    .oauth-field-label {
+      font-weight: 700;
+      color: var(--ink);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-family: 'Inter', sans-serif;
+    }
+    .oauth-field-value {
+      word-break: break-all;
+      color: var(--ink-2);
+      font-size: 11px;
+    }
+    .oauth-field-value.masked {
+      letter-spacing: 0.1em;
+    }
+    .oauth-field-btn {
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .oauth-field-btn:hover {
+      color: var(--ink);
+      border-color: var(--ink);
+    }
+
+    /* ==================== PHASE D: activity live toggle ==================== */
+    .live-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      user-select: none;
+    }
+    .live-toggle input {
+      appearance: none;
+      width: 32px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--line-strong);
+      position: relative;
+      transition: background 0.2s var(--ease);
+      cursor: pointer;
+    }
+    .live-toggle input::before {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: white;
+      transition: transform 0.2s var(--ease);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .live-toggle input:checked {
+      background: var(--blue);
+    }
+    .live-toggle input:checked::before {
+      transform: translateX(14px);
+    }
+    .live-toggle input:checked + .live-dot {
+      background: #10B981;
+      box-shadow: 0 0 0 4px rgba(16,185,129,0.18);
+      animation: pulse-dot 1.6s ease-in-out infinite;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--muted);
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dash-shell">
+
+    <!-- ===================== NAV ===================== -->
+    <nav class="nav" id="nav">
+      <div class="container nav-inner">
+        <a href="/" class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </a>
+        <div class="nav-links">
+          <a href="/dashboard">Dashboard</a>
+          <a href="#keys">Keys</a>
+          <a href="#tokens">Tokens</a>
+          <a href="#activity">Activity</a>
+          <a href="#devices">Devices</a>
+          <a href="#doctor">Doctor</a>
+          <a href="#mcp">MCP</a>
+        </div>
+        <div id="nav-user" class="hidden">
+          <div class="user-chip">
+            <img id="user-avatar" src="" alt="" />
+            <div>
+              <div class="uc-name" id="user-name">—</div>
+              <div class="uc-email" id="user-email">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ===================== LOADING ===================== -->
+    <div id="loading" class="loading-shell">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- ===================== MAIN ===================== -->
+    <main id="main" class="dash-main hidden">
+      <div class="container">
+
+        <div class="dash-header">
+          <div class="dash-greeting">
+            <span class="eyebrow"><span class="eyebrow-dot"></span> Vault unlocked</span>
+            <h1>Welcome back, <span id="greet-name">friend</span>.</h1>
+            <p>Here's what's in your vault today.</p>
+          </div>
+          <button class="signout-btn" id="signout-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </button>
+        </div>
+
+        <!-- Stat row -->
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            <div class="stat-label">Stored keys</div>
+            <div class="stat-value" id="stat-keys">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div class="stat-label">Active tokens</div>
+            <div class="stat-value" id="stat-tokens">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></div>
+            <div class="stat-label">Devices</div>
+            <div class="stat-value" id="stat-devices">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg></div>
+            <div class="stat-label">Calls (recent)</div>
+            <div class="stat-value" id="stat-calls">0</div>
+          </div>
+        </div>
+
+        <!-- Keys panel -->
+        <section class="panel" id="keys">
+          <div class="panel-head">
+            <div>
+              <h2>Your keys</h2>
+              <p>Encrypted credentials stored in your vault.</p>
+            </div>
+            <button class="panel-action" id="open-add-key">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add a key
+            </button>
+          </div>
+
+          <div id="keys-empty" class="empty-state">
+            <div class="empty-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h3>No keys yet</h3>
+            <p>Store your first credential — an OpenAI API key, an OAuth client secret, a database password — anything you'd normally drop into a .env file.</p>
+          </div>
+
+          <!-- Filter row (shown only when there are keys) -->
+          <div id="keys-filter-row" class="filter-row hidden">
+            <input type="text" id="keys-search" class="filter-input" placeholder="Search by name…" autocomplete="off" />
+            <select id="keys-provider-filter" class="filter-select">
+              <option value="">All providers</option>
+            </select>
+            <select id="keys-tag-filter" class="filter-select">
+              <option value="">All tags</option>
+            </select>
+            <span id="keys-filter-count" class="filter-count"></span>
+          </div>
+
+          <!-- Three-bucket container (v1.0.0) -->
+          <div id="keys-buckets" class="hidden">
+
+            <!-- LLM API Keys bucket -->
+            <div class="key-bucket" id="bucket-llm">
+              <div class="bucket-head">
+                <div class="bucket-head-left">
+                  <div class="bucket-icon bucket-icon-llm">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3 3 3 0 0 0-2 5.5A3 3 0 0 0 6.5 14a3 3 0 0 0 2 5.5 3 3 0 0 0 3 2.5 3 3 0 0 0 3-2.5 3 3 0 0 0 2-5.5 3 3 0 0 0 .5-3.5A3 3 0 0 0 15 5a3 3 0 0 0-3-3z"/><path d="M12 9v6"/><path d="M9 12h6"/></svg>
+                  </div>
+                  <div>
+                    <h3 class="bucket-title">LLM API Keys</h3>
+                    <p class="bucket-sub">OpenAI, Anthropic, Gemini, Groq, Mistral</p>
+                  </div>
+                  <span class="bucket-count" id="bucket-count-llm">0</span>
+                </div>
+                <button class="bucket-add" data-add-category="llm">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add LLM key
+                </button>
+              </div>
+              <div class="row-list" id="bucket-list-llm"></div>
+              <div class="bucket-empty" id="bucket-empty-llm">
+                No LLM keys yet. Click "Add LLM key" above to store one.
+              </div>
+            </div>
+
+            <!-- Service API Keys bucket -->
+            <div class="key-bucket" id="bucket-service">
+              <div class="bucket-head">
+                <div class="bucket-head-left">
+                  <div class="bucket-icon bucket-icon-service">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </div>
+                  <div>
+                    <h3 class="bucket-title">Service API Keys</h3>
+                    <p class="bucket-sub">Stripe, Twilio, Resend, ElevenLabs, and anything with a .env line</p>
+                  </div>
+                  <span class="bucket-count" id="bucket-count-service">0</span>
+                </div>
+                <button class="bucket-add" data-add-category="service">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add service key
+                </button>
+              </div>
+              <div class="row-list" id="bucket-list-service"></div>
+              <div class="bucket-empty" id="bucket-empty-service">
+                No service keys yet. Click "Add service key" above to store one.
+              </div>
+            </div>
+
+            <!-- OAuth Credentials bucket -->
+            <div class="key-bucket" id="bucket-oauth">
+              <div class="bucket-head">
+                <div class="bucket-head-left">
+                  <div class="bucket-icon bucket-icon-oauth">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  </div>
+                  <div>
+                    <h3 class="bucket-title">OAuth Credentials</h3>
+                    <p class="bucket-sub">Google, GitHub, Slack, Microsoft, Notion, Spotify, and more</p>
+                  </div>
+                  <span class="bucket-count" id="bucket-count-oauth">0</span>
+                </div>
+                <button class="bucket-add" data-add-category="oauth">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add OAuth credential
+                </button>
+              </div>
+              <div class="row-list" id="bucket-list-oauth"></div>
+              <div class="bucket-empty" id="bucket-empty-oauth">
+                No OAuth credentials yet. Click "Add OAuth credential" above to store one.
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Tokens panel -->
+        <section class="panel" id="tokens">
+          <div class="panel-head">
+            <div>
+              <h2>Scoped tokens</h2>
+              <p>Per-app tokens that authorize proxy access without exposing the underlying credentials.</p>
+            </div>
+            <button class="panel-action" id="open-create-token">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Issue token
+            </button>
+          </div>
+
+          <div id="tokens-empty" class="empty-state">
+            <div class="empty-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </div>
+            <h3>No tokens issued</h3>
+            <p>Once you store a key, issue a scoped token to let an app or AI agent call it through the proxy — without ever seeing the raw credential.</p>
+          </div>
+
+          <div id="tokens-list" class="row-list hidden"></div>
+        </section>
+
+        <!-- Activity panel -->
+        <section class="panel" id="activity">
+          <div class="panel-head">
+            <div>
+              <h2>Recent activity</h2>
+              <p>Every proxied request, logged in real time.</p>
+            </div>
+            <label class="live-toggle">
+              <input type="checkbox" id="activity-live-toggle" />
+              <span class="live-dot"></span>
+              <span>Live</span>
+            </label>
+          </div>
+
+          <div id="activity-empty" class="empty-state">
+            <div class="empty-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+            </div>
+            <h3>Quiet so far</h3>
+            <p>Once your keys start handling traffic, you'll see every request, response code, and latency right here.</p>
+          </div>
+
+          <div id="activity-list" class="row-list hidden"></div>
+        </section>
+
+        <!-- Devices panel -->
+        <section class="panel" id="devices">
+          <div class="panel-head">
+            <div>
+              <h2>Devices</h2>
+              <p>Every machine where you've signed into the CLI. Revoke any you no longer use.</p>
+            </div>
+          </div>
+
+          <div id="devices-empty" class="empty-state">
+            <div class="empty-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3>No devices registered</h3>
+            <p>Run <code style="font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--card); padding: 2px 6px; border-radius: 4px;">apilocker register</code> on any machine to sign in the CLI and it'll show up here.</p>
+          </div>
+
+          <div id="devices-list" class="row-list hidden"></div>
+        </section>
+
+        <!-- Doctor panel -->
+        <section class="panel" id="doctor">
+          <div class="panel-head">
+            <div>
+              <h2>Vault health</h2>
+              <p>Rotation hygiene, unused keys, stale devices, and security warnings — refreshed on every visit.</p>
+            </div>
+            <button class="panel-action" id="doctor-refresh">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Re-run
+            </button>
+          </div>
+
+          <div id="doctor-loading" class="doctor-loading">
+            <div class="spinner-sm"></div>
+            <span>Running checks…</span>
+          </div>
+          <div id="doctor-findings" class="doctor-findings hidden"></div>
+          <div id="doctor-summary" class="doctor-summary hidden"></div>
+        </section>
+
+        <!-- MCP panel (v1.0.0) -->
+        <section class="panel mcp-panel" id="mcp">
+          <div class="panel-head">
+            <div>
+              <h2>MCP server</h2>
+              <p>Let AI assistants (Claude Desktop, Cursor, Zed, etc.) read and manage your vault via the Model Context Protocol.</p>
+            </div>
+          </div>
+
+          <!-- Status card -->
+          <div class="mcp-status-card">
+            <div class="mcp-status-left">
+              <div class="mcp-status-dot"></div>
+              <div>
+                <div class="mcp-status-label">MCP server is active</div>
+                <div class="mcp-status-url" id="mcp-url">https://api.apilocker.app/v1/mcp</div>
+              </div>
+            </div>
+            <div class="mcp-status-actions">
+              <button class="mcp-test-btn" id="mcp-test-btn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Test connection
+              </button>
+            </div>
+          </div>
+
+          <div class="mcp-test-result hidden" id="mcp-test-result"></div>
+
+          <!-- Setup instructions tabs -->
+          <div class="mcp-section-head">
+            <h3>Connect your AI tool</h3>
+            <p>Pick your client below. Copy the config, paste it into your client, done.</p>
+          </div>
+
+          <div class="mcp-tabs" role="tablist">
+            <button class="mcp-tab active" data-mcp-tab="claude-desktop" type="button">Claude Desktop</button>
+            <button class="mcp-tab" data-mcp-tab="claude-code" type="button">Claude Code</button>
+            <button class="mcp-tab" data-mcp-tab="cursor" type="button">Cursor</button>
+            <button class="mcp-tab" data-mcp-tab="continue" type="button">Continue</button>
+            <button class="mcp-tab" data-mcp-tab="zed" type="button">Zed</button>
+          </div>
+
+          <!-- Tab panels -->
+          <div class="mcp-tab-panel active" data-mcp-panel="claude-desktop">
+            <p class="mcp-tab-intro">Paste this into your Claude Desktop config file. On macOS that's <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>. Restart Claude Desktop after saving.</p>
+            <div class="mcp-code-block">
+              <pre id="mcp-code-claude-desktop">{
+  "mcpServers": {
+    "apilocker": {
+      "command": "apilocker",
+      "args": ["mcp"]
+    }
+  }
+}</pre>
+              <button class="mcp-copy-btn" data-mcp-copy="claude-desktop">Copy</button>
+            </div>
+            <p class="mcp-tab-hint">Once Claude Desktop restarts, all 21 API Locker tools become available in the tool picker — list_keys, reveal_key, run_doctor, proxy_request, and more.</p>
+          </div>
+
+          <div class="mcp-tab-panel" data-mcp-panel="claude-code">
+            <p class="mcp-tab-intro">Run this command in any terminal (Claude Code is the CLI you're already using for this conversation):</p>
+            <div class="mcp-code-block">
+              <pre id="mcp-code-claude-code">claude mcp add apilocker -- apilocker mcp</pre>
+              <button class="mcp-copy-btn" data-mcp-copy="claude-code">Copy</button>
+            </div>
+            <p class="mcp-tab-hint">Verify with <code>claude mcp list</code>. The server appears in the next Claude Code session automatically.</p>
+          </div>
+
+          <div class="mcp-tab-panel" data-mcp-panel="cursor">
+            <p class="mcp-tab-intro">Open Cursor Settings → Features → Model Context Protocol → Add Server, and paste this config:</p>
+            <div class="mcp-code-block">
+              <pre id="mcp-code-cursor">{
+  "mcpServers": {
+    "apilocker": {
+      "command": "apilocker",
+      "args": ["mcp"]
+    }
+  }
+}</pre>
+              <button class="mcp-copy-btn" data-mcp-copy="cursor">Copy</button>
+            </div>
+            <p class="mcp-tab-hint">Restart Cursor. The agent gets the full API Locker toolset inside your IDE.</p>
+          </div>
+
+          <div class="mcp-tab-panel" data-mcp-panel="continue">
+            <p class="mcp-tab-intro">Continue (VS Code extension) reads <code>~/.continue/config.json</code>. Add an <code>mcpServers</code> section with this entry:</p>
+            <div class="mcp-code-block">
+              <pre id="mcp-code-continue">{
+  "mcpServers": {
+    "apilocker": {
+      "command": "apilocker",
+      "args": ["mcp"]
+    }
+  }
+}</pre>
+              <button class="mcp-copy-btn" data-mcp-copy="continue">Copy</button>
+            </div>
+            <p class="mcp-tab-hint">Reload VS Code after saving.</p>
+          </div>
+
+          <div class="mcp-tab-panel" data-mcp-panel="zed">
+            <p class="mcp-tab-intro">Zed uses <code>context_servers</code> in its settings.json. Add this entry:</p>
+            <div class="mcp-code-block">
+              <pre id="mcp-code-zed">{
+  "context_servers": {
+    "apilocker": {
+      "command": {
+        "path": "apilocker",
+        "args": ["mcp"],
+        "env": {}
+      }
+    }
+  }
+}</pre>
+              <button class="mcp-copy-btn" data-mcp-copy="zed">Copy</button>
+            </div>
+            <p class="mcp-tab-hint">Reload Zed after saving.</p>
+          </div>
+
+          <!-- Recent MCP activity -->
+          <div class="mcp-section-head">
+            <h3>Is it working?</h3>
+            <p>Recent reveal and proxy calls show up here the moment a connected MCP client uses your vault.</p>
+          </div>
+          <div id="mcp-recent-activity" class="mcp-activity-feed">
+            <div class="mcp-activity-empty">No activity yet. Connect a client and ask it to list your keys.</div>
+          </div>
+
+          <!-- CLI prereq note -->
+          <div class="mcp-prereq-note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <strong>Prerequisite:</strong> every config above uses the <code>apilocker</code> CLI to bridge MCP over stdio. Make sure the CLI is installed globally (<code>npm install -g apilocker</code>) and registered (<code>apilocker register</code>) on the same machine as your MCP client. The bridge reads your master token from <code>~/.apilocker/config.json</code> automatically.
+            </div>
+          </div>
+        </section>
+
+        <!-- CLI nudge card -->
+        <section class="cli-nudge">
+          <div class="cli-nudge-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          </div>
+          <div class="cli-nudge-body">
+            <h3>Stop using .env files</h3>
+            <p>Your keys live here; your code can use them directly. Install the CLI, then <code>apilocker run -- npm start</code> injects your secrets as environment variables for the duration of a single command. No .env file, no shell history, no leaks.</p>
+            <div class="cli-nudge-cmds">
+              <div class="cli-cmd"><span class="cli-prompt">$</span> <span class="cli-text">npm install -g apilocker</span></div>
+              <div class="cli-cmd"><span class="cli-prompt">$</span> <span class="cli-text">apilocker register</span></div>
+              <div class="cli-cmd"><span class="cli-prompt">$</span> <span class="cli-text">cd ~/your-project && apilocker init</span></div>
+              <div class="cli-cmd"><span class="cli-prompt">$</span> <span class="cli-text">apilocker run -- npm start</span></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer>
+      <div class="container footer-inner">
+        <div class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </div>
+        <div class="footer-links">
+          <a href="#">Docs</a>
+          <a href="#">GitHub</a>
+          <a href="https://www.npmjs.com/package/apilocker">npm</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+        </div>
+        <div class="footer-copy">© 2026 API Locker</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ===================== MODAL: ADD KEY ===================== -->
+  <div class="modal-backdrop" id="modal-add-key">
+    <div class="modal" role="dialog" aria-labelledby="add-key-title">
+      <div class="modal-head">
+        <div class="modal-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3 id="add-key-title" class="modal-title">Add a credential</h3>
+        <p class="modal-sub">Choose how you'll use this credential. You can always change your mind later.</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-error" id="add-key-error"></div>
+
+        <!-- Three-mode tabs (v1.0.0) -->
+        <div class="add-key-tabs" role="tablist">
+          <button class="add-key-tab active" data-add-mode="inject" type="button">
+            <span class="add-key-tab-label">Inject</span>
+            <span class="add-key-tab-sub">Use via apilocker run</span>
+          </button>
+          <button class="add-key-tab" data-add-mode="proxy" type="button">
+            <span class="add-key-tab-label">Proxy</span>
+            <span class="add-key-tab-sub">Route through API Locker</span>
+          </button>
+          <button class="add-key-tab" data-add-mode="oauth" type="button">
+            <span class="add-key-tab-label">OAuth</span>
+            <span class="add-key-tab-sub">Multi-field credential</span>
+          </button>
+        </div>
+
+        <!-- Shared: provider grid (contents filtered per mode) -->
+        <div class="field">
+          <label>Provider</label>
+          <div class="provider-grid" id="provider-grid"></div>
+        </div>
+
+        <!-- Shared: name -->
+        <div class="field">
+          <label for="key-name">Name</label>
+          <input type="text" id="key-name" placeholder="e.g. OPENAI_API_KEY" autocomplete="off" />
+          <p class="field-hint" id="key-name-hint">A short label for this credential. Must be unique. Tip: use SCREAMING_SNAKE_CASE for direct env var injection.</p>
+        </div>
+
+        <!-- api_key mode fields -->
+        <div id="mode-inject-fields">
+          <div class="field">
+            <label for="key-secret">Secret</label>
+            <input type="password" id="key-secret" class="mono" placeholder="Paste the raw key or secret" autocomplete="off" />
+            <p class="field-hint">Encrypted with AES-GCM the moment you submit. We never log or display it again.</p>
+          </div>
+        </div>
+
+        <!-- proxy-only fields (base URL etc.) -->
+        <div id="mode-proxy-fields" class="hidden">
+          <div class="field">
+            <label for="key-secret-proxy">Secret</label>
+            <input type="password" id="key-secret-proxy" class="mono" placeholder="Paste the raw key or secret" autocomplete="off" />
+            <p class="field-hint">Encrypted with AES-GCM the moment you submit.</p>
+          </div>
+          <div class="field">
+            <label for="key-base-url">Base URL</label>
+            <input type="text" id="key-base-url" class="mono" placeholder="https://api.example.com" autocomplete="off" />
+            <p class="field-hint">The provider's API root. Leave blank to use the selected template's default.</p>
+          </div>
+        </div>
+
+        <!-- oauth2 mode fields -->
+        <div id="mode-oauth-fields" class="hidden">
+          <div class="field">
+            <label for="oauth-client-id">Client ID</label>
+            <input type="text" id="oauth-client-id" class="mono" placeholder="e.g. 856449281783-abc...apps.googleusercontent.com" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="oauth-client-secret">Client Secret</label>
+            <input type="password" id="oauth-client-secret" class="mono" placeholder="Paste the OAuth client secret" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="oauth-refresh-token">Refresh Token <span class="field-optional">(optional)</span></label>
+            <input type="password" id="oauth-refresh-token" class="mono" placeholder="Paste the refresh token if you have one" autocomplete="off" />
+            <p class="field-hint">Optional. You can add this later when you complete an OAuth dance.</p>
+          </div>
+          <div class="field">
+            <label for="oauth-scopes">Scopes <span class="field-optional">(optional)</span></label>
+            <input type="text" id="oauth-scopes" class="mono" placeholder="openid email profile" autocomplete="off" />
+            <p class="field-hint">Space-separated list. Leave blank to use the provider's default.</p>
+          </div>
+          <div class="field">
+            <label for="oauth-redirect-uri">Redirect URI <span class="field-optional">(optional)</span></label>
+            <input type="text" id="oauth-redirect-uri" class="mono" placeholder="https://yourapp.com/oauth/callback" autocomplete="off" />
+          </div>
+
+          <!-- Advanced fields (shown only when a custom OAuth provider is selected;
+               for known providers these auto-fill from the template) -->
+          <div id="oauth-custom-fields" class="hidden">
+            <div class="field">
+              <label for="oauth-authorize-url">Authorize URL</label>
+              <input type="text" id="oauth-authorize-url" class="mono" placeholder="https://auth.example.com/oauth/authorize" autocomplete="off" />
+              <p class="field-hint">The provider's OAuth authorize endpoint. Required for Custom OAuth.</p>
+            </div>
+            <div class="field">
+              <label for="oauth-token-url">Token URL</label>
+              <input type="text" id="oauth-token-url" class="mono" placeholder="https://auth.example.com/oauth/token" autocomplete="off" />
+              <p class="field-hint">The provider's token exchange / refresh endpoint. Required for Custom OAuth.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" data-close-modal="modal-add-key">Cancel</button>
+        <button class="btn-modal btn-modal-primary" id="submit-add-key">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Lock in vault
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: WELCOME (v1.0.0 first-run) ===================== -->
+  <div class="modal-backdrop" id="modal-welcome">
+    <div class="modal welcome-modal" role="dialog" aria-labelledby="welcome-title">
+      <div class="modal-head welcome-head">
+        <div class="welcome-badge">NEW · v1.0.0</div>
+        <h3 id="welcome-title" class="modal-title welcome-title">Welcome to API Locker.</h3>
+        <p class="welcome-sub">One vault, three types of credentials — all production-ready.</p>
+      </div>
+      <div class="modal-body">
+        <div class="welcome-pillars">
+          <div class="welcome-pillar">
+            <div class="welcome-pillar-icon welcome-pillar-llm">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3 3 3 0 0 0-2 5.5A3 3 0 0 0 6.5 14a3 3 0 0 0 2 5.5 3 3 0 0 0 3 2.5 3 3 0 0 0 3-2.5 3 3 0 0 0 2-5.5 3 3 0 0 0 .5-3.5A3 3 0 0 0 15 5a3 3 0 0 0-3-3z"/><path d="M12 9v6"/><path d="M9 12h6"/></svg>
+            </div>
+            <div>
+              <div class="welcome-pillar-name">LLM API Keys</div>
+              <div class="welcome-pillar-desc">OpenAI, Anthropic, Gemini, Groq, Mistral</div>
+            </div>
+          </div>
+          <div class="welcome-pillar">
+            <div class="welcome-pillar-icon welcome-pillar-service">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <div class="welcome-pillar-name">Service API Keys</div>
+              <div class="welcome-pillar-desc">Stripe, Twilio, Resend, ElevenLabs, and anything with a .env line</div>
+            </div>
+          </div>
+          <div class="welcome-pillar">
+            <div class="welcome-pillar-icon welcome-pillar-oauth">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div>
+              <div class="welcome-pillar-name">OAuth Credentials</div>
+              <div class="welcome-pillar-desc">Google, GitHub, Slack, Spotify, Salesforce, HubSpot, and more</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcome-cli">
+          <div class="welcome-cli-title">Ship the full experience in 3 commands</div>
+          <pre class="welcome-cli-code">npm install -g apilocker
+apilocker register
+apilocker run -- npm start</pre>
+          <div class="welcome-cli-sub">Your secrets get injected as env vars. Zero <code>.env</code> files, zero shell history, zero leaks.</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-primary" id="welcome-dismiss">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Let's go
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: ROTATE KEY ===================== -->
+  <div class="modal-backdrop" id="modal-rotate-key">
+    <div class="modal" role="dialog" aria-labelledby="rotate-key-title">
+      <div class="modal-head">
+        <div class="modal-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+        </div>
+        <h3 id="rotate-key-title" class="modal-title">Rotate credential</h3>
+        <p class="modal-sub">Replace this credential's value. The key's name, provider, and any scoped tokens that use it all keep working — only the encrypted secret changes.</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-error" id="rotate-key-error"></div>
+
+        <div class="field">
+          <label>Key</label>
+          <div class="rotate-target">
+            <div class="rotate-target-name" id="rotate-target-name">—</div>
+            <div class="rotate-target-meta" id="rotate-target-meta">—</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rotate-new-value">New value</label>
+          <input type="password" id="rotate-new-value" class="mono" placeholder="Paste the new secret" autocomplete="off" />
+          <p class="field-hint">Encrypted with AES-GCM the moment you submit. We never log or display it again.</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" data-close-modal="modal-rotate-key">Cancel</button>
+        <button class="btn-modal btn-modal-primary" id="submit-rotate-key">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Rotate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: ROTATE OAUTH SECRET (v1.0.1) ===================== -->
+  <!--
+    Partial rotation for OAuth credentials. Only client_secret and/or
+    refresh_token get updated — all other OAuth fields (client_id,
+    authorize_url, token_url, scopes, redirect_uri) are preserved by
+    the server's merge-then-re-encrypt flow. This is the correct UX for
+    "my Google client secret leaked, rotate it" without wiping the rest
+    of the OAuth entry.
+  -->
+  <div class="modal-backdrop" id="modal-rotate-oauth">
+    <div class="modal" role="dialog" aria-labelledby="rotate-oauth-title">
+      <div class="modal-head">
+        <div class="modal-icon" style="background: linear-gradient(135deg, #10B981 0%, #047857 100%); box-shadow: 0 10px 24px -10px rgba(16,185,129,0.45);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+        </div>
+        <h3 id="rotate-oauth-title" class="modal-title">Rotate OAuth secret</h3>
+        <p class="modal-sub">Replace the compromised or expired secret without touching the rest of the OAuth credential.</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-error" id="rotate-oauth-error"></div>
+
+        <div class="field">
+          <label>Credential</label>
+          <div class="rotate-target">
+            <div class="rotate-target-name" id="rotate-oauth-target-name">—</div>
+            <div class="rotate-target-meta" id="rotate-oauth-target-meta">—</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rotate-oauth-client-secret">New client secret</label>
+          <input type="password" id="rotate-oauth-client-secret" class="mono" placeholder="Paste the new client_secret" autocomplete="off" />
+          <p class="field-hint">Leave blank if you only want to rotate the refresh token.</p>
+        </div>
+
+        <div class="field">
+          <label for="rotate-oauth-refresh-token">New refresh token <span style="color: var(--text-muted); font-weight: 400;">(optional)</span></label>
+          <input type="password" id="rotate-oauth-refresh-token" class="mono" placeholder="Paste a new refresh_token if you have one" autocomplete="off" />
+          <p class="field-hint">Most rotations only need client_secret. Refresh token rotation is for when the upstream provider revokes a stored grant.</p>
+        </div>
+
+        <div class="rename-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>
+            <strong>Only the secret changes.</strong> <code>client_id</code>, authorize URL, token URL, scopes, and redirect URI stay exactly as they are. Scoped tokens that reference this credential keep working without any changes.
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" data-close-modal="modal-rotate-oauth">Cancel</button>
+        <button class="btn-modal btn-modal-primary" id="submit-rotate-oauth">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Rotate secret
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: RENAME KEY (v1.0.0) ===================== -->
+  <div class="modal-backdrop" id="modal-rename-key">
+    <div class="modal" role="dialog" aria-labelledby="rename-key-title">
+      <div class="modal-head">
+        <div class="modal-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <h3 id="rename-key-title" class="modal-title">Rename credential</h3>
+        <p class="modal-sub">Update the alias. The encrypted value stays the same; scoped tokens referencing this key keep working.</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-error" id="rename-key-error"></div>
+
+        <div class="field">
+          <label>Current name</label>
+          <div class="rotate-target">
+            <div class="rotate-target-name" id="rename-current-name">—</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rename-new-name">New name</label>
+          <input type="text" id="rename-new-name" class="mono" placeholder="e.g. OPENAI_API_KEY" autocomplete="off" />
+          <p class="field-hint">Tip: use SCREAMING_SNAKE_CASE for cleaner env var injection via <code>apilocker run</code>.</p>
+        </div>
+
+        <div class="rename-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>
+            <strong>Nothing breaks.</strong> Existing <code>.apilockerrc</code> files and app code that reference the old name keep working — API Locker remembers the old alias and transparently resolves it. You'll see a gentle reminder next time you run <code>apilocker run</code> in a project that still uses the old alias.
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" data-close-modal="modal-rename-key">Cancel</button>
+        <button class="btn-modal btn-modal-primary" id="submit-rename-key">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Rename
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: OAUTH REVEAL (v1.0.0) ===================== -->
+  <div class="modal-backdrop" id="modal-oauth-reveal">
+    <div class="modal" role="dialog" aria-labelledby="oauth-reveal-title">
+      <div class="modal-head">
+        <div class="modal-icon" style="background: linear-gradient(135deg, #10B981 0%, #047857 100%); box-shadow: 0 10px 24px -10px rgba(16,185,129,0.45);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <h3 id="oauth-reveal-title" class="modal-title">OAuth credential</h3>
+        <p class="modal-sub" id="oauth-reveal-sub">Click any field to reveal its value.</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-error" id="oauth-reveal-error"></div>
+        <div id="oauth-reveal-loading" class="doctor-loading">
+          <div class="spinner-sm"></div>
+          <span>Decrypting…</span>
+        </div>
+        <div id="oauth-reveal-fields" class="oauth-fields hidden"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" data-close-modal="modal-oauth-reveal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: CREATE TOKEN ===================== -->
+  <div class="modal-backdrop" id="modal-create-token">
+    <div class="modal" role="dialog" aria-labelledby="create-token-title">
+      <div class="modal-head">
+        <div class="modal-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <h3 id="create-token-title" class="modal-title">Issue a scoped token</h3>
+        <p class="modal-sub">Pick which keys this token can access and how often it should rotate. We'll generate it once — copy it before you close.</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-error" id="create-token-error"></div>
+
+        <div class="field">
+          <label for="token-name">Name</label>
+          <input type="text" id="token-name" placeholder="e.g. my-app-prod" autocomplete="off" />
+          <p class="field-hint">A short label so you can find this token later.</p>
+        </div>
+
+        <div class="field">
+          <label>Allowed keys</label>
+          <div class="check-list" id="token-keys-list"></div>
+          <p class="field-hint">Pick one or more keys this token can use through the proxy.</p>
+        </div>
+
+        <div class="field">
+          <label for="token-rotation">Rotation</label>
+          <select id="token-rotation">
+            <option value="static">Static (never expires)</option>
+            <option value="hourly">Rotate hourly (max security)</option>
+            <option value="daily" selected>Rotate daily (recommended)</option>
+            <option value="weekly">Rotate weekly</option>
+            <option value="monthly">Rotate monthly</option>
+          </select>
+          <p class="field-hint">Rotating tokens use a long-lived refresh token under the hood — your app auto-renews without ever being locked out.</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" data-close-modal="modal-create-token">Cancel</button>
+        <button class="btn-modal btn-modal-primary" id="submit-create-token">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Issue token
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: TOKEN REVEAL (one-time) ===================== -->
+  <div class="modal-backdrop" id="modal-token-reveal">
+    <div class="modal" role="dialog" aria-labelledby="reveal-title">
+      <div class="modal-head">
+        <div class="modal-icon" style="background: linear-gradient(135deg, #10B981 0%, #047857 100%); box-shadow: 0 10px 24px -10px rgba(16,185,129,0.45);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 id="reveal-title" class="modal-title">Token issued</h3>
+        <p class="modal-sub" id="reveal-sub">This is the only time we'll show the raw token. Copy it now and paste it into your app's environment.</p>
+      </div>
+      <div class="modal-body">
+
+        <!-- Access token -->
+        <div class="token-label-row">
+          <span class="token-label">Access token</span>
+          <span class="token-label-hint" id="access-hint">—</span>
+        </div>
+        <div class="reveal-block">
+          <div class="reveal-code" id="reveal-access-value">—</div>
+          <button class="copy-btn" id="copy-access-btn" title="Copy access token">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+
+        <!-- Refresh token (hidden for static) -->
+        <div id="refresh-block">
+          <div class="token-label-row" style="margin-top: 16px;">
+            <span class="token-label">Refresh token</span>
+            <span class="token-label-hint">Keep this safe — never expires</span>
+          </div>
+          <div class="reveal-block">
+            <div class="reveal-code" id="reveal-refresh-value">—</div>
+            <button class="copy-btn" id="copy-refresh-btn" title="Copy refresh token">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="warn-callout" style="margin-top: 16px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div id="reveal-warn-text">Once you close this dialog, the raw tokens cannot be retrieved. If you lose them, revoke and issue a new pair.</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" id="reveal-show-code">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Show integration code
+        </button>
+        <button class="btn-modal btn-modal-primary" data-close-modal="modal-token-reveal">I've saved it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: CODE EXAMPLES ===================== -->
+  <div class="modal-backdrop" id="modal-code-examples">
+    <div class="modal modal-code" role="dialog" aria-labelledby="code-title">
+      <div class="modal-head">
+        <div class="modal-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3 id="code-title" class="modal-title">How to use this token</h3>
+        <p class="modal-sub">Drop this into your app and you're proxying through API Locker. The raw provider key never leaves the vault.</p>
+      </div>
+      <div class="modal-body">
+        <!-- Provider switcher (shown when token has multiple attached keys) -->
+        <div class="provider-switcher" id="provider-switcher"></div>
+
+        <div class="code-provider-head" id="code-provider-head">
+          <img id="code-provider-logo" src="" alt="" />
+          <div class="cph-name" id="code-provider-name">—</div>
+          <div class="cph-meta" id="code-provider-meta">—</div>
+        </div>
+
+        <div class="code-tabs">
+          <button class="code-tab active" data-lang="curl">cURL</button>
+          <button class="code-tab" data-lang="node">Node.js</button>
+          <button class="code-tab" data-lang="python">Python</button>
+          <button class="code-tab" data-lang="swift">Swift</button>
+          <button class="code-tab" data-lang="go">Go</button>
+        </div>
+
+        <div class="code-surface">
+          <button class="code-copy" id="code-copy-btn" title="Copy">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <pre id="code-display"></pre>
+        </div>
+
+        <p class="code-hint" id="code-hint">Replace <code>YOUR_API_LOCKER_TOKEN</code> with the scoped token you saved when you issued it. The token authorizes access — API Locker injects the real provider credential.</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-modal btn-modal-secondary" data-close-modal="modal-code-examples">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div class="toast" id="toast">
+    <span id="toast-text"></span>
+  </div>
+
+  <script>
+    // ============================================================
+    //  CONFIG
+    // ============================================================
+    const API = 'https://api.apilocker.app';
+
+    // Brand favicons from Google's universal favicon service.
+    // Reliable across all domains and recognizable at small sizes.
+    const FAVICON = (domain) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    // Provider catalog — each entry includes a category so the Add Key
+    // modal can filter by mode (inject/proxy show llm+service; oauth
+    // shows oauth only).
+    const PROVIDERS = [
+      // ---- LLM ----
+      { id: 'openai',           name: 'OpenAI',       category: 'llm',     logo: FAVICON('openai.com')            },
+      { id: 'anthropic',        name: 'Anthropic',    category: 'llm',     logo: FAVICON('anthropic.com')         },
+      { id: 'google-ai',        name: 'Gemini',       category: 'llm',     logo: FAVICON('ai.google.dev')         },
+      { id: 'groq',             name: 'Groq',         category: 'llm',     logo: FAVICON('groq.com')              },
+      { id: 'mistral',          name: 'Mistral',      category: 'llm',     logo: FAVICON('mistral.ai')            },
+      // ---- Service ----
+      { id: 'stripe',           name: 'Stripe',       category: 'service', logo: FAVICON('stripe.com')            },
+      { id: 'lemonsqueezy',     name: 'Lemon Sqzy',   category: 'service', logo: FAVICON('lemonsqueezy.com')      },
+      { id: 'twilio',           name: 'Twilio',       category: 'service', logo: FAVICON('twilio.com')            },
+      { id: 'sendgrid',         name: 'SendGrid',     category: 'service', logo: FAVICON('sendgrid.com')          },
+      { id: 'resend',           name: 'Resend',       category: 'service', logo: FAVICON('resend.com')            },
+      { id: 'elevenlabs',       name: 'ElevenLabs',   category: 'service', logo: FAVICON('elevenlabs.io')         },
+      { id: 'cloudflare',       name: 'Cloudflare',   category: 'service', logo: FAVICON('cloudflare.com')        },
+      { id: 'vercel',           name: 'Vercel',       category: 'service', logo: FAVICON('vercel.com')            },
+      { id: 'upstash',          name: 'Upstash',      category: 'service', logo: FAVICON('upstash.com')           },
+      { id: 'github',           name: 'GitHub',       category: 'service', logo: FAVICON('github.com')            },
+      { id: 'clerk',            name: 'Clerk',        category: 'service', logo: FAVICON('clerk.com')             },
+      { id: 'sentry',           name: 'Sentry',       category: 'service', logo: FAVICON('sentry.io')             },
+      { id: 'posthog',          name: 'PostHog',      category: 'service', logo: FAVICON('posthog.com')           },
+      { id: 'cloudinary',       name: 'Cloudinary',   category: 'service', logo: FAVICON('cloudinary.com')        },
+      { id: 'mux',              name: 'Mux',          category: 'service', logo: FAVICON('mux.com')               },
+      { id: 'custom',           name: 'Custom',       category: 'service', logo: null                              },
+      // ---- OAuth ----
+      { id: 'google-oauth',     name: 'Google',       category: 'oauth',   logo: FAVICON('google.com')            },
+      { id: 'github-oauth',     name: 'GitHub App',   category: 'oauth',   logo: FAVICON('github.com')            },
+      { id: 'slack-oauth',      name: 'Slack',        category: 'oauth',   logo: FAVICON('slack.com')             },
+      { id: 'microsoft-oauth',  name: 'Microsoft',    category: 'oauth',   logo: FAVICON('microsoft.com')         },
+      { id: 'notion-oauth',     name: 'Notion',       category: 'oauth',   logo: FAVICON('notion.so')             },
+      { id: 'spotify-oauth',    name: 'Spotify',      category: 'oauth',   logo: FAVICON('spotify.com')           },
+      { id: 'twitter-oauth',    name: 'Twitter / X',  category: 'oauth',   logo: FAVICON('x.com')                 },
+      { id: 'linkedin-oauth',   name: 'LinkedIn',     category: 'oauth',   logo: FAVICON('linkedin.com')          },
+      { id: 'discord-oauth',    name: 'Discord',      category: 'oauth',   logo: FAVICON('discord.com')           },
+      { id: 'zoom-oauth',       name: 'Zoom',         category: 'oauth',   logo: FAVICON('zoom.us')               },
+      { id: 'dropbox-oauth',    name: 'Dropbox',      category: 'oauth',   logo: FAVICON('dropbox.com')           },
+      { id: 'salesforce-oauth', name: 'Salesforce',   category: 'oauth',   logo: FAVICON('salesforce.com')        },
+      { id: 'hubspot-oauth',    name: 'HubSpot',      category: 'oauth',   logo: FAVICON('hubspot.com')           },
+      { id: 'custom-oauth',     name: 'Custom OAuth', category: 'oauth',   logo: null                              },
+    ];
+
+    // ------------------------------------------------------------------
+    // INTEGRATION EXAMPLES
+    // Each provider gets a forward path + body template so the code
+    // snippets look useful out of the box. The proxy handles all the
+    // auth injection — these examples never touch the raw provider key.
+    // ------------------------------------------------------------------
+    const EXAMPLES = {
+      openai: {
+        method: 'POST',
+        forwardPath: '/v1/chat/completions',
+        body: { model: 'gpt-4o-mini', messages: [{ role: 'user', content: 'Say hello' }] },
+      },
+      anthropic: {
+        method: 'POST',
+        forwardPath: '/v1/messages',
+        body: { model: 'claude-haiku-4-5', max_tokens: 60, messages: [{ role: 'user', content: 'Say hello' }] },
+        extraHeaders: { 'anthropic-version': '2023-06-01' },
+      },
+      'google-ai': {
+        method: 'POST',
+        forwardPath: '/v1beta/models/gemini-1.5-flash:generateContent',
+        body: { contents: [{ parts: [{ text: 'Say hello' }] }] },
+      },
+      groq: {
+        method: 'POST',
+        forwardPath: '/chat/completions',
+        body: { model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: 'Say hello' }] },
+      },
+      mistral: {
+        method: 'POST',
+        forwardPath: '/v1/chat/completions',
+        body: { model: 'mistral-small-latest', messages: [{ role: 'user', content: 'Say hello' }] },
+      },
+      stripe: { method: 'GET', forwardPath: '/v1/customers?limit=3' },
+      lemonsqueezy: { method: 'GET', forwardPath: '/v1/stores' },
+      twilio: { method: 'GET', forwardPath: '/2010-04-01/Accounts.json' },
+      sendgrid: {
+        method: 'POST',
+        forwardPath: '/v3/mail/send',
+        body: {
+          personalizations: [{ to: [{ email: 'you@example.com' }] }],
+          from: { email: 'hello@yourdomain.com' },
+          subject: 'Sent via API Locker',
+          content: [{ type: 'text/plain', value: 'Hello from the proxy.' }],
+        },
+      },
+      resend: {
+        method: 'POST',
+        forwardPath: '/emails',
+        body: {
+          from: 'onboarding@resend.dev',
+          to: ['you@example.com'],
+          subject: 'Sent via API Locker',
+          text: 'Hello from the proxy.',
+        },
+      },
+      cloudflare: { method: 'GET', forwardPath: '/client/v4/user' },
+      vercel: { method: 'GET', forwardPath: '/v9/projects' },
+      upstash: { method: 'GET', forwardPath: '/redis' },
+      github: { method: 'GET', forwardPath: '/user' },
+      clerk: { method: 'GET', forwardPath: '/v1/users' },
+      sentry: { method: 'GET', forwardPath: '/organizations/' },
+      posthog: { method: 'GET', forwardPath: '/api/projects/' },
+      cloudinary: { method: 'GET', forwardPath: '/v1_1/demo/resources/image' },
+      mux: { method: 'GET', forwardPath: '/video/v1/assets' },
+      custom: { method: 'GET', forwardPath: '/' },
+    };
+
+    // ---------------------------------------------------------------
+    // Auto-refreshing SDK snippets.
+    //
+    // Each language gets a self-contained mini-SDK that:
+    //   1. Holds a refresh token + a short-lived access token in memory
+    //   2. Before each proxy call, checks if the access token is expired
+    //   3. If so, calls /v1/tokens/refresh with the refresh token and
+    //      stores the new pair
+    //   4. Makes the actual proxy request
+    //   5. On 401, refreshes once and retries
+    //
+    // The user pastes ONE line of config (their refresh token) and uses
+    // `client.proxy(...)`. Rotation is completely invisible.
+    // ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    //  SDK snippets — the "one-line .env" pattern.
+    //
+    //  Each language shows a tiny self-contained client that:
+    //    1. Takes ONLY the refresh token as config (the one-liner)
+    //    2. On first call, hits /v1/tokens/refresh to mint an access token
+    //    3. Hits /v1/keys/allowed to auto-discover which keys this token
+    //       can use, keyed by friendly alias (the key's name)
+    //    4. Lets the developer write `client.proxy('openai', path, body)`
+    //       instead of ever touching key IDs
+    //    5. Auto-refreshes the access token before expiry; retries on 401
+    //
+    //  The developer's entire credential surface becomes:
+    //     APILOCKER_REFRESH_TOKEN=rtk_xxx
+    //  Everything else is derived automatically.
+    // ---------------------------------------------------------------
+    function buildExamples(provider, keyId, accessToken, refreshToken) {
+      const ex = EXAMPLES[provider] || EXAMPLES.custom;
+      const base = 'https://api.apilocker.app';
+      const proxyUrlTemplate = `${base}/v1/proxy/`;
+      const refreshUrl = `${base}/v1/tokens/refresh`;
+      const allowedUrl = `${base}/v1/keys/allowed`;
+
+      const accessVar = accessToken || 'YOUR_ACCESS_TOKEN';
+      const refreshVar = refreshToken || 'YOUR_REFRESH_TOKEN';
+      const alias = provider; // the key's friendly alias (defaults to provider name)
+      const bodyJson = ex.body ? JSON.stringify(ex.body, null, 2) : null;
+      const extraHeaders = ex.extraHeaders || {};
+      const extraHeaderEntries = Object.entries(extraHeaders);
+
+      // ============ cURL ============
+      let curl =
+`# One-line .env:
+#   APILOCKER_REFRESH_TOKEN=${refreshVar}
+
+# 1. Mint an access token from your refresh token
+curl -sX POST "${refreshUrl}" \\
+  -H "Authorization: Bearer $APILOCKER_REFRESH_TOKEN"
+# -> { "access_token": "...", "refresh_token": "...", "access_token_expires_at": "..." }
+
+# 2. (Optional) Discover which keys this token can use, keyed by alias
+curl -s "${allowedUrl}" \\
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+# -> { "keys": [{ "id": "key_...", "alias": "${alias}", "provider": "${provider}", ... }] }
+
+# 3. Proxy a real request. The proxy injects the provider key automatically.
+curl -X ${ex.method} "${proxyUrlTemplate}$KEY_ID" \\
+  -H "Authorization: Bearer $ACCESS_TOKEN" \\
+  -H "X-Locker-Forward-Path: ${ex.forwardPath}"`;
+      for (const [k, v] of extraHeaderEntries) {
+        curl += ` \\\n  -H "${k}: ${v}"`;
+      }
+      if (bodyJson) {
+        curl += ` \\\n  -H "Content-Type: application/json" \\\n  -d '${bodyJson.replace(/'/g, "'\\''")}'`;
+      }
+
+      // ============ Node.js ============
+      const nodeExtra = extraHeaderEntries
+        .map(([k, v]) => `      "${k}": "${v}",`)
+        .join('\n');
+      const nodeBodyLine = bodyJson
+        ? `,\n    body: JSON.stringify(${indentJson(bodyJson, '    ')})`
+        : '';
+
+      const node =
+`// apilocker.js — entire credential surface is ONE env var
+// .env:
+//   APILOCKER_REFRESH_TOKEN=${refreshVar}
+
+const REFRESH_TOKEN = process.env.APILOCKER_REFRESH_TOKEN;
+const BASE = "${base}";
+
+let access, expiresAt = 0, aliasMap = null;
+
+async function refresh() {
+  const r = await fetch(BASE + "/v1/tokens/refresh", {
+    method: "POST",
+    headers: { Authorization: \`Bearer \${REFRESH_TOKEN}\` },
+  });
+  if (!r.ok) throw new Error("Refresh failed: " + r.status);
+  const d = await r.json();
+  access = d.access_token;
+  expiresAt = Date.parse(d.access_token_expires_at);
+}
+
+async function loadAliases() {
+  const r = await fetch(BASE + "/v1/keys/allowed", {
+    headers: { Authorization: \`Bearer \${access}\` },
+  });
+  const d = await r.json();
+  aliasMap = Object.fromEntries(d.keys.map(k => [k.alias, k.id]));
+}
+
+async function proxy(alias, path, opts = {}) {
+  if (Date.now() > expiresAt - 60_000) await refresh();
+  if (!aliasMap) await loadAliases();
+  const keyId = aliasMap[alias];
+  if (!keyId) throw new Error("Unknown alias: " + alias);
+
+  const headers = {
+    Authorization: \`Bearer \${access}\`,
+    "X-Locker-Forward-Path": path,
+${nodeExtra}${bodyJson ? `\n    "Content-Type": "application/json",` : ''}
+  };
+  let res = await fetch(\`\${BASE}/v1/proxy/\${keyId}\`, {
+    method: "${ex.method}",
+    headers${nodeBodyLine}
+  });
+  if (res.status === 401) {
+    await refresh();
+    headers.Authorization = \`Bearer \${access}\`;
+    res = await fetch(\`\${BASE}/v1/proxy/\${keyId}\`, {
+      method: "${ex.method}",
+      headers${nodeBodyLine}
+    });
+  }
+  return res.json();
+}
+
+// Usage — friendly alias, no key IDs, no provider URLs, no credentials
+const result = await proxy("${alias}", "${ex.forwardPath}");
+console.log(result);`;
+
+      // ============ Python ============
+      const pyExtra = extraHeaderEntries
+        .map(([k, v]) => `        "${k}": "${v}",`)
+        .join('\n');
+      const pyBody = bodyJson
+        ? bodyJson.replace(/true/g, 'True').replace(/false/g, 'False').replace(/null/g, 'None')
+        : null;
+
+      const python =
+`# apilocker.py — one env var is your entire credential surface
+# .env:
+#   APILOCKER_REFRESH_TOKEN=${refreshVar}
+import os, time, requests
+from datetime import datetime
+
+REFRESH_TOKEN = os.environ["APILOCKER_REFRESH_TOKEN"]
+BASE = "${base}"
+
+_access = None
+_expires_at = 0
+_aliases = None
+
+def _refresh():
+    global _access, _expires_at
+    r = requests.post(BASE + "/v1/tokens/refresh",
+                      headers={"Authorization": f"Bearer {REFRESH_TOKEN}"})
+    r.raise_for_status()
+    d = r.json()
+    _access = d["access_token"]
+    _expires_at = datetime.fromisoformat(
+        d["access_token_expires_at"].replace("Z", "+00:00")
+    ).timestamp()
+
+def _load_aliases():
+    global _aliases
+    r = requests.get(BASE + "/v1/keys/allowed",
+                     headers={"Authorization": f"Bearer {_access}"})
+    _aliases = {k["alias"]: k["id"] for k in r.json()["keys"]}
+
+def proxy(alias, path, json_body=None):
+    global _access
+    if time.time() > _expires_at - 60:
+        _refresh()
+    if _aliases is None:
+        _load_aliases()
+    key_id = _aliases.get(alias)
+    if not key_id:
+        raise ValueError(f"Unknown alias: {alias}")
+
+    headers = {
+        "Authorization": f"Bearer {_access}",
+        "X-Locker-Forward-Path": path,
+${pyExtra}${bodyJson ? `\n        "Content-Type": "application/json",` : ''}
+    }
+    res = requests.${ex.method.toLowerCase()}(
+        f"{BASE}/v1/proxy/{key_id}",
+        headers=headers${bodyJson ? `, json=${indentJson(pyBody, '        ')}` : ''}
+    )
+    if res.status_code == 401:
+        _refresh()
+        headers["Authorization"] = f"Bearer {_access}"
+        res = requests.${ex.method.toLowerCase()}(
+            f"{BASE}/v1/proxy/{key_id}",
+            headers=headers${bodyJson ? `, json=${indentJson(pyBody, '            ')}` : ''}
+        )
+    return res.json()
+
+# Usage
+print(proxy("${alias}", "${ex.forwardPath}"))`;
+
+      // ============ Swift (iOS) ============
+      const swiftExtra = extraHeaderEntries
+        .map(([k, v]) => `        req.setValue("${v}", forHTTPHeaderField: "${k}")`)
+        .join('\n');
+      const swiftBodyLine = bodyJson
+        ? `\n        let bodyStr = #"${bodyJson.replace(/"/g, '\\"').replace(/\n/g, '')}"#\n        req.httpBody = bodyStr.data(using: .utf8)`
+        : '';
+
+      const swift =
+`// APILocker.swift — store the refresh token in Keychain, use .proxy()
+// That's the entire credential surface. The SDK handles everything else.
+import Foundation
+
+actor APILocker {
+    private let base = "${base}"
+    private let refreshToken: String
+    private var access = ""
+    private var expiresAt: Date = .distantPast
+    private var aliases: [String: String] = [:]
+
+    init(refreshToken: String) { self.refreshToken = refreshToken }
+
+    private func refresh() async throws {
+        var r = URLRequest(url: URL(string: "\\(base)/v1/tokens/refresh")!)
+        r.httpMethod = "POST"
+        r.setValue("Bearer \\(refreshToken)", forHTTPHeaderField: "Authorization")
+        let (d, _) = try await URLSession.shared.data(for: r)
+        let j = try JSONSerialization.jsonObject(with: d) as! [String: Any]
+        access = j["access_token"] as! String
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        expiresAt = iso.date(from: j["access_token_expires_at"] as! String) ?? .distantPast
+    }
+
+    private func loadAliases() async throws {
+        var r = URLRequest(url: URL(string: "\\(base)/v1/keys/allowed")!)
+        r.setValue("Bearer \\(access)", forHTTPHeaderField: "Authorization")
+        let (d, _) = try await URLSession.shared.data(for: r)
+        let j = try JSONSerialization.jsonObject(with: d) as! [String: Any]
+        let keys = j["keys"] as! [[String: Any]]
+        aliases = Dictionary(uniqueKeysWithValues: keys.map {
+            ($0["alias"] as! String, $0["id"] as! String)
+        })
+    }
+
+    func proxy(_ alias: String, path: String) async throws -> Data {
+        if Date() > expiresAt.addingTimeInterval(-60) { try await refresh() }
+        if aliases.isEmpty { try await loadAliases() }
+        guard let keyId = aliases[alias] else {
+            throw NSError(domain: "APILocker", code: 404,
+                          userInfo: [NSLocalizedDescriptionKey: "Unknown alias: \\(alias)"])
+        }
+        var req = URLRequest(url: URL(string: "\\(base)/v1/proxy/\\(keyId)")!)
+        req.httpMethod = "${ex.method}"
+        req.setValue("Bearer \\(access)", forHTTPHeaderField: "Authorization")
+        req.setValue(path, forHTTPHeaderField: "X-Locker-Forward-Path")
+${swiftExtra}${bodyJson ? '\n        req.setValue("application/json", forHTTPHeaderField: "Content-Type")' : ''}${swiftBodyLine}
+        let (data, res) = try await URLSession.shared.data(for: req)
+        if (res as? HTTPURLResponse)?.statusCode == 401 {
+            try await refresh()
+            req.setValue("Bearer \\(access)", forHTTPHeaderField: "Authorization")
+            return try await URLSession.shared.data(for: req).0
+        }
+        return data
+    }
+}
+
+// Usage
+let client = APILocker(refreshToken: "${refreshVar}")
+let data = try await client.proxy("${alias}", path: "${ex.forwardPath}")
+print(String(data: data, encoding: .utf8)!)`;
+
+      // ============ Go ============
+      const goExtra = extraHeaderEntries
+        .map(([k, v]) => `\treq.Header.Set("${k}", "${v}")`)
+        .join('\n');
+      const goBodyLine = bodyJson
+        ? `\n\tbody := strings.NewReader(\`${bodyJson}\`)`
+        : '';
+      const goReqArgs = bodyJson ? 'body' : 'nil';
+
+      const go =
+`// apilocker.go — one env var = entire credential surface
+package main
+
+import (
+\t"encoding/json"
+\t"fmt"
+\t"io"
+\t"net/http"
+\t"os"
+\t"strings"
+\t"sync"
+\t"time"
+)
+
+type Client struct {
+\tmu        sync.Mutex
+\trefresh   string
+\taccess    string
+\texpiresAt time.Time
+\taliases   map[string]string
+}
+
+const base = "${base}"
+
+func (c *Client) doRefresh() error {
+\treq, _ := http.NewRequest("POST", base+"/v1/tokens/refresh", nil)
+\treq.Header.Set("Authorization", "Bearer "+c.refresh)
+\tres, err := http.DefaultClient.Do(req)
+\tif err != nil { return err }
+\tdefer res.Body.Close()
+\tvar d struct {
+\t\tAccessToken          string \`json:"access_token"\`
+\t\tAccessTokenExpiresAt string \`json:"access_token_expires_at"\`
+\t}
+\tif err := json.NewDecoder(res.Body).Decode(&d); err != nil { return err }
+\tc.access = d.AccessToken
+\tc.expiresAt, _ = time.Parse(time.RFC3339, d.AccessTokenExpiresAt)
+\treturn nil
+}
+
+func (c *Client) loadAliases() error {
+\treq, _ := http.NewRequest("GET", base+"/v1/keys/allowed", nil)
+\treq.Header.Set("Authorization", "Bearer "+c.access)
+\tres, err := http.DefaultClient.Do(req)
+\tif err != nil { return err }
+\tdefer res.Body.Close()
+\tvar d struct {
+\t\tKeys []struct{ ID, Alias string \`json:"id,alias"\` } \`json:"keys"\`
+\t}
+\tif err := json.NewDecoder(res.Body).Decode(&d); err != nil { return err }
+\tc.aliases = make(map[string]string)
+\tfor _, k := range d.Keys { c.aliases[k.Alias] = k.ID }
+\treturn nil
+}
+
+func (c *Client) Proxy(alias, path string) ([]byte, error) {
+\tc.mu.Lock(); defer c.mu.Unlock()
+\tif time.Now().After(c.expiresAt.Add(-60 * time.Second)) { c.doRefresh() }
+\tif c.aliases == nil { c.loadAliases() }
+\tkeyID, ok := c.aliases[alias]
+\tif !ok { return nil, fmt.Errorf("unknown alias: %s", alias) }${goBodyLine}
+\treq, _ := http.NewRequest("${ex.method}", base+"/v1/proxy/"+keyID, ${goReqArgs})
+\treq.Header.Set("Authorization", "Bearer "+c.access)
+\treq.Header.Set("X-Locker-Forward-Path", path)
+${goExtra}${bodyJson ? '\n\treq.Header.Set("Content-Type", "application/json")' : ''}
+\tres, err := http.DefaultClient.Do(req)
+\tif err != nil { return nil, err }
+\tdefer res.Body.Close()
+\treturn io.ReadAll(res.Body)
+}
+
+func main() {
+\tc := &Client{refresh: os.Getenv("APILOCKER_REFRESH_TOKEN")}
+\tdata, _ := c.Proxy("${alias}", "${ex.forwardPath}")
+\tfmt.Println(string(data))
+}`;
+
+      return { curl, node, python, swift, go };
+    }
+
+    function indentJson(s, indent) {
+      return s.split('\n').map((line, i) => i === 0 ? line : indent + line).join('\n');
+    }
+
+    let cachedKeys = [];
+
+    // ============================================================
+    //  UTILITIES
+    // ============================================================
+    const $ = (id) => document.getElementById(id);
+
+    function api(path, opts = {}) {
+      return fetch(API + path, {
+        credentials: 'include',
+        headers: opts.body ? { 'Content-Type': 'application/json' } : undefined,
+        ...opts,
+      });
+    }
+
+    function showToast(text, isError = false) {
+      const t = $('toast');
+      $('toast-text').textContent = text;
+      t.classList.toggle('error', isError);
+      t.classList.add('shown');
+      setTimeout(() => t.classList.remove('shown'), 2600);
+    }
+
+    function openModal(id) {
+      $(id).classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+      $(id).classList.remove('open');
+      document.body.style.overflow = '';
+      // Clear errors on close
+      const err = $(id).querySelector('.modal-error');
+      if (err) { err.classList.remove('shown'); err.textContent = ''; }
+    }
+
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+      btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+    });
+    document.querySelectorAll('.modal-backdrop').forEach(bd => {
+      bd.addEventListener('click', (e) => {
+        if (e.target === bd) closeModal(bd.id);
+      });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.open').forEach(bd => closeModal(bd.id));
+      }
+    });
+
+    function fmtRelative(iso) {
+      if (!iso) return '—';
+      const then = new Date(iso).getTime();
+      const diff = Math.floor((Date.now() - then) / 1000);
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+      return new Date(iso).toLocaleDateString();
+    }
+
+    function fmtRotation(r) {
+      if (!r || r === 'static') return 'Static';
+      return r.charAt(0).toUpperCase() + r.slice(1);
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // ============================================================
+    //  NAV SCROLL STATE
+    // ============================================================
+    const nav = $('nav');
+    const onScroll = () => {
+      if (window.scrollY > 8) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // ============================================================
+    //  AUTH
+    // ============================================================
+    async function loadUser() {
+      try {
+        const res = await api('/v1/auth/me');
+        if (res.status === 401) { window.location.href = '/login'; return; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const user = await res.json();
+        renderUser(user);
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        window.location.href = '/login';
+      }
+    }
+
+    function renderUser(user) {
+      const firstName = (user.name || user.email.split('@')[0]).split(' ')[0];
+      $('greet-name').textContent = firstName;
+      $('user-name').textContent = user.name || firstName;
+      $('user-email').textContent = user.email;
+      const avatar = $('user-avatar');
+      if (user.avatar_url) {
+        avatar.src = user.avatar_url;
+      } else {
+        avatar.style.background = 'linear-gradient(135deg, #3B82F6, #1E3A8A)';
+      }
+      $('loading').classList.add('hidden');
+      $('main').classList.remove('hidden');
+      $('nav-user').classList.remove('hidden');
+    }
+
+    $('signout-btn').addEventListener('click', async () => {
+      try { await api('/v1/auth/logout', { method: 'POST' }); } catch {}
+      window.location.href = '/';
+    });
+
+    // ============================================================
+    //  ADD KEY MODAL (v1.0.0) — three tabs, provider grid filtered by mode
+    // ============================================================
+    // Mode: 'inject' | 'proxy' | 'oauth'. Matches the Add Key modal tabs.
+    let addKeyMode = 'inject';
+
+    /**
+     * Render the provider grid, filtered by the current add-key mode:
+     *   - 'inject' or 'proxy' → show llm + service providers
+     *   - 'oauth' → show oauth providers only
+     * Auto-selects the first provider in the filtered set.
+     */
+    function renderProviderGrid() {
+      const grid = $('provider-grid');
+      grid.innerHTML = '';
+
+      const allowedCategories = addKeyMode === 'oauth'
+        ? new Set(['oauth'])
+        : new Set(['llm', 'service']);
+      const filtered = PROVIDERS.filter(p => allowedCategories.has(p.category));
+
+      filtered.forEach((p, i) => {
+        const tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'provider-tile' + (i === 0 ? ' selected' : '');
+        tile.dataset.provider = p.id;
+        tile.dataset.category = p.category;
+        const iconInner = p.logo
+          ? `<img src="${p.logo}" alt="${p.name} logo" width="20" height="20" loading="lazy" style="width:20px;height:20px;max-width:20px;max-height:20px;object-fit:contain;display:block;" />`
+          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+        tile.innerHTML = `
+          <div class="provider-tile-icon">${iconInner}</div>
+          <div class="provider-tile-name">${p.name}</div>
+        `;
+        tile.addEventListener('click', () => {
+          document.querySelectorAll('.provider-tile').forEach(t => t.classList.remove('selected'));
+          tile.classList.add('selected');
+          // In OAuth mode, show the custom authorize_url/token_url fields
+          // only when the user has picked the "custom-oauth" provider.
+          // For everything else (google-oauth, github-oauth, etc.) the
+          // backend auto-fills those from the template.
+          if (addKeyMode === 'oauth') {
+            const isCustom = p.id === 'custom-oauth';
+            $('oauth-custom-fields').classList.toggle('hidden', !isCustom);
+          }
+        });
+        grid.appendChild(tile);
+      });
+      // Initial state: match the currently-selected tile to the fields
+      if (addKeyMode === 'oauth') {
+        const selected = grid.querySelector('.provider-tile.selected');
+        const isCustom = selected?.dataset.provider === 'custom-oauth';
+        $('oauth-custom-fields').classList.toggle('hidden', !isCustom);
+      }
+    }
+
+    /**
+     * Switch Add Key modal to a different mode (inject/proxy/oauth).
+     * Updates tab highlight, toggles visible field groups, re-renders
+     * the provider grid with the appropriate subset.
+     */
+    function setAddKeyMode(mode) {
+      addKeyMode = mode;
+      document.querySelectorAll('.add-key-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.addMode === mode);
+      });
+      $('mode-inject-fields').classList.toggle('hidden', mode !== 'inject');
+      $('mode-proxy-fields').classList.toggle('hidden', mode !== 'proxy');
+      $('mode-oauth-fields').classList.toggle('hidden', mode !== 'oauth');
+      renderProviderGrid();
+    }
+
+    /**
+     * Open the Add Key modal, optionally pre-selecting a category from
+     * one of the per-bucket "+ Add" buttons. Category 'llm' or 'service'
+     * defaults to inject mode; category 'oauth' opens oauth mode.
+     */
+    function openAddKeyModal(category) {
+      // Reset form
+      $('key-name').value = '';
+      $('key-secret').value = '';
+      $('key-secret-proxy').value = '';
+      $('key-base-url').value = '';
+      $('oauth-client-id').value = '';
+      $('oauth-client-secret').value = '';
+      $('oauth-refresh-token').value = '';
+      $('oauth-scopes').value = '';
+      $('oauth-redirect-uri').value = '';
+      $('oauth-authorize-url').value = '';
+      $('oauth-token-url').value = '';
+      $('oauth-custom-fields').classList.add('hidden');
+      $('add-key-error').classList.remove('shown');
+      $('add-key-error').textContent = '';
+
+      // Pick mode from category
+      const mode = category === 'oauth' ? 'oauth' : 'inject';
+      setAddKeyMode(mode);
+
+      openModal('modal-add-key');
+      setTimeout(() => $('key-name').focus(), 50);
+    }
+
+    // Wire the tab click handlers
+    document.querySelectorAll('.add-key-tab').forEach(tab => {
+      tab.addEventListener('click', () => setAddKeyMode(tab.dataset.addMode));
+    });
+
+    // ============================================================
+    //  KEYS — load, render list, add, delete
+    // ============================================================
+    async function loadKeys() {
+      try {
+        const res = await api('/v1/keys');
+        if (!res.ok) return;
+        const data = await res.json();
+        cachedKeys = data.keys || [];
+        renderKeys(cachedKeys);
+        $('stat-keys').textContent = cachedKeys.length;
+      } catch (e) {
+        console.error('Load keys error:', e);
+      }
+    }
+
+    // Filter state for the Keys panel (Phase D)
+    let keyFilterState = { search: '', provider: '', tag: '' };
+
+    function renderKeys(keys) {
+      const buckets = $('keys-buckets');
+      const empty = $('keys-empty');
+      const filterRow = $('keys-filter-row');
+
+      if (!keys.length) {
+        buckets.classList.add('hidden');
+        filterRow.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      filterRow.classList.remove('hidden');
+      buckets.classList.remove('hidden');
+
+      // Populate filter dropdowns from the full key set
+      populateKeyFilterOptions(keys);
+
+      // Apply client-side filters
+      const filtered = applyKeyFilters(keys, keyFilterState);
+      $('keys-filter-count').textContent = filtered.length === keys.length
+        ? `${keys.length} credential${keys.length === 1 ? '' : 's'}`
+        : `${filtered.length} of ${keys.length}`;
+
+      // Split into three buckets by category
+      const byCategory = {
+        llm: filtered.filter(k => (k.category || 'service') === 'llm'),
+        service: filtered.filter(k => (k.category || 'service') === 'service'),
+        oauth: filtered.filter(k => (k.category || 'service') === 'oauth'),
+      };
+
+      // Render each bucket
+      for (const category of ['llm', 'service', 'oauth']) {
+        const list = $('bucket-list-' + category);
+        const bucketEmpty = $('bucket-empty-' + category);
+        const count = $('bucket-count-' + category);
+        const bucketKeys = byCategory[category];
+        count.textContent = bucketKeys.length;
+
+        if (bucketKeys.length === 0) {
+          list.innerHTML = '';
+          list.classList.add('hidden');
+          bucketEmpty.classList.remove('hidden');
+          continue;
+        }
+        list.classList.remove('hidden');
+        bucketEmpty.classList.add('hidden');
+        list.innerHTML = bucketKeys.map(k => renderKeyRow(k)).join('');
+      }
+
+      // Wire row action handlers (buckets share the same handler set)
+      wireKeyRowHandlers();
+    }
+
+    function renderKeyRow(k) {
+      const isOAuth = (k.credential_type || 'api_key') === 'oauth2';
+      const isPaused = !!k.paused_at;
+
+      // Rotation indicator
+      const lastRotation = k.rotated_at || k.created_at;
+      const rotDays = lastRotation ? Math.floor((Date.now() - new Date(lastRotation).getTime()) / 86400000) : null;
+      const rotStale = rotDays != null && rotDays >= 90;
+      const rotLabel = k.rotated_at
+        ? `rotated ${fmtRelative(k.rotated_at)}`
+        : `added ${fmtRelative(k.created_at)}`;
+
+      // Tags
+      const tags = (k.tags || []);
+      const tagHtml = tags.length
+        ? `<span class="row-tags">${tags.map(t => `<span class="row-tag-chip">${escapeHtml(t)}</span>`).join('')}</span>`
+        : '';
+
+      // Pause/resume button icon
+      const pauseBtn = isPaused
+        ? `<button class="icon-btn" data-resume-key="${escapeHtml(k.id)}" data-name="${escapeHtml(k.name)}" title="Resume">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>`
+        : `<button class="icon-btn" data-pause-key="${escapeHtml(k.id)}" data-name="${escapeHtml(k.name)}" title="Pause">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>`;
+
+      // Reveal/rotate primary action differs by type
+      // OAuth cards get BOTH a Reveal button (to inspect fields) and a
+      // Rotate Secret button (to swap the client_secret/refresh_token
+      // without touching client_id or other static OAuth fields).
+      const revealOrRotate = isOAuth
+        ? `<button class="icon-btn" data-reveal-oauth="${escapeHtml(k.id)}" data-name="${escapeHtml(k.name)}" data-provider="${escapeHtml(k.provider)}" title="Reveal fields">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="icon-btn" data-rotate-oauth="${escapeHtml(k.id)}" data-name="${escapeHtml(k.name)}" data-provider="${escapeHtml(k.provider)}" title="Rotate secret">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>`
+        : `<button class="icon-btn" data-rotate-key="${escapeHtml(k.id)}" data-name="${escapeHtml(k.name)}" data-provider="${escapeHtml(k.provider)}" title="Rotate value">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>`;
+
+      return `
+      <div class="row ${isPaused ? 'paused' : ''} ${isOAuth ? 'row-oauth' : ''}" data-key-id="${escapeHtml(k.id)}">
+        <div class="row-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="row-main">
+          <div class="row-title">${escapeHtml(k.name)}</div>
+          <div class="row-meta">
+            <span class="row-badge">${escapeHtml(k.provider)}</span>
+            ${tagHtml}
+            <span class="row-rotated ${rotStale ? 'stale' : ''}">${rotLabel}${rotStale ? ' ⚠' : ''}</span>
+          </div>
+        </div>
+        <div class="row-actions">
+          ${revealOrRotate}
+          <button class="icon-btn" data-rename-key="${escapeHtml(k.id)}" data-name="${escapeHtml(k.name)}" title="Rename">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          ${pauseBtn}
+          <button class="icon-btn danger" data-delete-key="${escapeHtml(k.id)}" data-name="${escapeHtml(k.name)}" title="Delete">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }
+
+    function wireKeyRowHandlers() {
+      // Rotate
+      document.querySelectorAll('[data-rotate-key]').forEach(btn => {
+        btn.onclick = () => openRotateModal(btn.dataset.rotateKey, btn.dataset.name, btn.dataset.provider);
+      });
+      // Rename
+      document.querySelectorAll('[data-rename-key]').forEach(btn => {
+        btn.onclick = () => openRenameModal(btn.dataset.renameKey, btn.dataset.name);
+      });
+      // Pause
+      document.querySelectorAll('[data-pause-key]').forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.pauseKey;
+          try {
+            const res = await api(`/v1/keys/${encodeURIComponent(id)}/pause`, { method: 'POST' });
+            if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'HTTP ' + res.status);
+            showToast(`${btn.dataset.name} paused`);
+            await loadKeys();
+            await loadDoctor();
+          } catch (e) {
+            showToast('Could not pause: ' + e.message, true);
+          }
+        };
+      });
+      // Resume
+      document.querySelectorAll('[data-resume-key]').forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.resumeKey;
+          try {
+            const res = await api(`/v1/keys/${encodeURIComponent(id)}/resume`, { method: 'POST' });
+            if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'HTTP ' + res.status);
+            showToast(`${btn.dataset.name} resumed`);
+            await loadKeys();
+            await loadDoctor();
+          } catch (e) {
+            showToast('Could not resume: ' + e.message, true);
+          }
+        };
+      });
+      // Reveal OAuth fields
+      document.querySelectorAll('[data-reveal-oauth]').forEach(btn => {
+        btn.onclick = () => openOAuthRevealModal(btn.dataset.revealOauth, btn.dataset.name, btn.dataset.provider);
+      });
+      // Rotate OAuth secret (client_secret / refresh_token only — other OAuth fields preserved)
+      document.querySelectorAll('[data-rotate-oauth]').forEach(btn => {
+        btn.onclick = () => openRotateOAuthModal(btn.dataset.rotateOauth, btn.dataset.name, btn.dataset.provider);
+      });
+      // Delete
+      document.querySelectorAll('[data-delete-key]').forEach(btn => {
+        btn.onclick = async () => {
+          if (!confirm(`Delete "${btn.dataset.name}"? This cannot be undone.`)) return;
+          const id = btn.dataset.deleteKey;
+          try {
+            const res = await api('/v1/keys/' + encodeURIComponent(id), { method: 'DELETE' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            showToast('Deleted');
+            await loadKeys();
+            await loadDoctor();
+          } catch (e) {
+            showToast('Could not delete', true);
+          }
+        };
+      });
+    }
+
+    // Wire up the per-bucket "+ Add" buttons (once on boot)
+    function wireBucketAddButtons() {
+      document.querySelectorAll('[data-add-category]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const category = btn.dataset.addCategory;
+          openAddKeyModal(category);
+        });
+      });
+    }
+
+    function populateKeyFilterOptions(keys) {
+      const providers = Array.from(new Set(keys.map(k => k.provider))).sort();
+      const tags = Array.from(new Set(keys.flatMap(k => k.tags || []))).sort();
+
+      const providerSel = $('keys-provider-filter');
+      const prevProvider = providerSel.value;
+      providerSel.innerHTML = '<option value="">All providers</option>' +
+        providers.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+      if (providers.includes(prevProvider)) providerSel.value = prevProvider;
+
+      const tagSel = $('keys-tag-filter');
+      const prevTag = tagSel.value;
+      tagSel.innerHTML = '<option value="">All tags</option>' +
+        tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+      if (tags.length === 0) {
+        tagSel.classList.add('hidden');
+      } else {
+        tagSel.classList.remove('hidden');
+        if (tags.includes(prevTag)) tagSel.value = prevTag;
+      }
+    }
+
+    function applyKeyFilters(keys, state) {
+      let result = keys;
+      if (state.search) {
+        const q = state.search.toLowerCase();
+        result = result.filter(k => k.name.toLowerCase().includes(q));
+      }
+      if (state.provider) {
+        result = result.filter(k => k.provider === state.provider);
+      }
+      if (state.tag) {
+        result = result.filter(k => (k.tags || []).includes(state.tag));
+      }
+      return result;
+    }
+
+    // Wire filter inputs (runs once on boot; event listeners persist)
+    function wireKeyFilters() {
+      const search = $('keys-search');
+      const provider = $('keys-provider-filter');
+      const tag = $('keys-tag-filter');
+      if (!search || search.dataset.wired) return;
+      search.dataset.wired = '1';
+
+      search.addEventListener('input', () => {
+        keyFilterState.search = search.value.trim();
+        renderKeys(cachedKeys);
+      });
+      provider.addEventListener('change', () => {
+        keyFilterState.provider = provider.value;
+        renderKeys(cachedKeys);
+      });
+      tag.addEventListener('change', () => {
+        keyFilterState.tag = tag.value;
+        renderKeys(cachedKeys);
+      });
+    }
+
+    $('open-add-key').addEventListener('click', () => {
+      // Default header button opens in inject mode (the most common case)
+      openAddKeyModal('service');
+    });
+
+    $('submit-add-key').addEventListener('click', async () => {
+      const provider = document.querySelector('.provider-tile.selected')?.dataset.provider;
+      const name = $('key-name').value.trim();
+      const errEl = $('add-key-error');
+      errEl.classList.remove('shown');
+
+      if (!name) { errEl.textContent = 'Please enter a name.'; errEl.classList.add('shown'); return; }
+      if (!provider) { errEl.textContent = 'Please pick a provider.'; errEl.classList.add('shown'); return; }
+
+      // Build request body per mode
+      const body = { name, provider };
+
+      if (addKeyMode === 'inject') {
+        const secret = $('key-secret').value;
+        if (!secret) { errEl.textContent = 'Please paste the secret.'; errEl.classList.add('shown'); return; }
+        body.credential_type = 'api_key';
+        body.key = secret;
+        // No base_url → vault-only, works with apilocker run/get/env
+      } else if (addKeyMode === 'proxy') {
+        const secret = $('key-secret-proxy').value;
+        const baseUrl = $('key-base-url').value.trim();
+        if (!secret) { errEl.textContent = 'Please paste the secret.'; errEl.classList.add('shown'); return; }
+        if (provider === 'custom' && !baseUrl) {
+          errEl.textContent = 'Custom providers need a base URL for proxy mode.';
+          errEl.classList.add('shown');
+          return;
+        }
+        body.credential_type = 'api_key';
+        body.key = secret;
+        if (baseUrl) body.base_url = baseUrl;
+        if (provider === 'custom') body.auth_header_type = 'bearer';
+      } else if (addKeyMode === 'oauth') {
+        const clientId = $('oauth-client-id').value.trim();
+        const clientSecret = $('oauth-client-secret').value;
+        if (!clientId) { errEl.textContent = 'Client ID is required.'; errEl.classList.add('shown'); return; }
+        if (!clientSecret) { errEl.textContent = 'Client Secret is required.'; errEl.classList.add('shown'); return; }
+        // Custom OAuth providers need explicit endpoints
+        if (provider === 'custom-oauth') {
+          const aurl = $('oauth-authorize-url').value.trim();
+          const turl = $('oauth-token-url').value.trim();
+          if (!aurl || !turl) {
+            errEl.textContent = 'Custom OAuth requires both Authorize URL and Token URL.';
+            errEl.classList.add('shown');
+            return;
+          }
+          body.authorize_url = aurl;
+          body.token_url = turl;
+        } else {
+          // For known providers, optionally override the template defaults
+          const aurl = $('oauth-authorize-url').value.trim();
+          const turl = $('oauth-token-url').value.trim();
+          if (aurl) body.authorize_url = aurl;
+          if (turl) body.token_url = turl;
+        }
+        body.credential_type = 'oauth2';
+        body.client_id = clientId;
+        body.client_secret = clientSecret;
+        const refreshToken = $('oauth-refresh-token').value;
+        if (refreshToken) body.refresh_token = refreshToken;
+        const scopes = $('oauth-scopes').value.trim();
+        if (scopes) body.scopes = scopes;
+        const redirectUri = $('oauth-redirect-uri').value.trim();
+        if (redirectUri) body.redirect_uri = redirectUri;
+      }
+
+      const btn = $('submit-add-key');
+      btn.disabled = true;
+      btn.textContent = 'Encrypting…';
+      try {
+        const res = await api('/v1/keys', { method: 'POST', body: JSON.stringify(body) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        closeModal('modal-add-key');
+        const modeLabel = addKeyMode === 'oauth' ? 'OAuth credential' : 'Key';
+        showToast(`${modeLabel} locked in vault`);
+        await loadKeys();
+        await loadTokenKeyPicker();
+        await loadDoctor();
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.add('shown');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Lock in vault';
+      }
+    });
+
+    // ============================================================
+    //  ROTATE KEY — modal + submit (Phase D)
+    // ============================================================
+    let rotateTargetId = null;
+
+    function openRotateModal(keyId, name, provider) {
+      rotateTargetId = keyId;
+      $('rotate-target-name').textContent = name;
+      $('rotate-target-meta').textContent = `${provider} · ${keyId}`;
+      $('rotate-new-value').value = '';
+      $('rotate-key-error').classList.remove('shown');
+      $('rotate-key-error').textContent = '';
+      openModal('modal-rotate-key');
+      setTimeout(() => $('rotate-new-value').focus(), 50);
+    }
+
+    $('submit-rotate-key').addEventListener('click', async () => {
+      if (!rotateTargetId) return;
+      const value = $('rotate-new-value').value;
+      const errEl = $('rotate-key-error');
+      errEl.classList.remove('shown');
+
+      if (!value) {
+        errEl.textContent = 'Please paste the new secret value.';
+        errEl.classList.add('shown');
+        return;
+      }
+
+      const btn = $('submit-rotate-key');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner-sm"></div> Rotating…';
+      try {
+        const res = await api(`/v1/keys/${encodeURIComponent(rotateTargetId)}/rotate`, {
+          method: 'POST',
+          body: JSON.stringify({ key: value }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${res.status}`);
+        }
+        closeModal('modal-rotate-key');
+        showToast('Key rotated');
+        rotateTargetId = null;
+        await loadKeys();
+        await loadDoctor(); // refresh health checks
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.add('shown');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Rotate';
+      }
+    });
+
+    // ============================================================
+    //  ROTATE OAUTH SECRET — partial rotation (v1.0.1)
+    //
+    //  OAuth credentials are a multi-field JSON blob (client_id,
+    //  client_secret, refresh_token, authorize_url, token_url, scopes,
+    //  redirect_uri). A "rotation" here means swapping ONLY the
+    //  compromised field(s) — almost always client_secret — while
+    //  preserving everything else. The server side of this lives in
+    //  handleRotateKey's oauth2 branch, which decrypts, merges, and
+    //  re-encrypts.
+    // ============================================================
+    let rotateOAuthTargetId = null;
+
+    function openRotateOAuthModal(keyId, name, provider) {
+      rotateOAuthTargetId = keyId;
+      $('rotate-oauth-target-name').textContent = name;
+      $('rotate-oauth-target-meta').textContent = `${provider} · ${keyId}`;
+      $('rotate-oauth-client-secret').value = '';
+      $('rotate-oauth-refresh-token').value = '';
+      $('rotate-oauth-error').classList.remove('shown');
+      $('rotate-oauth-error').textContent = '';
+      openModal('modal-rotate-oauth');
+      setTimeout(() => $('rotate-oauth-client-secret').focus(), 50);
+    }
+
+    $('submit-rotate-oauth').addEventListener('click', async () => {
+      if (!rotateOAuthTargetId) return;
+      const clientSecret = $('rotate-oauth-client-secret').value;
+      const refreshToken = $('rotate-oauth-refresh-token').value;
+      const errEl = $('rotate-oauth-error');
+      errEl.classList.remove('shown');
+
+      if (!clientSecret && !refreshToken) {
+        errEl.textContent = 'Paste a new client_secret, or a new refresh_token, or both.';
+        errEl.classList.add('shown');
+        return;
+      }
+
+      const payload = {};
+      if (clientSecret) payload.client_secret = clientSecret;
+      if (refreshToken) payload.refresh_token = refreshToken;
+
+      const btn = $('submit-rotate-oauth');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner-sm"></div> Rotating…';
+      try {
+        const res = await api(`/v1/keys/${encodeURIComponent(rotateOAuthTargetId)}/rotate`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json().catch(() => ({}));
+        const rotated = Array.isArray(data.rotated_fields) && data.rotated_fields.length
+          ? data.rotated_fields.join(' + ')
+          : 'secret';
+        closeModal('modal-rotate-oauth');
+        showToast(`Rotated ${rotated}`);
+        rotateOAuthTargetId = null;
+        await loadKeys();
+        await loadDoctor(); // refresh health checks
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.add('shown');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    });
+
+    // ============================================================
+    //  RENAME KEY — modal + submit (v1.0.0)
+    // ============================================================
+    let renameTargetId = null;
+
+    function openRenameModal(keyId, currentName) {
+      renameTargetId = keyId;
+      $('rename-current-name').textContent = currentName;
+      $('rename-new-name').value = currentName;
+      $('rename-key-error').classList.remove('shown');
+      $('rename-key-error').textContent = '';
+      openModal('modal-rename-key');
+      setTimeout(() => {
+        const input = $('rename-new-name');
+        input.focus();
+        input.select();
+      }, 50);
+    }
+
+    $('submit-rename-key').addEventListener('click', async () => {
+      if (!renameTargetId) return;
+      const newName = $('rename-new-name').value.trim();
+      const errEl = $('rename-key-error');
+      errEl.classList.remove('shown');
+
+      if (!newName) {
+        errEl.textContent = 'New name cannot be empty.';
+        errEl.classList.add('shown');
+        return;
+      }
+      if (newName === $('rename-current-name').textContent) {
+        closeModal('modal-rename-key');
+        return;
+      }
+
+      const btn = $('submit-rename-key');
+      btn.disabled = true;
+      try {
+        const res = await api(`/v1/keys/${encodeURIComponent(renameTargetId)}/rename`, {
+          method: 'POST',
+          body: JSON.stringify({ new_name: newName }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${res.status}`);
+        }
+        closeModal('modal-rename-key');
+        showToast('Renamed');
+        renameTargetId = null;
+        await loadKeys();
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.add('shown');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ============================================================
+    //  OAUTH REVEAL — open modal + fetch fields + per-field reveal
+    // ============================================================
+    async function openOAuthRevealModal(keyId, name, provider) {
+      $('oauth-reveal-title').textContent = name;
+      $('oauth-reveal-sub').textContent = `${provider} OAuth credential. Click any field to reveal its value.`;
+      $('oauth-reveal-error').classList.remove('shown');
+      $('oauth-reveal-error').textContent = '';
+      $('oauth-reveal-fields').classList.add('hidden');
+      $('oauth-reveal-loading').classList.remove('hidden');
+      openModal('modal-oauth-reveal');
+
+      try {
+        const res = await api('/v1/keys/reveal', {
+          method: 'POST',
+          body: JSON.stringify({ keys: [name] }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        const key = (data.keys || [])[0];
+        if (!key || key.credential_type !== 'oauth2') {
+          throw new Error('This credential is not an OAuth credential');
+        }
+
+        const fields = key.fields || {};
+        const envNames = key.env_names || {};
+        const fieldOrder = ['client_id', 'client_secret', 'refresh_token', 'authorize_url', 'token_url', 'scopes', 'redirect_uri'];
+
+        const html = fieldOrder
+          .filter(f => fields[f] != null && fields[f] !== '')
+          .map(f => {
+            const value = fields[f];
+            const isSecret = f === 'client_secret' || f === 'refresh_token';
+            const label = f.replace(/_/g, ' ').toUpperCase();
+            const displayValue = isSecret ? '•'.repeat(Math.min(32, value.length)) : escapeHtml(value);
+            return `
+              <div class="oauth-field" data-field="${f}" data-value="${escapeHtml(value)}" data-secret="${isSecret ? '1' : '0'}">
+                <div class="oauth-field-label">${label}</div>
+                <div class="oauth-field-value ${isSecret ? 'masked' : ''}">${displayValue}</div>
+                ${isSecret ? `<button class="oauth-field-btn" data-oauth-reveal>Show</button>` : '<span></span>'}
+                <button class="oauth-field-btn" data-oauth-copy>Copy</button>
+              </div>
+            `;
+          })
+          .join('');
+
+        const container = $('oauth-reveal-fields');
+        container.innerHTML = html || '<div class="bucket-empty">No fields populated.</div>';
+        $('oauth-reveal-loading').classList.add('hidden');
+        container.classList.remove('hidden');
+
+        // Wire show/hide + copy handlers
+        container.querySelectorAll('[data-oauth-reveal]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const row = btn.closest('.oauth-field');
+            const valueEl = row.querySelector('.oauth-field-value');
+            const rawValue = row.dataset.value;
+            if (btn.textContent === 'Show') {
+              valueEl.textContent = rawValue;
+              valueEl.classList.remove('masked');
+              btn.textContent = 'Hide';
+            } else {
+              valueEl.textContent = '•'.repeat(Math.min(32, rawValue.length));
+              valueEl.classList.add('masked');
+              btn.textContent = 'Show';
+            }
+          });
+        });
+        container.querySelectorAll('[data-oauth-copy]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const row = btn.closest('.oauth-field');
+            await navigator.clipboard.writeText(row.dataset.value);
+            showToast(`${row.dataset.field} copied`);
+          });
+        });
+      } catch (e) {
+        $('oauth-reveal-loading').classList.add('hidden');
+        const errEl = $('oauth-reveal-error');
+        errEl.textContent = e.message;
+        errEl.classList.add('shown');
+      }
+    }
+
+    // ============================================================
+    //  DOCTOR — client-side vault health checks (Phase D)
+    //  Mirrors the CLI `apilocker doctor` command exactly.
+    // ============================================================
+    const DOCTOR_ROTATION_STALE_DAYS = 90;
+    const DOCTOR_ACTIVITY_STALE_DAYS = 30;
+    const DOCTOR_TOKEN_EXPIRY_WARN_HOURS = 48;
+    const DOCTOR_DEVICE_STALE_DAYS = 60;
+    const DOCTOR_ACTIVITY_LOOKBACK_LIMIT = 500;
+
+    async function loadDoctor() {
+      const loading = $('doctor-loading');
+      const findingsEl = $('doctor-findings');
+      const summaryEl = $('doctor-summary');
+      loading.classList.remove('hidden');
+      findingsEl.classList.add('hidden');
+      summaryEl.classList.add('hidden');
+
+      try {
+        const [keysRes, tokensRes, devicesRes, logsRes] = await Promise.all([
+          api('/v1/keys'),
+          api('/v1/tokens').catch(() => null),
+          api('/v1/devices').catch(() => null),
+          api(`/v1/activity?limit=${DOCTOR_ACTIVITY_LOOKBACK_LIMIT}`).catch(() => null),
+        ]);
+        const keys = keysRes.ok ? (await keysRes.json()).keys || [] : [];
+        const tokens = tokensRes && tokensRes.ok ? (await tokensRes.json()).tokens || [] : [];
+        const devices = devicesRes && devicesRes.ok ? (await devicesRes.json()).devices || [] : [];
+        const logs = logsRes && logsRes.ok ? (await logsRes.json()).logs || [] : [];
+
+        const findings = computeDoctorFindings({ keys, tokens, devices, logs });
+        renderDoctorFindings(findings);
+      } catch (e) {
+        loading.classList.add('hidden');
+        findingsEl.classList.remove('hidden');
+        findingsEl.innerHTML = `<div class="doctor-finding severity-warn">
+          <div class="doctor-finding-icon">!</div>
+          <div class="doctor-finding-body">
+            <h4>Could not run health checks</h4>
+            <p>${escapeHtml(e.message)}</p>
+          </div>
+        </div>`;
+      }
+    }
+
+    function computeDoctorFindings({ keys, tokens, devices, logs }) {
+      const findings = [];
+      const now = Date.now();
+      const daysSince = (iso) => {
+        if (!iso) return null;
+        const t = new Date(iso).getTime();
+        if (isNaN(t)) return null;
+        return Math.floor((now - t) / 86400000);
+      };
+      const hoursUntil = (iso) => {
+        if (!iso) return null;
+        const t = new Date(iso).getTime();
+        if (isNaN(t)) return null;
+        return Math.floor((t - now) / 3600000);
+      };
+
+      // 1. Rotation hygiene
+      const stale = keys.filter(k => {
+        const ref = k.rotated_at || k.created_at;
+        const d = daysSince(ref);
+        return d != null && d >= DOCTOR_ROTATION_STALE_DAYS;
+      });
+      if (stale.length) {
+        findings.push({
+          severity: 'warn',
+          category: 'Rotation',
+          summary: `${stale.length} key${stale.length === 1 ? '' : 's'} not rotated in ${DOCTOR_ROTATION_STALE_DAYS}+ days`,
+          details: stale.slice(0, 10).map(k => `${k.name} — last rotated ${daysSince(k.rotated_at || k.created_at)} days ago`),
+          remedy: 'Click the rotate icon on the key row',
+        });
+      } else if (keys.length) {
+        findings.push({
+          severity: 'ok',
+          category: 'Rotation',
+          summary: `All ${keys.length} key${keys.length === 1 ? '' : 's'} rotated within the last ${DOCTOR_ROTATION_STALE_DAYS} days`,
+        });
+      }
+
+      // 2. Unused keys
+      const activityCutoff = now - DOCTOR_ACTIVITY_STALE_DAYS * 86400000;
+      const activeKeyIds = new Set();
+      for (const log of logs) {
+        if (!log.key_id) continue;
+        if (new Date(log.timestamp).getTime() >= activityCutoff) {
+          activeKeyIds.add(log.key_id);
+        }
+      }
+      const unused = keys.filter(k => !activeKeyIds.has(k.id));
+      const atLimit = logs.length >= DOCTOR_ACTIVITY_LOOKBACK_LIMIT;
+      if (unused.length && keys.length) {
+        findings.push({
+          severity: atLimit ? 'info' : 'warn',
+          category: 'Unused keys',
+          summary: atLimit
+            ? `${unused.length} key${unused.length === 1 ? '' : 's'} may be unused (based on last ${DOCTOR_ACTIVITY_LOOKBACK_LIMIT} audit entries)`
+            : `${unused.length} key${unused.length === 1 ? '' : 's'} with no activity in ${DOCTOR_ACTIVITY_STALE_DAYS}+ days`,
+          details: unused.slice(0, 10).map(k => k.name),
+          remedy: 'If truly unused, click the trash icon on the key row',
+        });
+      }
+
+      // 3. Expiring scoped tokens
+      const expiring = tokens.filter(t => {
+        if (t.revoked_at || t.paused_at) return false;
+        if (!t.current_token_expires_at) return false;
+        const h = hoursUntil(t.current_token_expires_at);
+        return h != null && h >= 0 && h <= DOCTOR_TOKEN_EXPIRY_WARN_HOURS;
+      });
+      if (expiring.length) {
+        findings.push({
+          severity: 'info',
+          category: 'Expiring tokens',
+          summary: `${expiring.length} scoped token${expiring.length === 1 ? '' : 's'} expiring in the next ${DOCTOR_TOKEN_EXPIRY_WARN_HOURS} hours`,
+          details: expiring.slice(0, 10).map(t => `${t.name} — expires in ${hoursUntil(t.current_token_expires_at)}h (${t.rotation_type})`),
+          remedy: 'Rotating tokens auto-refresh; no action needed unless they stop working',
+        });
+      }
+
+      // 4. Stale devices
+      const staleDevices = devices.filter(d => {
+        const days = daysSince(d.last_used_at);
+        return days != null && days >= DOCTOR_DEVICE_STALE_DAYS;
+      });
+      if (staleDevices.length) {
+        findings.push({
+          severity: 'warn',
+          category: 'Stale devices',
+          summary: `${staleDevices.length} device${staleDevices.length === 1 ? '' : 's'} not seen in ${DOCTOR_DEVICE_STALE_DAYS}+ days`,
+          details: staleDevices.slice(0, 10).map(d => `${d.name} — last seen ${daysSince(d.last_used_at)} days ago${d.current ? ' (this device!)' : ''}`),
+          remedy: 'Revoke from the Devices section above',
+        });
+      } else if (devices.length) {
+        findings.push({
+          severity: 'ok',
+          category: 'Devices',
+          summary: `${devices.length} active device${devices.length === 1 ? '' : 's'}, all recently used`,
+        });
+      }
+
+      return findings;
+    }
+
+    function renderDoctorFindings(findings) {
+      const loading = $('doctor-loading');
+      const findingsEl = $('doctor-findings');
+      const summaryEl = $('doctor-summary');
+      loading.classList.add('hidden');
+      findingsEl.classList.remove('hidden');
+      summaryEl.classList.remove('hidden');
+
+      if (findings.length === 0) {
+        findingsEl.innerHTML = '';
+        summaryEl.textContent = 'All checks passing. Your vault looks healthy.';
+        return;
+      }
+
+      // Sort: warn → info → ok
+      const order = { warn: 0, info: 1, ok: 2 };
+      findings.sort((a, b) => (order[a.severity] ?? 9) - (order[b.severity] ?? 9));
+
+      findingsEl.innerHTML = findings.map(f => {
+        const icon = f.severity === 'warn' ? '⚠' : f.severity === 'info' ? 'ℹ' : '✓';
+        const details = (f.details && f.details.length)
+          ? `<ul class="doctor-finding-details">${f.details.map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ul>`
+          : '';
+        const remedy = f.remedy
+          ? `<div class="doctor-finding-remedy">→ ${escapeHtml(f.remedy)}</div>`
+          : '';
+        return `
+          <div class="doctor-finding severity-${f.severity}">
+            <div class="doctor-finding-icon">${icon}</div>
+            <div class="doctor-finding-body">
+              <h4>${escapeHtml(f.category)}</h4>
+              <p>${escapeHtml(f.summary)}</p>
+              ${details}
+              ${remedy}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const warns = findings.filter(f => f.severity === 'warn').length;
+      const infos = findings.filter(f => f.severity === 'info').length;
+      if (warns === 0 && infos === 0) {
+        summaryEl.textContent = 'All checks passing. Your vault looks healthy.';
+      } else {
+        summaryEl.textContent = `${warns} warning${warns === 1 ? '' : 's'}, ${infos} informational note${infos === 1 ? '' : 's'}.`;
+      }
+    }
+
+    $('doctor-refresh').addEventListener('click', loadDoctor);
+
+    // ============================================================
+    //  LIVE ACTIVITY — polling toggle (Phase D)
+    //  Mirrors `apilocker activity --follow`
+    // ============================================================
+    let liveActivityTimer = null;
+    const seenActivityIds = new Set();
+
+    $('activity-live-toggle').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        startLiveActivity();
+      } else {
+        stopLiveActivity();
+      }
+    });
+
+    function startLiveActivity() {
+      // Prime: mark all currently-visible log IDs as seen so we only
+      // show brand new entries from this point forward.
+      seenActivityIds.clear();
+      api('/v1/activity?limit=50').then(r => r.ok ? r.json() : { logs: [] }).then(data => {
+        for (const log of data.logs || []) seenActivityIds.add(log.id);
+      }).catch(() => {});
+
+      liveActivityTimer = setInterval(pollActivity, 2000);
+    }
+
+    function stopLiveActivity() {
+      if (liveActivityTimer) {
+        clearInterval(liveActivityTimer);
+        liveActivityTimer = null;
+      }
+    }
+
+    async function pollActivity() {
+      try {
+        const res = await api('/v1/activity?limit=50');
+        if (!res.ok) return;
+        const data = await res.json();
+        const newLogs = (data.logs || []).filter(l => !seenActivityIds.has(l.id));
+        for (const l of newLogs) seenActivityIds.add(l.id);
+        if (newLogs.length > 0) {
+          // Reload the full activity panel with the latest snapshot
+          renderActivity(data.logs || []);
+        }
+      } catch {
+        // Silent — just retry next tick
+      }
+    }
+
+    // ============================================================
+    //  TOKENS — load, render list, create, revoke
+    // ============================================================
+    async function loadTokens() {
+      try {
+        const res = await api('/v1/tokens');
+        if (!res.ok) return;
+        const data = await res.json();
+        const tokens = data.tokens || [];
+        renderTokens(tokens);
+        $('stat-tokens').textContent = tokens.filter(t => !t.revoked).length;
+      } catch (e) {
+        console.error('Load tokens error:', e);
+      }
+    }
+
+    function renderTokens(tokens) {
+      const list = $('tokens-list');
+      const empty = $('tokens-empty');
+      if (!tokens.length) {
+        list.classList.add('hidden');
+        empty.classList.remove('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      empty.classList.add('hidden');
+      list.classList.remove('hidden');
+      list.innerHTML = tokens.map(t => {
+        const statusBadge = t.revoked
+          ? '<span class="row-badge danger">revoked</span>'
+          : t.paused
+            ? '<span class="row-badge warn">paused</span>'
+            : '<span class="row-badge">active</span>';
+
+        // Resolve allowed_keys into actual key objects so we can show logos.
+        // Keys the user has since deleted won't resolve — skip those.
+        const attachedKeys = (t.allowed_keys || [])
+          .map(id => cachedKeys.find(k => k.id === id))
+          .filter(Boolean);
+
+        const MAX_VISIBLE_LOGOS = 5;
+        const visible = attachedKeys.slice(0, MAX_VISIBLE_LOGOS);
+        const overflow = attachedKeys.length - visible.length;
+        const logosStrip = attachedKeys.length ? `
+          <span class="token-keys-strip">
+            ${visible.map(k => {
+              const p = PROVIDERS.find(pp => pp.id === k.provider);
+              const inner = p?.logo
+                ? `<img src="${p.logo}" alt="${escapeHtml(p.name)}" width="12" height="12" style="width:12px;height:12px;object-fit:contain;" />`
+                : '';
+              return `<span class="token-key-chip" title="${escapeHtml(k.name + ' (' + k.provider + ')')}">${inner}</span>`;
+            }).join('')}
+            ${overflow > 0 ? `<span class="token-key-chip-more">+${overflow}</span>` : ''}
+          </span>` : '';
+
+        // Show action buttons unless the token is revoked. For paused tokens
+        // we swap the Pause icon for a Resume icon.
+        const actions = t.revoked ? `
+            <button class="icon-btn danger" data-delete-token="${escapeHtml(t.id)}" data-name="${escapeHtml(t.name)}" title="Delete permanently">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>` : `
+            <button class="icon-btn" data-code-token="${escapeHtml(t.id)}" data-keys="${escapeHtml(JSON.stringify(attachedKeys.map(k => ({ id: k.id, provider: k.provider, name: k.name }))))}" title="How to use">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </button>
+            ${t.paused ? `
+            <button class="icon-btn" data-resume-token="${escapeHtml(t.id)}" data-name="${escapeHtml(t.name)}" title="Resume">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>` : `
+            <button class="icon-btn" data-pause-token="${escapeHtml(t.id)}" data-name="${escapeHtml(t.name)}" title="Pause">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>`}
+            <button class="icon-btn danger" data-delete-token="${escapeHtml(t.id)}" data-name="${escapeHtml(t.name)}" title="Delete permanently">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>`;
+
+        return `
+        <div class="row ${t.paused ? 'row-paused' : ''} ${t.revoked ? 'row-revoked' : ''}" data-token-id="${escapeHtml(t.id)}">
+          <div class="row-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <div class="row-main">
+            <div class="row-title">${escapeHtml(t.name)}</div>
+            <div class="row-meta">
+              ${statusBadge}
+              <span class="row-badge muted">${fmtRotation(t.rotation_type)}</span>
+              ${logosStrip}
+              <span>· issued ${fmtRelative(t.created_at)}</span>
+            </div>
+          </div>
+          <div class="row-actions">${actions}</div>
+        </div>`;
+      }).join('');
+
+      // ---- wire "How to use" (code examples) ----
+      list.querySelectorAll('[data-code-token]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          let keys = [];
+          try { keys = JSON.parse(btn.dataset.keys || '[]'); } catch {}
+          if (!keys.length) { showToast('No keys attached to this token', true); return; }
+          openCodeModal(keys, null, null);
+        });
+      });
+
+      // ---- wire Pause ----
+      list.querySelectorAll('[data-pause-token]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.pauseToken;
+          try {
+            const res = await api('/v1/tokens/' + encodeURIComponent(id) + '/pause', { method: 'POST' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            showToast('Token paused');
+            await loadTokens();
+          } catch (e) {
+            showToast('Could not pause', true);
+          }
+        });
+      });
+
+      // ---- wire Resume ----
+      list.querySelectorAll('[data-resume-token]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.resumeToken;
+          try {
+            const res = await api('/v1/tokens/' + encodeURIComponent(id) + '/resume', { method: 'POST' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            showToast('Token resumed');
+            await loadTokens();
+          } catch (e) {
+            showToast('Could not resume', true);
+          }
+        });
+      });
+
+      // ---- wire Delete (permanent) ----
+      list.querySelectorAll('[data-delete-token]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const name = btn.dataset.name;
+          if (!confirm(`Permanently delete the token "${name}"?\n\nThis cannot be undone. Any app or agent using it will stop working immediately.`)) return;
+          const id = btn.dataset.deleteToken;
+          try {
+            const res = await api('/v1/tokens/' + encodeURIComponent(id), { method: 'DELETE' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            showToast('Token deleted');
+            await loadTokens();
+          } catch (e) {
+            showToast('Could not delete', true);
+          }
+        });
+      });
+    }
+
+    function loadTokenKeyPicker() {
+      const list = $('token-keys-list');
+      if (!cachedKeys.length) {
+        list.innerHTML = '<div style="padding:14px;text-align:center;font-size:13px;color:var(--muted);">Add a key first to issue a token.</div>';
+        return;
+      }
+      list.innerHTML = cachedKeys.map(k => `
+        <label class="check-row">
+          <input type="checkbox" value="${escapeHtml(k.id)}" />
+          <div>
+            <div class="cr-name">${escapeHtml(k.name)}</div>
+            <div class="cr-meta">${escapeHtml(k.provider)} · ${escapeHtml(k.id)}</div>
+          </div>
+        </label>
+      `).join('');
+    }
+
+    $('open-create-token').addEventListener('click', () => {
+      $('token-name').value = '';
+      $('token-rotation').value = 'static';
+      $('create-token-error').classList.remove('shown');
+      loadTokenKeyPicker();
+      openModal('modal-create-token');
+      setTimeout(() => $('token-name').focus(), 200);
+    });
+
+    // Context captured at issuance time so the "Show integration code" button
+    // in the reveal modal knows which provider/key/token to show examples for.
+    let lastIssuedContext = null;
+
+    $('submit-create-token').addEventListener('click', async () => {
+      const name = $('token-name').value.trim();
+      const rotation = $('token-rotation').value;
+      const allowed = Array.from(document.querySelectorAll('#token-keys-list input[type="checkbox"]:checked')).map(c => c.value);
+      const errEl = $('create-token-error');
+      errEl.classList.remove('shown');
+
+      if (!name) { errEl.textContent = 'Please enter a name.'; errEl.classList.add('shown'); return; }
+      if (!allowed.length) { errEl.textContent = 'Pick at least one key this token can access.'; errEl.classList.add('shown'); return; }
+
+      const btn = $('submit-create-token');
+      btn.disabled = true;
+      btn.textContent = 'Issuing…';
+      try {
+        const res = await api('/v1/tokens', {
+          method: 'POST',
+          body: JSON.stringify({ name, allowed_keys: allowed, rotation_type: rotation }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+
+        closeModal('modal-create-token');
+
+        // Populate the dual-token reveal modal
+        $('reveal-access-value').textContent = data.access_token;
+        if (data.refresh_token) {
+          $('reveal-refresh-value').textContent = data.refresh_token;
+          $('refresh-block').style.display = '';
+          $('reveal-sub').textContent = 'Two credentials, one flow. Paste the refresh token into your app — it auto-rotates the access token for you.';
+          $('reveal-warn-text').textContent = 'Once you close this dialog, the raw tokens cannot be retrieved. If you lose them, revoke and issue a new pair.';
+          const hintLabel = rotation.charAt(0).toUpperCase() + rotation.slice(1);
+          $('access-hint').textContent = `${hintLabel} rotation · auto-refreshes`;
+        } else {
+          $('refresh-block').style.display = 'none';
+          $('reveal-sub').textContent = 'This is the only time we\'ll show the raw token. Copy it now and paste it into your app.';
+          $('reveal-warn-text').textContent = 'Once you close this dialog, the raw token cannot be retrieved. If you lose it, revoke and issue a new one.';
+          $('access-hint').textContent = 'Static · never expires';
+        }
+
+        // Capture context for the "Show integration code" button — keep
+        // ALL the selected keys so the modal's provider switcher works.
+        const selectedKeyObjects = allowed
+          .map(id => cachedKeys.find(k => k.id === id))
+          .filter(Boolean)
+          .map(k => ({ id: k.id, provider: k.provider, name: k.name }));
+        lastIssuedContext = {
+          keys: selectedKeyObjects,
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+          rotation,
+        };
+        openModal('modal-token-reveal');
+        await loadTokens();
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.add('shown');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Issue token';
+      }
+    });
+
+    function wireCopyBtn(btnId, valueId, toastLabel) {
+      $(btnId).addEventListener('click', async () => {
+        const value = $(valueId).textContent;
+        await navigator.clipboard.writeText(value);
+        const btn = $(btnId);
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        showToast(toastLabel + ' copied');
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        }, 2000);
+      });
+    }
+    wireCopyBtn('copy-access-btn', 'reveal-access-value', 'Access token');
+    wireCopyBtn('copy-refresh-btn', 'reveal-refresh-value', 'Refresh token');
+
+    // ============================================================
+    //  CODE EXAMPLES MODAL
+    // ============================================================
+    let currentCodeSnippets = null;
+    let currentCodeLang = 'curl';
+
+    // Multi-provider context for the code modal. The user can switch
+    // between any key the token can access.
+    let currentCodeKeys = [];           // [{id, provider, name}]
+    let currentCodeKeyIdx = 0;
+    let currentCodeAccess = null;
+    let currentCodeRefresh = null;
+
+    function openCodeModal(keys, accessToken, refreshToken) {
+      // Backwards-compat: also accept (provider, keyId, ...) signature
+      if (typeof keys === 'string') {
+        keys = [{ id: arguments[1], provider: keys, name: arguments[1] }];
+        accessToken = arguments[2];
+        refreshToken = arguments[3];
+      }
+
+      currentCodeKeys = Array.isArray(keys) ? keys : [];
+      currentCodeKeyIdx = 0;
+      currentCodeAccess = accessToken;
+      currentCodeRefresh = refreshToken;
+      currentCodeLang = 'curl';
+
+      renderProviderSwitcher();
+      renderCurrentSnippet();
+
+      // Reset tabs to cURL
+      document.querySelectorAll('.code-tab').forEach(t => t.classList.toggle('active', t.dataset.lang === 'curl'));
+
+      // Hint changes based on whether the token is live
+      if (accessToken || refreshToken) {
+        $('code-hint').innerHTML = 'These tokens are <strong>live</strong> in the snippet below — copy, paste, and it runs. The refresh token stays valid; the SDK auto-rotates the access token.';
+      } else {
+        $('code-hint').innerHTML = 'Replace <code>YOUR_ACCESS_TOKEN</code> and <code>YOUR_REFRESH_TOKEN</code> with the values from your token reveal. The SDK handles refresh automatically — you never touch access tokens after setup.';
+      }
+
+      openModal('modal-code-examples');
+    }
+
+    function renderProviderSwitcher() {
+      const wrap = $('provider-switcher');
+      // Hide entirely if there's only one key — switcher would be redundant
+      if (currentCodeKeys.length <= 1) {
+        wrap.style.display = 'none';
+        return;
+      }
+      wrap.style.display = 'flex';
+      wrap.innerHTML = currentCodeKeys.map((k, i) => {
+        const meta = PROVIDERS.find(p => p.id === k.provider) || { name: k.provider, logo: null };
+        const iconInner = meta.logo
+          ? `<img src="${meta.logo}" alt="${escapeHtml(meta.name)}" width="12" height="12" style="width:12px;height:12px;object-fit:contain;" />`
+          : '';
+        return `
+          <button class="provider-pill ${i === currentCodeKeyIdx ? 'active' : ''}" data-pill-idx="${i}">
+            <span class="provider-pill-icon">${iconInner}</span>
+            ${escapeHtml(meta.name)}
+          </button>`;
+      }).join('');
+      wrap.querySelectorAll('[data-pill-idx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCodeKeyIdx = parseInt(btn.dataset.pillIdx, 10);
+          renderProviderSwitcher();
+          renderCurrentSnippet();
+        });
+      });
+    }
+
+    function renderCurrentSnippet() {
+      const k = currentCodeKeys[currentCodeKeyIdx];
+      if (!k) return;
+      const snippets = buildExamples(k.provider, k.id, currentCodeAccess, currentCodeRefresh);
+      currentCodeSnippets = snippets;
+
+      // Update the small provider chip
+      const providerMeta = PROVIDERS.find(p => p.id === k.provider) || { name: k.provider, logo: null };
+      const logo = $('code-provider-logo');
+      if (providerMeta.logo) {
+        logo.src = providerMeta.logo;
+        logo.style.display = 'block';
+      } else {
+        logo.style.display = 'none';
+      }
+      $('code-provider-name').textContent = providerMeta.name;
+      $('code-provider-meta').textContent = k.id;
+
+      // Re-render the currently-active language tab
+      $('code-display').textContent = snippets[currentCodeLang] || snippets.curl;
+    }
+
+    document.querySelectorAll('.code-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (!currentCodeSnippets) return;
+        const lang = tab.dataset.lang;
+        currentCodeLang = lang;
+        document.querySelectorAll('.code-tab').forEach(t => t.classList.toggle('active', t === tab));
+        $('code-display').textContent = currentCodeSnippets[lang] || currentCodeSnippets.curl;
+      });
+    });
+
+    $('code-copy-btn').addEventListener('click', async () => {
+      if (!currentCodeSnippets) return;
+      await navigator.clipboard.writeText(currentCodeSnippets[currentCodeLang]);
+      const btn = $('code-copy-btn');
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      showToast('Code copied');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      }, 2000);
+    });
+
+    $('reveal-show-code').addEventListener('click', () => {
+      if (!lastIssuedContext) return;
+      closeModal('modal-token-reveal');
+      openCodeModal(
+        lastIssuedContext.keys,
+        lastIssuedContext.accessToken,
+        lastIssuedContext.refreshToken
+      );
+    });
+
+    // ============================================================
+    //  ACTIVITY
+    // ============================================================
+    async function loadActivity() {
+      try {
+        const res = await api('/v1/activity?limit=20');
+        if (!res.ok) return;
+        const data = await res.json();
+        const logs = data.logs || [];
+        renderActivity(logs);
+        $('stat-calls').textContent = logs.length;
+      } catch (e) {
+        console.error('Load activity error:', e);
+      }
+    }
+
+    function renderActivity(logs) {
+      const list = $('activity-list');
+      const empty = $('activity-empty');
+      if (!logs.length) {
+        list.classList.add('hidden');
+        empty.classList.remove('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      empty.classList.add('hidden');
+      list.classList.remove('hidden');
+      list.innerHTML = logs.map(l => {
+        const ok = l.status_code && l.status_code < 400;
+        return `
+          <div class="activity-row">
+            <span class="activity-status ${ok ? 'ok' : 'err'}"></span>
+            <span class="activity-method">${escapeHtml(l.status_code || '—')}</span>
+            <span class="activity-path">${escapeHtml(l.provider || '—')} · ${escapeHtml(l.forward_path || '/')}</span>
+            <span class="activity-meta">${l.latency_ms ? l.latency_ms + 'ms' : '—'}</span>
+            <span class="activity-meta">${fmtRelative(l.timestamp)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ============================================================
+    //  DEVICES
+    // ============================================================
+    async function loadDevices() {
+      try {
+        const res = await api('/v1/devices');
+        if (!res.ok) return;
+        const data = await res.json();
+        const devices = data.devices || [];
+        const statEl = $('stat-devices');
+        if (statEl) statEl.textContent = devices.length;
+        renderDevices(devices);
+      } catch (e) {
+        console.error('Load devices error:', e);
+      }
+    }
+
+    function renderDevices(devices) {
+      const list = $('devices-list');
+      const empty = $('devices-empty');
+      if (!devices.length) {
+        list.classList.add('hidden');
+        empty.classList.remove('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      empty.classList.add('hidden');
+      list.classList.remove('hidden');
+      list.innerHTML = devices.map(d => {
+        const platform = [d.platform, d.platform_version].filter(Boolean).join(' ') || '—';
+        const currentBadge = d.current
+          ? '<span class="row-badge">this device</span>'
+          : '';
+        return `
+        <div class="row" data-device-id="${escapeHtml(d.id)}">
+          <div class="row-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="row-body">
+            <div class="row-title">
+              ${escapeHtml(d.name || 'Unknown device')} ${currentBadge}
+            </div>
+            <div class="row-meta">
+              ${escapeHtml(platform)} · registered ${fmtRelative(d.registered_at)} · last seen ${fmtRelative(d.last_used_at)}
+            </div>
+          </div>
+          <div class="row-actions">
+            <button class="icon-btn danger" data-revoke-device="${escapeHtml(d.id)}" data-name="${escapeHtml(d.name || 'Unknown device')}" data-current="${d.current ? '1' : '0'}" title="Revoke device">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+
+      // Wire up revoke buttons
+      list.querySelectorAll('[data-revoke-device]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const b = e.currentTarget;
+          const id = b.getAttribute('data-revoke-device');
+          const name = b.getAttribute('data-name');
+          const isCurrent = b.getAttribute('data-current') === '1';
+          const warning = isCurrent
+            ? `\n\n⚠ This is the device you're currently using on the CLI. After revoking, apilocker commands on that machine will stop working until you run 'apilocker register' again.`
+            : '';
+          if (!confirm(`Revoke device "${name}"? This cannot be undone.${warning}`)) return;
+          try {
+            const res = await api(`/v1/devices/${id}/revoke`, { method: 'POST' });
+            if (!res.ok) {
+              const body = await res.json().catch(() => ({}));
+              alert('Failed to revoke device: ' + (body.error || res.status));
+              return;
+            }
+            loadDevices();
+          } catch (err) {
+            alert('Failed to revoke device: ' + err.message);
+          }
+        });
+      });
+    }
+
+    // ============================================================
+    //  MCP PANEL (v1.0.0) — tabs, test connection, copy, activity feed
+    // ============================================================
+    const MCP_URL = 'https://api.apilocker.app/v1/mcp';
+
+    // Tab switching
+    document.querySelectorAll('.mcp-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.mcpTab;
+        document.querySelectorAll('.mcp-tab').forEach(t => t.classList.toggle('active', t === tab));
+        document.querySelectorAll('.mcp-tab-panel').forEach(p => {
+          p.classList.toggle('active', p.dataset.mcpPanel === target);
+        });
+      });
+    });
+
+    // Copy buttons
+    document.querySelectorAll('.mcp-copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const target = btn.dataset.mcpCopy;
+        const codeEl = document.getElementById('mcp-code-' + target);
+        if (!codeEl) return;
+        try {
+          await navigator.clipboard.writeText(codeEl.textContent || '');
+          const original = btn.textContent;
+          btn.textContent = 'Copied ✓';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = original;
+            btn.classList.remove('copied');
+          }, 1800);
+        } catch (e) {
+          btn.textContent = 'Copy failed';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 1800);
+        }
+      });
+    });
+
+    // Test connection button
+    $('mcp-test-btn').addEventListener('click', async () => {
+      const btn = $('mcp-test-btn');
+      const resultEl = $('mcp-test-result');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner-sm" style="width:12px;height:12px;border-width:2px;"></div> Testing…';
+      resultEl.classList.add('hidden');
+      try {
+        // Use the backend via an authenticated POST. The dashboard's
+        // session cookie authenticates the request to the worker,
+        // which handles the MCP tools/list method and returns the
+        // tool count as proof the server is responsive.
+        const res = await api('/v1/mcp', {
+          method: 'POST',
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'tools/list',
+          }),
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const body = await res.json();
+        const toolCount = body?.result?.tools?.length || 0;
+        resultEl.classList.remove('hidden');
+        resultEl.classList.remove('err');
+        resultEl.classList.add('ok');
+        resultEl.textContent = `✓ Connected — ${toolCount} MCP tools available via this endpoint.`;
+      } catch (e) {
+        resultEl.classList.remove('hidden');
+        resultEl.classList.remove('ok');
+        resultEl.classList.add('err');
+        resultEl.textContent = `✗ Test failed: ${e.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Test connection';
+      }
+    });
+
+    // Load recent MCP-relevant activity (reveals + proxy calls)
+    // and render in the MCP activity feed.
+    async function loadMcpRecentActivity() {
+      try {
+        const res = await api('/v1/activity?limit=30');
+        if (!res.ok) return;
+        const data = await res.json();
+        const logs = data.logs || [];
+        // Filter to reveal and proxy calls (what MCP tools write)
+        const mcpish = logs.filter(l =>
+          l.forward_path === '/reveal' ||
+          (l.token_id != null) // proxy calls have a token_id
+        ).slice(0, 10);
+
+        const container = $('mcp-recent-activity');
+        if (mcpish.length === 0) {
+          container.innerHTML = '<div class="mcp-activity-empty">No activity yet. Connect a client and ask it to list your keys.</div>';
+          return;
+        }
+        container.innerHTML = mcpish.map(l => {
+          const ok = !l.status_code || (l.status_code >= 200 && l.status_code < 400);
+          const op = l.forward_path === '/reveal' ? 'reveal' : 'proxy';
+          const provider = l.provider || '—';
+          const status = l.status_code ?? '—';
+          return `
+            <div class="mcp-activity-row">
+              <span class="mcp-activity-time">${fmtRelative(l.timestamp)}</span>
+              <span class="mcp-activity-op">${op} · <span class="mcp-activity-provider">${escapeHtml(provider)}</span></span>
+              <span>${l.latency_ms ? l.latency_ms + 'ms' : ''}</span>
+              <span class="mcp-activity-status ${ok ? 'ok' : 'err'}">${status}</span>
+            </div>
+          `;
+        }).join('');
+      } catch {
+        // Silent
+      }
+    }
+
+    // ============================================================
+    //  WELCOME MODAL (v1.0.0 first-run)
+    // ============================================================
+    const WELCOME_SEEN_KEY = 'apilocker_welcome_v1_seen';
+
+    function maybeShowWelcomeModal() {
+      try {
+        if (localStorage.getItem(WELCOME_SEEN_KEY)) return;
+        openModal('modal-welcome');
+      } catch {
+        // localStorage unavailable (private mode, etc.) — skip silently
+      }
+    }
+
+    $('welcome-dismiss').addEventListener('click', () => {
+      try {
+        localStorage.setItem(WELCOME_SEEN_KEY, new Date().toISOString());
+      } catch {}
+      closeModal('modal-welcome');
+    });
+
+    // ============================================================
+    //  BOOT
+    // ============================================================
+    renderProviderGrid();
+    wireKeyFilters();
+    wireBucketAddButtons();
+    loadUser().then(() => {
+      maybeShowWelcomeModal();
+      Promise.all([
+        loadKeys(),
+        loadTokens(),
+        loadDevices(),
+        loadActivity(),
+        loadDoctor(),
+        loadMcpRecentActivity(),
+      ]);
+    });
+  </script>
+</body>
+</html>

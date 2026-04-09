@@ -1,0 +1,55 @@
+{
+  "name": "apilocker",
+  "version": "1.0.0",
+  "description": "Replace your .env file with one token. Encrypted vault, auto-rotating tokens, and a smart proxy for every API your app talks to.",
+  "keywords": [
+    "api-keys",
+    "vault",
+    "secrets",
+    "credentials",
+    "proxy",
+    "env",
+    "environment-variables",
+    "oauth",
+    "rotation",
+    "encryption",
+    "cli",
+    "openai",
+    "anthropic",
+    "stripe",
+    "mcp"
+  ],
+  "homepage": "https://www.apilocker.app",
+  "bugs": {
+    "url": "https://www.apilocker.app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apilocker/cli.git"
+  },
+  "license": "MIT",
+  "author": "Mayer Sancivieri",
+  "bin": {
+    "apilocker": "./dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  }
+}

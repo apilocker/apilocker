@@ -1,0 +1,50 @@
+name = "apilocker"
+main = "src/index.ts"
+compatibility_date = "2024-04-05"
+
+# Vault-backed OAuth config (v1.0.2+).
+# The Worker reads its own OAuth sign-in credentials from the vault at
+# runtime via src/vault-client.ts. Which providers are enabled + what
+# vault key name each one uses is defined in src/oauth-providers.ts —
+# adding a new sign-in provider is a one-file code change plus a
+# vault credential under the matching name.
+#
+# The only Worker-level config we need is APILOCKER_SERVICE_USER_ID,
+# which is set via `wrangler secret put`. No OAuth values live at the
+# env level anymore.
+
+[[kv_namespaces]]
+binding = "KEYS"
+id = "e7c4ee52186c4f9297e92393c484e6eb"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "apilocker"
+database_id = "0b18b237-a1e2-4596-99d6-d267ed0a4f71"
+
+[durable_objects]
+bindings = [
+  { name = "TRAFFIC_MONITOR", class_name = "TrafficMonitor" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TrafficMonitor"]
+
+# Cron trigger for scheduled jobs (v1.0.0).
+# Runs hourly to purge expired device_codes rows. See src/index.ts
+# scheduled() handler for the job body.
+[triggers]
+crons = ["0 * * * *"]
+
+# Secrets (set via: wrangler secret put <KEY>)
+# ENCRYPTION_KEY — base64-encoded 256-bit key for AES-GCM
+# SESSION_SECRET — secret for signing session tokens
+# ADMIN_USER_IDS — comma-separated list of admin user IDs
+# APILOCKER_SERVICE_USER_ID — user_id that owns the Worker's OAuth
+#   credentials in the vault (read by src/vault-client.ts)
+#
+# No longer required (kept for backwards compat, removed after migration):
+# GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+#   — the Worker now reads these from the vault at runtime. Rotation is
+#   done via the dashboard Rotate Secret button; no more manual sync.

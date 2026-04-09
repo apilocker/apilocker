@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign up — API Locker</title>
+  <meta name="description" content="Create your API Locker account in seconds. One vault for every credential." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <div class="auth-shell">
+
+    <!-- ===================== NAV ===================== -->
+    <nav class="nav" id="nav">
+      <div class="container nav-inner">
+        <a href="/" class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </a>
+        <div class="nav-links">
+          <a href="/#features">Features</a>
+          <a href="/#vault">Vault</a>
+          <a href="/#proxy">Proxy</a>
+          <a href="/#pricing">Pricing</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 18px;">
+          <a href="/login" class="nav-signin">Log in</a>
+          <a href="/signup" class="nav-cta">
+            Sign up
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ===================== AUTH ===================== -->
+    <main class="auth-main">
+      <div class="auth-stack">
+        <span class="eyebrow reveal"><span class="eyebrow-dot"></span> Free during beta</span>
+        <h1 class="auth-h1 reveal delay-1">Create your account.</h1>
+        <p class="auth-sub reveal delay-2">One vault for every credential. No credit card, no setup — pick a provider and you're in.</p>
+
+        <div class="auth-card reveal delay-3">
+          <!-- Rendered dynamically from GET /v1/auth/providers -->
+          <div id="oauth-providers" class="oauth-providers">
+            <div class="oauth-loading">Loading sign-up options…</div>
+          </div>
+
+          <p class="auth-fineprint">By signing up, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+        </div>
+
+        <p class="auth-switch reveal delay-4">Already have an account? <a href="/login">Log in</a></p>
+      </div>
+    </main>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer>
+      <div class="container footer-inner">
+        <div class="logo">
+          <span class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          API Locker
+        </div>
+        <div class="footer-links">
+          <a href="#">Docs</a>
+          <a href="#">GitHub</a>
+          <a href="https://www.npmjs.com/package/apilocker">npm</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+        </div>
+        <div class="footer-copy">© 2026 API Locker</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if (window.scrollY > 8) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ---- Dynamic OAuth provider buttons ----
+    // Rendered from GET /v1/auth/providers — any provider in the
+    // registry with a vault credential is automatically listed.
+    const API = 'https://api.apilocker.app';
+    (async () => {
+      const container = document.getElementById('oauth-providers');
+      try {
+        const res = await fetch(`${API}/v1/auth/providers`, { credentials: 'omit' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const providers = Array.isArray(data.providers) ? data.providers : [];
+
+        if (providers.length === 0) {
+          container.innerHTML =
+            '<div class="oauth-loading">No sign-in providers configured.</div>';
+          return;
+        }
+
+        container.innerHTML = providers.map(p => `
+          <a href="${API}${p.auth_url}" class="oauth-btn" style="background: ${p.brand_color}; color: ${p.text_color};">
+            ${p.icon_svg}
+            Continue with ${p.display_name}
+          </a>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load providers:', e);
+        container.innerHTML =
+          '<div class="oauth-loading" style="color:#dc2626;">Could not load sign-in options. Please refresh.</div>';
+      }
+    })();
+  </script>
+</body>
+</html>
