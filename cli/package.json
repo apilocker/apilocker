@@ -19,13 +19,14 @@
     "stripe",
     "mcp"
   ],
-  "homepage": "https://www.apilocker.app",
+  "homepage": "https://github.com/apilocker/apilocker/tree/main/cli#readme",
   "bugs": {
-    "url": "https://www.apilocker.app"
+    "url": "https://github.com/apilocker/apilocker/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/apilocker/cli.git"
+    "url": "git+https://github.com/apilocker/apilocker.git",
+    "directory": "cli"
   },
   "license": "MIT",
   "author": "Mayer Sancivieri",
