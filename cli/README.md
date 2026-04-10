@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://www.apilocker.app/brand/logo-256.png" alt="API Locker mascot" width="160" height="160" />
+</div>
+
 # API Locker
 
 > **One vault, three types of credentials.** LLM API keys, service API keys, and OAuth credentials — all encrypted, all injectable into your code with a single command.

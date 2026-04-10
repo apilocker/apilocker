@@ -135,6 +135,16 @@
       line-height: 1.6;
     }
   </style>
+
+  <!-- API Locker brand assets (mascot logo) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/brand/logo-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/brand/logo-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/brand/logo-180.png">
+  <meta property="og:image" content="https://www.apilocker.app/brand/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.apilocker.app/brand/og-image.png">
 </head>
 <body>
 
@@ -167,9 +177,29 @@
   <div class="docs-shell">
     <span class="eyebrow"><span class="eyebrow-dot"></span> Docs · MCP integration</span>
     <h1>Give your AI agent your vault.</h1>
-    <p class="lede">API Locker exposes a full Model Context Protocol (MCP) server. Any MCP-compatible client — Claude Code, Claude Desktop, Cursor, Zed, Continue, Cline — can list your credentials, reveal values, run health checks, and proxy API calls, all with one config entry.</p>
+    <p class="lede">API Locker exposes a full Model Context Protocol (MCP) server. Any MCP-compatible client — Claude (web), Claude Code, Claude Desktop, Cursor, Zed, Continue, Cline — can list your credentials, reveal values, run health checks, and proxy API calls, all with one connection.</p>
 
-    <h2>Install in 3 steps</h2>
+    <h2>Two ways to connect</h2>
+    <p>Pick the one that fits your AI client:</p>
+    <ul>
+      <li><strong>Remote MCP (OAuth):</strong> For Claude on claude.ai and claude.com. Click <strong>Add connector</strong> → sign in → approve. No CLI install. Nothing to configure. This is the path most people want.</li>
+      <li><strong>Local MCP (stdio bridge):</strong> For Claude Desktop, Claude Code, Cursor, Zed, and Continue. Install the <code>apilocker</code> CLI, run <code>apilocker register</code> once, then point your client at <code>apilocker mcp</code>. Covered further down this page.</li>
+    </ul>
+
+    <h2>Remote MCP <span style="color: var(--muted); font-weight: 400;">— for Claude web + Claude Code</span></h2>
+    <p>API Locker is a compliant OAuth 2.1 remote MCP server. When Claude's Connectors Directory supports API Locker, users can add it in three clicks:</p>
+    <ol>
+      <li>Open Claude settings → <strong>Connectors</strong> → <strong>Add connector</strong></li>
+      <li>Search for <strong>API Locker</strong> and click <strong>Add</strong></li>
+      <li>Sign in with your API Locker account (GitHub or Google) and click <strong>Approve</strong> on the consent screen</li>
+    </ol>
+    <p>After approval, Claude has full access to your vault through the same 21 tools listed below. Claude shows a safety label on every tool call (read vs. write vs. external request) before executing. You can revoke the connection at any time from your <a href="/dashboard">dashboard</a>.</p>
+
+    <blockquote>
+      <strong>Is API Locker in the directory yet?</strong> Submission is in progress with Anthropic. Until it's listed, you can still add API Locker manually by pasting this URL into Claude's <em>Add custom connector</em> flow: <code>https://api.apilocker.app/v1/mcp</code> — Claude will handle the OAuth handshake and consent screen automatically.
+    </blockquote>
+
+    <h2>Install in 3 steps <span style="color: var(--muted); font-weight: 400;">— for local MCP clients</span></h2>
 
     <h3>1. Install the CLI</h3>
 <pre><code>npm install -g apilocker</code></pre>
@@ -250,9 +280,74 @@
       <div class="docs-tool">revoke_device</div>
     </div>
 
+    <h2>Usage examples</h2>
+    <p>Once API Locker is connected, your AI agent can handle credential-related tasks in plain English. Here are three concrete flows, each showing the kinds of prompts that work well and which MCP tools get called under the hood:</p>
+
+    <h3>Example 1 — Audit my vault health</h3>
+    <p><strong>What you ask Claude:</strong></p>
+    <blockquote>
+      "Take a look at my API Locker vault. Which keys haven't been rotated in over 90 days, and are any of my scoped tokens close to expiring?"
+    </blockquote>
+    <p><strong>What Claude does:</strong></p>
+    <ul>
+      <li>Calls <code>list_keys</code> to enumerate every credential you have stored</li>
+      <li>Calls <code>run_doctor</code> to get the built-in health report (stale rotations, unused keys, expiring tokens, local config permission checks)</li>
+      <li>Calls <code>list_tokens</code> to see which scoped tokens exist and their rotation cadence</li>
+      <li>Summarizes the findings: "You have 4 keys over 90 days old (OPENAI_API_KEY last rotated 2025-11-08, …). Your daily-rotating <code>web-app-prod</code> token expires in 3 days unless refreshed."</li>
+    </ul>
+    <p>All three tools are <em>read-only</em> — no state changes, nothing consumed, nothing charged. This is the safest entry point for a new connection.</p>
+
+    <h3>Example 2 — Rotate a leaked credential</h3>
+    <p><strong>What you ask Claude:</strong></p>
+    <blockquote>
+      "I just got an alert that my Stripe live key might be compromised. Generate a new one, store it in the vault, and tell me what to paste into the Stripe dashboard."
+    </blockquote>
+    <p><strong>What Claude does:</strong></p>
+    <ul>
+      <li>Calls <code>get_key_metadata</code> to confirm the credential alias (<code>STRIPE_SECRET_KEY</code>) and its current provider + rotation history</li>
+      <li>Generates a new secret value (or prompts you for the one you already created in the Stripe dashboard)</li>
+      <li>Calls <code>rotate_key</code> to replace the encrypted blob in the vault and stamp <code>rotated_at</code></li>
+      <li>Calls <code>get_activity</code> to confirm the rotation event was audit-logged</li>
+      <li>Reminds you that scoped tokens referencing <code>STRIPE_SECRET_KEY</code> keep working automatically — no app-code changes needed</li>
+    </ul>
+    <p>The <code>rotate_key</code> tool carries <code>destructiveHint: true</code>, so Claude will show a confirmation UI before executing. Your existing Stripe API client code continues to work against the proxied endpoint immediately.</p>
+
+    <h3>Example 3 — Call a real API without exposing the key</h3>
+    <p><strong>What you ask Claude:</strong></p>
+    <blockquote>
+      "Use my OpenAI key in API Locker to call gpt-4.1-mini with the prompt 'Write a haiku about vault security.' Don't show me the raw key."
+    </blockquote>
+    <p><strong>What Claude does:</strong></p>
+    <ul>
+      <li>Calls <code>list_keys</code> filtered by <code>category: "llm"</code> to find the OpenAI credential's <code>key_id</code></li>
+      <li>Calls <code>proxy_request</code> with <code>key_id</code> + <code>path: "/v1/chat/completions"</code> + the request body — API Locker's proxy handler injects the raw key into the outbound call <em>server-side</em>, forwards to OpenAI, and returns the response</li>
+      <li>Shows you the haiku</li>
+    </ul>
+    <p>At no point did Claude see your OpenAI API key. The <code>proxy_request</code> tool carries <code>openWorldHint: true</code> and <code>destructiveHint: true</code> because it makes an outbound call that can affect billing or state on the target service. Every call is audit-logged with the source IP, latency, and response status.</p>
+
+    <h2>Privacy &amp; data handling</h2>
+    <p>API Locker's MCP server handles sensitive data. Here's exactly what we do and don't store:</p>
+    <ul>
+      <li><strong>Credential values:</strong> encrypted with AES-256-GCM before ever touching disk. Stored in Cloudflare KV as ciphertext only. The plaintext is only ever assembled inside the Worker for one of three reasons: an authenticated <code>reveal_key</code> call, an authenticated <code>proxy_request</code> call, or the Worker's own OAuth sign-in flow reading its own credentials from the vault. Plaintext is never logged, cached, or persisted outside of encrypted storage.</li>
+      <li><strong>Request bodies sent through <code>proxy_request</code>:</strong> forwarded to the target upstream API unchanged. We do not log, store, or retain request bodies or responses — only metadata (timestamp, target host, status code, latency, response size).</li>
+      <li><strong>Audit logs:</strong> every credential reveal, rotation, rename, pause/resume, proxy call, and MCP tool invocation is logged with <code>{user_id, timestamp, source_ip, country, status_code, latency_ms}</code>. Logs are retained indefinitely for the user's own visibility (<code>GET /v1/activity</code>, <code>apilocker activity</code>) and are never shared externally.</li>
+      <li><strong>OAuth session data from MCP clients:</strong> when a client like Claude authenticates via the OAuth 2.1 flow, we store a hashed access token and refresh token plus the approved scopes, client ID, and user ID. The refresh token rotates on every use; old tokens are held one rotation back for reuse detection and then discarded. We do not store the access token plaintext.</li>
+      <li><strong>Conversation content:</strong> API Locker does not see, log, or store any conversation history between you and Claude. Only the individual MCP tool calls reach the Worker, and only their arguments (e.g. "rotate key alias OPENAI_API_KEY") — never the surrounding conversation context.</li>
+    </ul>
+    <p>See our full <a href="/privacy">Privacy Policy</a> for the formal version.</p>
+
     <h2>Security</h2>
     <p>The MCP bridge reads your master token from <code>~/.apilocker/config.json</code>. This gives the connected MCP client <strong>full vault access</strong> — the same permissions you have at the CLI. Only connect MCP clients you own and trust completely (Claude Desktop on your own laptop, your own Cursor instance, etc.).</p>
     <p>For more restricted scenarios, use the scoped-token auth path: pass a scoped token in the Authorization header when calling the MCP server directly over HTTP. Scoped tokens can only call read tools (<code>list_keys</code>, <code>reveal_key</code>, <code>proxy_request</code>, etc.) and only for credentials in their pre-approved <code>allowed_keys</code> list. Write tools (<code>store_key</code>, <code>rotate_key</code>, <code>delete_key</code>, device/token management) are rejected for scoped tokens.</p>
+    <p>For remote MCP connections (OAuth 2.1), scopes are enforced at the token level: <code>vault:read</code> is required for any MCP call, <code>vault:write</code> is additionally required for tools that modify vault state, and <code>vault:proxy</code> is required for <code>proxy_request</code>. Refresh tokens rotate on use and reuse is treated as token theft (the entire grant family is revoked immediately).</p>
+
+    <h2>Support</h2>
+    <p>Questions, bug reports, or security disclosures:</p>
+    <ul>
+      <li><strong>GitHub Issues:</strong> <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a> — preferred for bugs and feature requests</li>
+      <li><strong>Email:</strong> <a href="mailto:support@apilocker.app">support@apilocker.app</a> — for private questions and security reports</li>
+      <li><strong>Dashboard MCP panel:</strong> <a href="/dashboard#mcp">www.apilocker.app/dashboard#mcp</a> — live server status, test-connection button, and recent MCP activity feed</li>
+    </ul>
 
     <blockquote>
       <strong>Want visual confirmation?</strong> The <a href="/dashboard#mcp">dashboard's MCP panel</a> shows the server status, a test-connection button, and a live feed of recent MCP activity. Check there after connecting a client to verify everything's working.

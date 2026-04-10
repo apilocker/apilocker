@@ -72,6 +72,7 @@ import {
   queryAuditLogs,
 } from './db';
 import { validateScopedToken, validateSession } from './auth';
+import { validateOAuthAccessToken } from './oauth-server';
 import { getProviderTemplate, listProviders, listProvidersByCategory } from './providers';
 import { jsonOk, jsonError } from './responses';
 
@@ -96,12 +97,33 @@ interface MCPAuthContext {
   tokenId: string | null; // null = master token
   /** null = all keys (master token); array = scoped allowedKeys */
   allowedKeys: string[] | null;
+  /**
+   * OAuth 2.1 scopes if the caller authenticated via an OAuth
+   * access token (Claude, other remote MCP clients). Undefined for
+   * master-token / scoped-token callers. Individual tool handlers
+   * can inspect this to enforce vault:write vs vault:read vs
+   * vault:proxy granularity beyond the simple master-token gate.
+   */
+  oauthScopes?: string[];
 }
 
 // ==================== TOOL CATALOG ====================
 
 const TOOLS = [
   // ---- Read tools ----
+  //
+  // Every tool in this catalog has an `annotations` block per MCP spec.
+  // The Claude Connectors Directory submission guide requires these
+  // hints so the client can render safety signals and decide whether
+  // to auto-approve the call:
+  //   - title: human-readable tool name
+  //   - readOnlyHint: true if the tool never modifies server state
+  //   - destructiveHint: true if the tool modifies state or makes
+  //     external requests (only meaningful when readOnlyHint is false)
+  //   - idempotentHint: true if calling twice has the same effect as
+  //     once (helpful for retry behavior)
+  //   - openWorldHint: true if the tool interacts with external
+  //     systems beyond the vault itself
   {
     name: 'list_keys',
     description:
@@ -124,6 +146,11 @@ const TOOLS = [
         },
       },
     },
+    annotations: {
+      title: 'List credentials',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'get_key_metadata',
@@ -136,6 +163,11 @@ const TOOLS = [
       },
       required: ['alias'],
     },
+    annotations: {
+      title: 'Get credential metadata',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'reveal_key',
@@ -147,6 +179,11 @@ const TOOLS = [
         alias: { type: 'string', description: 'The credential alias (name).' },
       },
       required: ['alias'],
+    },
+    annotations: {
+      title: 'Reveal credential value',
+      readOnlyHint: true,
+      openWorldHint: false,
     },
   },
   {
@@ -163,6 +200,11 @@ const TOOLS = [
         },
       },
     },
+    annotations: {
+      title: 'List provider templates',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'get_activity',
@@ -176,12 +218,22 @@ const TOOLS = [
         token_id: { type: 'string', description: 'Filter by a specific token ID.' },
       },
     },
+    annotations: {
+      title: 'Get audit activity',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'run_doctor',
     description:
       'Run a security health check on the vault. Returns warnings about stale rotations, unused keys, expiring tokens, stale devices. The same checks the CLI `apilocker doctor` command runs.',
     inputSchema: { type: 'object', properties: {} },
+    annotations: {
+      title: 'Run vault health check',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'proxy_request',
@@ -197,6 +249,14 @@ const TOOLS = [
         headers: { type: 'object', description: 'Additional headers to include.' },
       },
       required: ['key_id', 'path'],
+    },
+    annotations: {
+      title: 'Proxy external API request',
+      // Not read-only: forwards to an external API which itself may
+      // mutate state (e.g. Stripe charges, OpenAI embeddings billed).
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: true,
     },
   },
 
@@ -215,6 +275,12 @@ const TOOLS = [
         base_url: { type: 'string', description: 'Optional base URL for proxy access. Omit for vault-only credentials.' },
       },
       required: ['name', 'provider', 'key'],
+    },
+    annotations: {
+      title: 'Store API key',
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false,
     },
   },
   {
@@ -237,6 +303,12 @@ const TOOLS = [
       },
       required: ['name', 'provider', 'client_id', 'client_secret'],
     },
+    annotations: {
+      title: 'Store OAuth credential',
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'rotate_key',
@@ -249,6 +321,13 @@ const TOOLS = [
         new_value: { type: 'string', description: 'The new secret value.' },
       },
       required: ['alias', 'new_value'],
+    },
+    annotations: {
+      title: 'Rotate credential value',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
     },
   },
   {
@@ -263,6 +342,13 @@ const TOOLS = [
       },
       required: ['old_alias', 'new_alias'],
     },
+    annotations: {
+      title: 'Rename credential alias',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'pause_key',
@@ -273,6 +359,13 @@ const TOOLS = [
       properties: { alias: { type: 'string' } },
       required: ['alias'],
     },
+    annotations: {
+      title: 'Pause credential',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'resume_key',
@@ -281,6 +374,13 @@ const TOOLS = [
       type: 'object',
       properties: { alias: { type: 'string' } },
       required: ['alias'],
+    },
+    annotations: {
+      title: 'Resume credential',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
     },
   },
   {
@@ -292,12 +392,23 @@ const TOOLS = [
       properties: { alias: { type: 'string', description: 'The credential alias to delete.' } },
       required: ['alias'],
     },
+    annotations: {
+      title: 'Delete credential',
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'list_tokens',
     description:
       'List scoped access tokens for the user\'s account. Each token authorizes proxy/MCP access to a specific subset of credentials. Requires master token auth.',
     inputSchema: { type: 'object', properties: {} },
+    annotations: {
+      title: 'List scoped tokens',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'create_token',
@@ -320,6 +431,12 @@ const TOOLS = [
       },
       required: ['name', 'allowed_keys'],
     },
+    annotations: {
+      title: 'Create scoped token',
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'pause_token',
@@ -328,6 +445,13 @@ const TOOLS = [
       type: 'object',
       properties: { token_id: { type: 'string' } },
       required: ['token_id'],
+    },
+    annotations: {
+      title: 'Pause scoped token',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
     },
   },
   {
@@ -338,6 +462,13 @@ const TOOLS = [
       properties: { token_id: { type: 'string' } },
       required: ['token_id'],
     },
+    annotations: {
+      title: 'Resume scoped token',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'revoke_token',
@@ -347,11 +478,22 @@ const TOOLS = [
       properties: { token_id: { type: 'string' } },
       required: ['token_id'],
     },
+    annotations: {
+      title: 'Revoke scoped token',
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'list_devices',
     description: 'List all devices registered to the user\'s account. Requires master token auth.',
     inputSchema: { type: 'object', properties: {} },
+    annotations: {
+      title: 'List registered devices',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   },
   {
     name: 'revoke_device',
@@ -362,13 +504,48 @@ const TOOLS = [
       properties: { device_id: { type: 'string' } },
       required: ['device_id'],
     },
+    annotations: {
+      title: 'Revoke device',
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false,
+    },
   },
 ];
 
 // ==================== AUTH ====================
 
 async function validateMCPAuth(request: Request, env: Env): Promise<MCPAuthContext | null> {
-  // Try scoped token first (existing path; preserves backwards compat)
+  // Try OAuth 2.1 access token first (new in v1.0.3). This is how
+  // Claude and other remote MCP clients authenticate after going
+  // through the authorization code flow + DCR. The caller gets full
+  // read access to the user's vault (allowedKeys=null), and the
+  // scopes list carries through so write-tool gates can check for
+  // vault:write. See isMasterToken below for the per-tool logic.
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const bearerToken = authHeader.slice(7);
+    const oauth = await validateOAuthAccessToken(bearerToken, env);
+    if (oauth) {
+      // OAuth tokens must at minimum have vault:read to use /v1/mcp.
+      // A token with only vault:write would be strange and we reject
+      // it rather than silently granting read access.
+      if (!oauth.scopes.includes('vault:read')) {
+        return null;
+      }
+      return {
+        userId: oauth.user_id,
+        tokenId: oauth.token_id,
+        // vault:read implies the token can see all of the user's keys
+        // via read tools; individual write tools check oauthScopes
+        // for vault:write via isMasterToken() below.
+        allowedKeys: null,
+        oauthScopes: oauth.scopes,
+      };
+    }
+  }
+
+  // Fall back to scoped token (existing path; preserves backwards compat)
   const scoped = await validateScopedToken(request, env);
   if (scoped) {
     return {
@@ -377,7 +554,7 @@ async function validateMCPAuth(request: Request, env: Env): Promise<MCPAuthConte
       allowedKeys: scoped.allowedKeys,
     };
   }
-  // Fall back to master token via validateSession (cookie OR Bearer master token)
+  // Then master token via validateSession (cookie OR Bearer master token)
   const userId = await validateSession(request, env);
   if (userId) {
     return {
@@ -390,6 +567,15 @@ async function validateMCPAuth(request: Request, env: Env): Promise<MCPAuthConte
 }
 
 function isMasterToken(auth: MCPAuthContext): boolean {
+  // OAuth callers: master-token-equivalent iff vault:write scope was
+  // approved. This is what gates write tools (store, rotate, rename,
+  // pause/resume, delete, token management, device management) for
+  // remote MCP clients that authenticated via OAuth.
+  if (auth.oauthScopes !== undefined) {
+    return auth.oauthScopes.includes('vault:write');
+  }
+  // Non-OAuth callers (dashboard session, CLI device master token,
+  // legacy scoped tokens): master iff no allowedKeys restriction.
   return auth.allowedKeys === null;
 }
 
@@ -450,20 +636,40 @@ export async function handleMCP(
   }
 
   switch (rpc.method) {
-    // Protocol lifecycle methods
-    case 'initialize':
+    // Protocol lifecycle methods.
+    //
+    // We support multiple protocol versions for compatibility with a
+    // range of MCP clients. We echo back the client's requested version
+    // if it's in our supported set, otherwise default to the latest.
+    // This is how the MCP spec describes protocol negotiation in
+    // §4.1.1 of 2025-03-26 and later.
+    case 'initialize': {
+      const SUPPORTED_PROTOCOL_VERSIONS = [
+        '2025-06-18',
+        '2025-03-26',
+        '2024-11-05',
+      ];
+      const clientVersion = rpc.params?.protocolVersion as string | undefined;
+      const protocolVersion =
+        clientVersion && SUPPORTED_PROTOCOL_VERSIONS.includes(clientVersion)
+          ? clientVersion
+          : SUPPORTED_PROTOCOL_VERSIONS[0];
       return jsonOk(
         rpcResult(rpc.id, {
-          protocolVersion: '2024-11-05',
+          protocolVersion,
           serverInfo: {
             name: 'apilocker',
-            version: '1.0.0',
+            title: 'API Locker',
+            version: '1.0.2',
           },
           capabilities: {
-            tools: {},
+            tools: { listChanged: false },
           },
+          instructions:
+            'API Locker — encrypted credential vault. Use list_keys to discover what credentials the user has stored, reveal_key to read a secret value (only when the user explicitly asks), proxy_request to make an API call through the vault without ever seeing the raw key, and run_doctor to audit vault health. Treat all reveal_key responses as highly sensitive; do not log or echo them.',
         })
       );
+    }
     case 'notifications/initialized':
       // Notification (no id) — return empty success for HTTP transport.
       // stdio transport clients ignore this response entirely.

@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="https://www.apilocker.app/brand/logo-256.png" alt="API Locker mascot" width="180" height="180" />
+
 # API Locker
 
 **One vault, three types of credentials. Replace your `.env` file with one token.**

@@ -63,3 +63,12 @@ rotate-fix.sh
 *.local.md
 scratch/
 tmp/
+
+# mcp-publisher CLI auth tokens — created by 'mcp-publisher login'
+# Contains a GitHub user OAuth token + MCP Registry JWT. NEVER commit.
+.mcpregistry_github_token
+.mcpregistry_registry_token
+
+# Internal submission/review notes — contain test account info,
+# reviewer-only links, etc. Not for the public repo.
+ANTHROPIC_SUBMISSION.md

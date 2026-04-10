@@ -1,5 +1,5 @@
 import { Env, Route, RouteHandler, UnauthenticatedRouteHandler } from './types';
-import { jsonError, corsPreflightResponse } from './responses';
+import { jsonError, corsPreflightResponse, applyCorsHeaders } from './responses';
 import { validateSession, validateScopedToken } from './auth';
 
 const routes: Route[] = [];
@@ -18,11 +18,23 @@ export function addRoute(
   });
 }
 
+/**
+ * Main dispatcher. Runs route matching, authenticates if required,
+ * invokes the handler, then rewrites CORS response headers to match
+ * the request's origin. Per-request CORS is applied here (rather than
+ * in jsonOk/jsonError) so every handler can stay ignorant of the
+ * request origin and still produce correct cross-origin responses.
+ */
 export async function handleRequest(request: Request, env: Env): Promise<Response> {
   if (request.method === 'OPTIONS') {
     return corsPreflightResponse(request);
   }
 
+  const response = await dispatch(request, env);
+  return applyCorsHeaders(response, request);
+}
+
+async function dispatch(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
 
   for (const route of routes) {

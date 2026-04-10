@@ -38,6 +38,15 @@ import {
 import { handleMCP } from './mcp';
 import { handleGetAlerts } from './alerts';
 import { handleAdminMetrics, handleAdminCheck } from './admin';
+import {
+  handleOAuthMetadata,
+  handleOAuthProtectedResourceMetadata,
+  handleOAuthRegister,
+  handleOAuthAuthorize,
+  handleOAuthIntent,
+  handleOAuthConsent,
+  handleOAuthToken,
+} from './oauth-server';
 
 // Auth routes
 //
@@ -114,6 +123,29 @@ addRoute('GET', '/v1/alerts', handleGetAlerts, 'session');
 // MCP server (for AI agents)
 addRoute('GET', '/v1/mcp', handleMCP as any, 'none');
 addRoute('POST', '/v1/mcp', handleMCP as any, 'none');
+
+// ============================================================
+// OAuth 2.1 authorization server (v1.0.3)
+//
+// Implements the endpoints required for remote MCP clients like
+// Claude to OAuth into API Locker. See src/oauth-server.ts for
+// the full implementation and docs/mcp.html for user-facing setup.
+// ============================================================
+
+// RFC 8414 — authorization server metadata discovery
+addRoute('GET', '/.well-known/oauth-authorization-server', handleOAuthMetadata, 'none');
+// RFC 9728 — protected resource metadata for /v1/mcp
+addRoute('GET', '/.well-known/oauth-protected-resource', handleOAuthProtectedResourceMetadata, 'none');
+// RFC 7591 — Dynamic Client Registration
+addRoute('POST', '/v1/oauth/register', handleOAuthRegister, 'none');
+// Authorization endpoint (starts the user-facing flow)
+addRoute('GET', '/v1/oauth/authorize', handleOAuthAuthorize, 'none');
+// Consent-screen support endpoints (both require session auth so the
+// consent page only renders after the user is signed into API Locker)
+addRoute('GET', '/v1/oauth/intent', handleOAuthIntent, 'session');
+addRoute('POST', '/v1/oauth/consent', handleOAuthConsent, 'session');
+// Token endpoint — authorization_code grant and refresh_token grant
+addRoute('POST', '/v1/oauth/token', handleOAuthToken, 'none');
 
 // Hidden admin analytics (session-authed; gated by ADMIN_USER_IDS secret)
 addRoute('GET', '/v1/admin/metrics', handleAdminMetrics, 'session');

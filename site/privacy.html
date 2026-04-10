@@ -5,12 +5,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Privacy Policy — API Locker</title>
-  <meta name="description" content="How API Locker handles your data, credentials, and traffic." />
+  <meta name="description" content="How API Locker handles your data, credentials, traffic, and MCP / AI-agent connections." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+
+  <!-- API Locker brand assets (mascot logo) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/brand/logo-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/brand/logo-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/brand/logo-180.png">
+  <meta property="og:image" content="https://www.apilocker.app/brand/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.apilocker.app/brand/og-image.png">
 </head>
 <body>
 
@@ -45,7 +55,7 @@
       <div class="legal-container">
         <span class="eyebrow"><span class="eyebrow-dot"></span> Legal</span>
         <h1 class="legal-h1">Privacy Policy</h1>
-        <p class="legal-updated">Last updated: April 8, 2026</p>
+        <p class="legal-updated">Last updated: April 9, 2026</p>
 
         <div class="legal-prose">
           <p class="legal-lede">API Locker is a credential vault and proxy. Our entire product exists to keep sensitive data secure, so we take privacy seriously. This page explains what we collect, what we do with it, and what we never touch.</p>
@@ -110,6 +120,19 @@
           </ul>
           <p>When you proxy a request through API Locker, that request is forwarded to the API provider you chose (OpenAI, Stripe, Anthropic, etc.). Those providers have their own privacy policies and terms that apply to your usage of their services.</p>
 
+          <h2>5a. MCP clients (Claude, Cursor, Zed, etc.)</h2>
+          <p>API Locker runs a Model Context Protocol (MCP) server that lets AI coding and chat agents read and manage your vault on your behalf. Two connection modes exist, and the privacy implications differ slightly:</p>
+          <ul>
+            <li><strong>Local MCP (stdio bridge).</strong> You install the <code>apilocker</code> CLI, register your device, and configure a local MCP client (Claude Desktop, Claude Code, Cursor, Zed, Continue) to run <code>apilocker mcp</code> as a subprocess. The bridge forwards your requests to <code>https://api.apilocker.app/v1/mcp</code> over HTTPS authenticated with a device master token stored at <code>~/.apilocker/config.json</code>. Only the JSON-RPC messages reach our servers; your conversation content with the AI model never does.</li>
+            <li><strong>Remote MCP (OAuth 2.1).</strong> You click an "Add connector" button in a supported MCP client (e.g. Claude web) and authorize the client on our consent screen. The client then holds an access token it uses to call our MCP endpoint directly. We store the token in hashed form, along with the client ID, the user ID, the approved scopes, and the refresh-token rotation history. We do not see or store the underlying conversation you have with the AI model; only the individual tool calls.</li>
+          </ul>
+          <p><strong>What MCP tool calls we log:</strong> the same metadata we log for proxy calls — tool name, key ID (if any), timestamp, source IP, country, status code, and latency. We do not log tool call arguments or responses.</p>
+          <p><strong>What we never see:</strong> your chat history with the AI, system prompts, model outputs unrelated to a tool call, or any content that doesn't flow through a specific MCP tool invocation.</p>
+          <p><strong>Revoking a connected MCP client:</strong> you can revoke any connected client at any time from your <a href="/dashboard">dashboard</a>. Revocation takes effect on the next authenticated request (within seconds). Revoking the grant invalidates both the current access token and its refresh token; the client must re-authorize to reconnect.</p>
+
+          <h2>5b. OAuth-connected third-party clients (Dynamic Client Registration)</h2>
+          <p>When you approve a new MCP client via the consent screen, that client goes through RFC 7591 Dynamic Client Registration. We record the client's self-declared name, logo URL (if provided), homepage URL (if provided), and the redirect URIs it registered. We display the self-declared name on the consent screen so you can identify the caller before approving. We do not verify the client's identity beyond its ability to complete the OAuth handshake — you are responsible for only approving clients you recognize and trust.</p>
+
           <h2>6. Your rights</h2>
           <ul>
             <li><strong>Access:</strong> you can view all your stored keys, tokens, and activity logs in the dashboard.</li>
@@ -122,6 +145,7 @@
 
           <h2>8. Contact</h2>
           <p>Questions about this policy? Reach out at <a href="mailto:privacy@apilocker.app">privacy@apilocker.app</a>.</p>
+          <p>Security disclosures, bug reports, or MCP-specific questions: <a href="mailto:support@apilocker.app">support@apilocker.app</a>, or open an issue at <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a>.</p>
 
           <p class="legal-note">This policy is a starting point for a credential-vault product in public beta. If you're planning to use API Locker for regulated data (PCI, HIPAA, GDPR-sensitive data, etc.), contact us before you do — we want to make sure the service fits your compliance needs.</p>
         </div>
