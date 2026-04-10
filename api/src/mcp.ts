@@ -73,6 +73,7 @@ import {
 } from './db';
 import { validateScopedToken, validateSession } from './auth';
 import { validateOAuthAccessToken } from './oauth-server';
+import { getOAuthAccessToken } from './oauth-proxy';
 import { getProviderTemplate, listProviders, listProvidersByCategory } from './providers';
 import { jsonOk, jsonError } from './responses';
 
@@ -1054,18 +1055,6 @@ async function toolProxyRequest(
     return mcpText(rpc.id, `Key "${metadata.name}" is paused. Resume it before proxying.`, true);
   if (!metadata.base_url)
     return mcpText(rpc.id, 'This credential has no base_url configured (vault-only).', true);
-  if (metadata.credential_type === 'oauth2')
-    return mcpText(
-      rpc.id,
-      'OAuth credentials cannot be proxied yet. Use reveal_key to fetch the fields and call the provider directly.',
-      true
-    );
-
-  const blob = await env.KEYS.get(key_id);
-  if (!blob) return mcpText(rpc.id, 'Encrypted blob missing', true);
-  const encrypted: EncryptedKeyRecord = JSON.parse(blob);
-  const realKey = await decrypt(encrypted, env);
-
   const targetUrl = `${metadata.base_url}${path}`;
   const outgoingHeaders = new Headers();
   outgoingHeaders.set('Content-Type', 'application/json');
@@ -1073,30 +1062,51 @@ async function toolProxyRequest(
     for (const [k, v] of Object.entries(extraHeaders)) outgoingHeaders.set(k, v as string);
   }
 
-  // Inject auth header (respecting custom header name from template)
-  const template = getProviderTemplate(metadata.provider);
-  if (template?.auth_header_name) {
-    outgoingHeaders.set(template.auth_header_name, realKey);
-  } else {
-    switch (metadata.auth_header_type) {
-      case 'bearer':
-        outgoingHeaders.set('Authorization', `Bearer ${realKey}`);
-        break;
-      case 'x-api-key':
-        outgoingHeaders.set('X-API-Key', realKey);
-        break;
-      case 'basic':
-        outgoingHeaders.set('Authorization', `Basic ${realKey}`);
-        break;
-    }
-  }
+  let finalUrl: string;
 
-  const finalUrl =
-    metadata.auth_header_type === 'query'
-      ? `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}${
-          template?.query_param_name ?? 'api_key'
-        }=${encodeURIComponent(realKey)}`
-      : targetUrl;
+  if (metadata.credential_type === 'oauth2') {
+    // Level 2 OAuth orchestration: get a cached or refreshed access_token
+    // from the vault's token lifecycle manager and inject as Bearer.
+    let accessToken: string;
+    try {
+      accessToken = await getOAuthAccessToken(env, key_id, metadata);
+    } catch (e: any) {
+      return mcpText(rpc.id, `OAuth proxy error: ${e.message}`, true);
+    }
+    outgoingHeaders.set('Authorization', `Bearer ${accessToken}`);
+    finalUrl = targetUrl;
+  } else {
+    // api_key credential: decrypt and inject directly
+    const blob = await env.KEYS.get(key_id);
+    if (!blob) return mcpText(rpc.id, 'Encrypted blob missing', true);
+    const encrypted: EncryptedKeyRecord = JSON.parse(blob);
+    const realKey = await decrypt(encrypted, env);
+
+    // Inject auth header (respecting custom header name from template)
+    const template = getProviderTemplate(metadata.provider);
+    if (template?.auth_header_name) {
+      outgoingHeaders.set(template.auth_header_name, realKey);
+    } else {
+      switch (metadata.auth_header_type) {
+        case 'bearer':
+          outgoingHeaders.set('Authorization', `Bearer ${realKey}`);
+          break;
+        case 'x-api-key':
+          outgoingHeaders.set('X-API-Key', realKey);
+          break;
+        case 'basic':
+          outgoingHeaders.set('Authorization', `Basic ${realKey}`);
+          break;
+      }
+    }
+
+    finalUrl =
+      metadata.auth_header_type === 'query'
+        ? `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}${
+            template?.query_param_name ?? 'api_key'
+          }=${encodeURIComponent(realKey)}`
+        : targetUrl;
+  }
 
   const startTime = Date.now();
   let providerResponse: Response;

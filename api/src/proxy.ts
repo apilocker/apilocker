@@ -1,9 +1,10 @@
-import { Env, EncryptedKeyRecord, KeyMetadata } from './types';
+import { Env, EncryptedKeyRecord, OAuthCredentialFields, KeyMetadata } from './types';
 import { decrypt } from './crypto';
 import { generateId } from './crypto';
 import { getKeyMetadata, insertAuditLog } from './db';
 import { validateScopedToken } from './auth';
 import { getProviderTemplate, getAuthHeaderName } from './providers';
+import { getOAuthAccessToken } from './oauth-proxy';
 import { jsonError } from './responses';
 
 export async function handleProxy(
@@ -32,17 +33,8 @@ export async function handleProxy(
     return jsonError('Key not found', 404);
   }
 
-  // v1.0.0: OAuth credentials cannot be proxied yet (the proxy would need
-  // to perform the full OAuth dance, which is Level 2 roadmap work).
-  if (metadata.credential_type === 'oauth2') {
-    return jsonError(
-      'OAuth credentials cannot be used via the proxy yet. Use apilocker run/get/env to inject them as environment variables instead.',
-      400
-    );
-  }
-
-  // v1.0.0: vault-only credentials (no base_url configured) cannot be
-  // proxied. The user meant to use them via reveal/run/get/env.
+  // Vault-only credentials (no base_url configured) cannot be proxied.
+  // The user meant to use them via reveal/run/get/env.
   if (!metadata.base_url) {
     return jsonError(
       'This credential has no base URL configured. Use apilocker run/get/env to inject it directly, or add a base URL to enable proxy access.',
@@ -50,8 +42,8 @@ export async function handleProxy(
     );
   }
 
-  // v1.0.0: paused keys are not forwardable. Reveal still works, so
-  // users can still rotate or inspect the key, but the proxy is frozen.
+  // Paused keys are not forwardable. Reveal still works, so users can
+  // still rotate or inspect the key, but the proxy is frozen.
   if (metadata.paused_at) {
     return new Response(
       JSON.stringify({
@@ -60,17 +52,6 @@ export async function handleProxy(
       { status: 423, headers: { 'Content-Type': 'application/json' } }
     );
   }
-
-  // Get encrypted key from KV
-  const encryptedJson = await env.KEYS.get(keyId);
-  if (!encryptedJson) {
-    return jsonError('Encrypted key data missing', 500);
-  }
-
-  const encrypted: EncryptedKeyRecord = JSON.parse(encryptedJson);
-
-  // Decrypt the real API key
-  const realKey = await decrypt(encrypted, env);
 
   // Build the target URL
   const forwardPath = request.headers.get('X-Locker-Forward-Path') || '';
@@ -92,18 +73,51 @@ export async function handleProxy(
     outgoingHeaders.set(key, value);
   }
 
-  // Inject the real API key based on auth_header_type, respecting any
-  // custom header name declared on the provider template.
-  const template = getProviderTemplate(metadata.provider);
-  injectApiKey(outgoingHeaders, metadata, template?.auth_header_name ?? null, realKey);
+  let finalUrl: string;
 
-  // Determine the final URL (may have query param appended)
-  // Providers like Google AI use `?key=...` instead of the default `?api_key=...`
-  const queryParamName = template?.query_param_name ?? 'api_key';
-  const finalUrl =
-    metadata.auth_header_type === 'query'
-      ? appendQueryParam(targetUrl, queryParamName, realKey)
-      : targetUrl;
+  if (metadata.credential_type === 'oauth2') {
+    // ===============================================================
+    // Level 2 OAuth orchestration (v1.1.0)
+    //
+    // The proxy performs the OAuth token lifecycle server-side:
+    //   1. Check KV cache for a valid access_token
+    //   2. If expired: refresh via the upstream provider's token_url
+    //   3. Cache the new token (with TTL)
+    //   4. Inject as Authorization: Bearer
+    //
+    // The app never sees the client_secret, the refresh_token, or
+    // even the access_token. It just calls the proxy and gets data.
+    // ===============================================================
+    let accessToken: string;
+    try {
+      accessToken = await getOAuthAccessToken(env, keyId, metadata);
+    } catch (e: any) {
+      return jsonError(e.message, 400);
+    }
+    outgoingHeaders.set('Authorization', `Bearer ${accessToken}`);
+    finalUrl = targetUrl;
+  } else {
+    // api_key credential — existing behavior: decrypt and inject
+    const encryptedJson = await env.KEYS.get(keyId);
+    if (!encryptedJson) {
+      return jsonError('Encrypted key data missing', 500);
+    }
+
+    const encrypted: EncryptedKeyRecord = JSON.parse(encryptedJson);
+    const realKey = await decrypt(encrypted, env);
+
+    // Inject the real API key based on auth_header_type, respecting any
+    // custom header name declared on the provider template.
+    const template = getProviderTemplate(metadata.provider);
+    injectApiKey(outgoingHeaders, metadata, template?.auth_header_name ?? null, realKey);
+
+    // Determine the final URL (may have query param appended)
+    const queryParamName = template?.query_param_name ?? 'api_key';
+    finalUrl =
+      metadata.auth_header_type === 'query'
+        ? appendQueryParam(targetUrl, queryParamName, realKey)
+        : targetUrl;
+  }
 
   // Forward the request — stream the body directly
   let providerResponse: Response;
