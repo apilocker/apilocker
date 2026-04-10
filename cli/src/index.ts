@@ -19,6 +19,7 @@ import { doctorCommand } from './commands/doctor';
 import { updateCommand } from './commands/update';
 import { mcpCommand } from './commands/mcp';
 import { oauthCommand } from './commands/oauth';
+import { syncCommand } from './commands/sync';
 import { maybeShowFirstRunBanner } from './banner';
 
 // First-run welcome banner — prints once, the very first time any command
@@ -67,5 +68,8 @@ program.addCommand(mcpCommand);
 
 // OAuth 2.1 grant management (new in 1.0.3)
 program.addCommand(oauthCommand);
+
+// Sync vault credentials to deployment targets (new in 1.1.0)
+program.addCommand(syncCommand);
 
 program.parse();
