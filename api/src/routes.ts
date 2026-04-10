@@ -46,6 +46,8 @@ import {
   handleOAuthIntent,
   handleOAuthConsent,
   handleOAuthToken,
+  handleListOAuthGrants,
+  handleRevokeOAuthGrant,
 } from './oauth-server';
 
 // Auth routes
@@ -146,6 +148,11 @@ addRoute('GET', '/v1/oauth/intent', handleOAuthIntent, 'session');
 addRoute('POST', '/v1/oauth/consent', handleOAuthConsent, 'session');
 // Token endpoint — authorization_code grant and refresh_token grant
 addRoute('POST', '/v1/oauth/token', handleOAuthToken, 'none');
+// Grant management — list active OAuth grants for the current user,
+// and revoke a specific grant by family ID. Both session-required so
+// only the grant's owner can see/revoke their own connections.
+addRoute('GET', '/v1/oauth/grants', handleListOAuthGrants, 'session');
+addRoute('POST', '/v1/oauth/grants/:id/revoke', handleRevokeOAuthGrant, 'session');
 
 // Hidden admin analytics (session-authed; gated by ADMIN_USER_IDS secret)
 addRoute('GET', '/v1/admin/metrics', handleAdminMetrics, 'session');

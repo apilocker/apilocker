@@ -930,6 +930,115 @@ async function issueTokenPair(
 }
 
 // ============================================================
+// Handler: GET /v1/oauth/grants (session-required)
+// ============================================================
+//
+// Returns the OAuth grants the current user has approved — one entry
+// per (client, refresh-token-family) pair, NOT one per token row,
+// because a single grant produces many rows over its lifetime as the
+// refresh token rotates.
+//
+// Used by the dashboard's "Connected MCP clients" panel so the user
+// can see which AI agents are connected and revoke them.
+
+export async function handleListOAuthGrants(
+  _request: Request,
+  env: Env,
+  _params: Record<string, string>,
+  userId: string
+): Promise<Response> {
+  // Group by (client_id, family_id) so each grant shows up once even
+  // though the underlying oauth_access_tokens table may have many rows
+  // per family due to refresh rotation. Pull client metadata via JOIN.
+  const result = await env.DB.prepare(
+    `SELECT
+       oat.refresh_token_family_id AS family_id,
+       oat.client_id AS client_id,
+       oc.client_name AS client_name,
+       oc.logo_uri AS logo_uri,
+       oc.client_uri AS client_uri,
+       MIN(oat.created_at) AS authorized_at,
+       COALESCE(MAX(oat.last_refreshed_at), MAX(oat.created_at)) AS last_active_at,
+       MAX(oat.scopes) AS scopes,
+       COUNT(*) AS rotation_count
+     FROM oauth_access_tokens oat
+     JOIN oauth_clients oc ON oat.client_id = oc.id
+     WHERE oat.user_id = ? AND oat.revoked_at IS NULL
+     GROUP BY oat.refresh_token_family_id, oat.client_id, oc.client_name, oc.logo_uri, oc.client_uri
+     ORDER BY last_active_at DESC`
+  )
+    .bind(userId)
+    .all<{
+      family_id: string;
+      client_id: string;
+      client_name: string;
+      logo_uri: string | null;
+      client_uri: string | null;
+      authorized_at: string;
+      last_active_at: string;
+      scopes: string;
+      rotation_count: number;
+    }>();
+
+  const grants = (result.results || []).map((row) => ({
+    id: row.family_id, // Public id used by /revoke; opaque to clients
+    client_id: row.client_id,
+    client_name: row.client_name,
+    logo_uri: row.logo_uri,
+    client_uri: row.client_uri,
+    scopes: parseScopes(row.scopes),
+    authorized_at: row.authorized_at,
+    last_active_at: row.last_active_at,
+    rotation_count: row.rotation_count,
+  }));
+
+  return jsonOk({ grants });
+}
+
+// ============================================================
+// Handler: POST /v1/oauth/grants/:id/revoke (session-required)
+// ============================================================
+//
+// Revokes the entire grant family identified by `:id` (which is the
+// `refresh_token_family_id`). All access tokens and refresh tokens in
+// the family are marked revoked in one statement, taking effect on
+// the next authenticated request from that client.
+//
+// CRITICAL: the user_id check in the WHERE clause is what prevents a
+// user from revoking another user's grants. Never remove it.
+
+export async function handleRevokeOAuthGrant(
+  _request: Request,
+  env: Env,
+  params: Record<string, string>,
+  userId: string
+): Promise<Response> {
+  const familyId = params.id;
+  if (!familyId) return jsonError('Missing grant id', 400);
+
+  const result = await env.DB.prepare(
+    `UPDATE oauth_access_tokens
+       SET revoked_at = ?
+       WHERE refresh_token_family_id = ?
+         AND user_id = ?
+         AND revoked_at IS NULL`
+  )
+    .bind(new Date().toISOString(), familyId, userId)
+    .run();
+
+  // result.meta.changes is the number of rows affected. Zero means
+  // either the family doesn't exist, doesn't belong to this user, or
+  // was already revoked. We return 404 in that case to avoid leaking
+  // existence info to attackers probing for valid family IDs.
+  const changes = (result as any).meta?.changes ?? 0;
+  if (changes === 0) {
+    return jsonError('Grant not found or already revoked', 404);
+  }
+
+  return jsonOk({ revoked: true, tokens_revoked: changes });
+}
+
+// ============================================================
 // Validation: called by MCP endpoint to authenticate OAuth tokens
 // ============================================================
 

@@ -981,6 +981,97 @@
     .mcp-activity-status.ok { color: #059669; }
     .mcp-activity-status.err { color: #dc2626; }
 
+    /* ==================== Connected MCP clients (OAuth grants) ==================== */
+    .oauth-grants-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .oauth-grants-loading,
+    .oauth-grants-empty {
+      padding: 18px 16px;
+      background: var(--card);
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .oauth-grants-empty strong { color: var(--ink); display: block; margin-bottom: 4px; }
+    .oauth-grant {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .oauth-grant-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--card);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      overflow: hidden;
+    }
+    .oauth-grant-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .oauth-grant-body { flex: 1; min-width: 0; }
+    .oauth-grant-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 4px;
+    }
+    .oauth-grant-name a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .oauth-grant-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .oauth-grant-meta .scope-chip {
+      background: rgba(59, 130, 246, 0.08);
+      color: var(--blue);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .oauth-grant-revoke {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      background: var(--surface);
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s var(--ease), border-color 0.15s var(--ease);
+    }
+    .oauth-grant-revoke:hover {
+      background: rgba(220, 38, 38, 0.06);
+      border-color: #dc2626;
+    }
+    .oauth-grant-revoke:disabled { opacity: 0.5; cursor: not-allowed; }
+
     .mcp-prereq-note {
       display: flex;
       gap: 12px;
@@ -1673,6 +1764,15 @@
           </div>
           <div id="mcp-recent-activity" class="mcp-activity-feed">
             <div class="mcp-activity-empty">No activity yet. Connect a client and ask it to list your keys.</div>
+          </div>
+
+          <!-- ===================== CONNECTED MCP CLIENTS (OAuth grants) ===================== -->
+          <div class="mcp-section-head">
+            <h3>Connected MCP clients</h3>
+            <p>AI clients (Claude on claude.ai, Cursor, etc.) that you've authorized via the OAuth 2.1 flow show up here. Each entry can be revoked instantly — both the access token and the refresh token are invalidated.</p>
+          </div>
+          <div id="oauth-grants-list" class="oauth-grants-list">
+            <div class="oauth-grants-loading">Loading…</div>
           </div>
 
           <!-- CLI prereq note -->
@@ -4435,6 +4535,94 @@ func main() {
     }
 
     // ============================================================
+    //  CONNECTED MCP CLIENTS — OAuth grants management (v1.0.3)
+    //
+    //  Lists active OAuth 2.1 grants the user has approved (Claude on
+    //  claude.ai, Cursor remote, etc.) and lets them revoke any of
+    //  them with one click. Each grant row covers an entire grant
+    //  family — revoke kills all access tokens AND refresh tokens
+    //  in the family in one shot.
+    // ============================================================
+    async function loadOAuthGrants() {
+      const container = $('oauth-grants-list');
+      try {
+        const res = await api('/v1/oauth/grants');
+        if (!res.ok) {
+          // 401 means session expired; let the auth check handle it
+          if (res.status === 401) return;
+          throw new Error('HTTP ' + res.status);
+        }
+        const data = await res.json();
+        const grants = Array.isArray(data.grants) ? data.grants : [];
+
+        if (grants.length === 0) {
+          container.innerHTML = `
+            <div class="oauth-grants-empty">
+              <strong>No connected MCP clients yet.</strong>
+              When you authorize a remote MCP client (Claude on claude.ai, Cursor, etc.) via the OAuth flow, it'll show up here. Each connection can be revoked instantly.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = grants.map(g => {
+          const scopes = (g.scopes || []).map(s => `<span class="scope-chip">${escapeHtml(s)}</span>`).join(' ');
+          const initials = (g.client_name || 'MCP').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+          const logo = g.logo_uri
+            ? `<img src="${escapeHtml(g.logo_uri)}" alt="" />`
+            : initials;
+          const nameNode = g.client_uri
+            ? `<a href="${escapeHtml(g.client_uri)}" target="_blank" rel="noopener noreferrer">${escapeHtml(g.client_name)}</a>`
+            : escapeHtml(g.client_name);
+          return `
+            <div class="oauth-grant" data-grant-id="${escapeHtml(g.id)}">
+              <div class="oauth-grant-logo">${logo}</div>
+              <div class="oauth-grant-body">
+                <div class="oauth-grant-name">${nameNode}</div>
+                <div class="oauth-grant-meta">
+                  ${scopes}
+                  <span>Authorized ${fmtRelative(g.authorized_at)}</span>
+                  <span>· Last active ${fmtRelative(g.last_active_at)}</span>
+                </div>
+              </div>
+              <button class="oauth-grant-revoke" data-revoke-grant="${escapeHtml(g.id)}" data-name="${escapeHtml(g.client_name)}">
+                Revoke
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        // Wire revoke buttons
+        container.querySelectorAll('[data-revoke-grant]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const grantId = btn.dataset.revokeGrant;
+            const name = btn.dataset.name || 'this connection';
+            if (!confirm(`Revoke access for "${name}"?\n\nThe client will lose access immediately and must re-authorize through the consent screen to reconnect.`)) {
+              return;
+            }
+            btn.disabled = true;
+            btn.textContent = 'Revoking…';
+            try {
+              const res = await api(`/v1/oauth/grants/${encodeURIComponent(grantId)}/revoke`, { method: 'POST' });
+              if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.error || `HTTP ${res.status}`);
+              }
+              showToast(`Revoked ${name}`);
+              await loadOAuthGrants();
+            } catch (e) {
+              btn.disabled = false;
+              btn.textContent = 'Revoke';
+              showToast('Could not revoke: ' + e.message, true);
+            }
+          });
+        });
+      } catch (e) {
+        container.innerHTML = `<div class="oauth-grants-empty" style="color:#dc2626;">Could not load connected clients: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    // ============================================================
     //  WELCOME MODAL (v1.0.0 first-run)
     // ============================================================
     const WELCOME_SEEN_KEY = 'apilocker_welcome_v1_seen';
@@ -4470,6 +4658,7 @@ func main() {
         loadActivity(),
         loadDoctor(),
         loadMcpRecentActivity(),
+        loadOAuthGrants(),
       ]);
     });
   </script>
