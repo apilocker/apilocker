@@ -4,6 +4,55 @@ All notable changes to the `apilocker` CLI are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-04-10 — "Level 2 OAuth + sync wrangler"
+
+### The headline features
+
+- **Level 2 OAuth orchestration.** The proxy now handles the full OAuth token lifecycle server-side. When an app calls `POST /v1/proxy/:keyId` on an OAuth credential that has a `refresh_token` and `base_url`, the Worker automatically refreshes the access token from the upstream provider, caches it in KV (with TTL), injects it as `Authorization: Bearer`, and forwards the request. The app never sees any OAuth secret — not the client_secret, not the refresh_token, not even the access_token. Verified end-to-end against Google's userinfo API with a real refresh token.
+
+- **`apilocker sync wrangler`** — push vault credentials to Cloudflare Workers secrets in one command. Reads a `.apilockersync.json` manifest from the current directory, reveals the listed credentials from the vault, and pipes each into `npx wrangler secret put` via stdin. Values never touch shell history or process arguments. Supports both api_key (single-value mapping) and oauth2 (per-field mapping) credentials. `--dry-run` flag for safe preview. The manifest is safe to commit (names only, never values).
+
+### How Level 2 works
+
+```
+App holds a scoped token → calls POST /v1/proxy/:keyId
+  → Worker checks KV cache for access_token
+  → Cache miss: decrypt stored credential, POST to upstream token_url
+    with grant_type=refresh_token + client_id + client_secret + refresh_token
+  → Get back fresh access_token (+ maybe rotated refresh_token)
+  → Cache access_token in KV with TTL = expires_in - 60s
+  → If upstream rotated the refresh_token: silently update the vault entry
+  → Inject access_token as Authorization: Bearer
+  → Forward to base_url + path → return response
+```
+
+### How sync wrangler works
+
+```bash
+# Create a manifest (safe to commit — names only, never values):
+cat > .apilockersync.json << 'EOF'
+{
+  "targets": [{
+    "type": "wrangler",
+    "worker": "my-worker",
+    "secrets": {
+      "OPENAI_API_KEY": "OPENAI_API_KEY",
+      "Google OAuth": {
+        "client_id": "GOOGLE_CLIENT_ID",
+        "client_secret": "GOOGLE_CLIENT_SECRET"
+      }
+    }
+  }]
+}
+EOF
+
+# Push everything in one shot:
+apilocker sync wrangler
+
+# Preview without pushing:
+apilocker sync wrangler --dry-run
+```
+
 ## [1.0.3] — 2026-04-09 — "OAuth 2.1 authorization server + grant management"
 
 ### New CLI commands
