@@ -71,6 +71,40 @@
       font-size: 16px;
     }
 
+    /* Right side of nav: Feedback button + user chip side by side */
+    #nav-user {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    /* Subtle "Send feedback" button next to the user chip in the dashboard nav.
+       Uses an outlined chip style so it's discoverable but not louder than
+       the primary navigation. Single-click opens mailto:feedback@apilocker.app
+       with a pre-filled subject. */
+    .nav-feedback-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--ink-2);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s var(--ease), color 0.15s var(--ease), transform 0.15s var(--ease);
+    }
+    .nav-feedback-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      transform: translateY(-1px);
+    }
+    .nav-feedback-btn svg {
+      flex-shrink: 0;
+    }
+
     .user-chip {
       display: inline-flex;
       align-items: center;
@@ -1252,6 +1286,10 @@
           <a href="#mcp">MCP</a>
         </div>
         <div id="nav-user" class="hidden">
+          <a href="mailto:feedback@apilocker.app?subject=API%20Locker%20feedback" class="nav-feedback-btn" title="Send us feedback or feature requests">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Feedback
+          </a>
           <div class="user-chip">
             <img id="user-avatar" src="" alt="" />
             <div>
@@ -1676,9 +1714,10 @@
           API Locker
         </div>
         <div class="footer-links">
-          <a href="#">Docs</a>
-          <a href="#">GitHub</a>
+          <a href="/docs/mcp">Docs</a>
+          <a href="https://github.com/apilocker/apilocker">GitHub</a>
           <a href="https://www.npmjs.com/package/apilocker">npm</a>
+          <a href="mailto:feedback@apilocker.app">Feedback</a>
           <a href="/terms">Terms</a>
           <a href="/privacy">Privacy</a>
         </div>

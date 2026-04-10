@@ -187,16 +187,25 @@ apilocker/
 
 **Free public beta.** Unlimited keys, unlimited tokens, unlimited proxy calls. Beta users get grandfathered into free Pro permanently when pricing kicks in.
 
-- **CLI:** [v1.0.0](https://www.npmjs.com/package/apilocker) on npm
+- **CLI:** [v1.0.2](https://www.npmjs.com/package/apilocker) on npm
 - **API:** live at `api.apilocker.app`
 - **Dashboard:** live at `www.apilocker.app/dashboard`
 - **Docs:** [`/docs/mcp`](https://www.apilocker.app/docs/mcp)
+- **MCP Registry:** [`io.github.apilocker/apilocker`](https://registry.modelcontextprotocol.io)
 
 ## Contributing
 
 Issues and PRs welcome. The repo is intentionally kept as a monorepo so a single PR can touch the CLI, API, and site in coordinated steps.
 
-For security issues, please email the maintainer directly instead of opening a public issue.
+## Contact
+
+The right address depends on what you want to talk about:
+
+- **Bugs & reproducible issues:** [open a GitHub issue](https://github.com/apilocker/apilocker/issues)
+- **Feature requests, ideas, advice, what's missing:** [feedback@apilocker.app](mailto:feedback@apilocker.app)
+- **General support, account questions:** [support@apilocker.app](mailto:support@apilocker.app)
+- **Security disclosures:** [security@apilocker.app](mailto:security@apilocker.app) — please don't open public issues for security findings
+- **Privacy questions:** [privacy@apilocker.app](mailto:privacy@apilocker.app)
 
 ## License
 
