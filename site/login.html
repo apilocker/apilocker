@@ -122,9 +122,22 @@
     // AND (b) have a credential stored in the vault. Any provider
     // returned here is guaranteed to work when clicked — we don't
     // render disabled buttons.
+    //
+    // If this page was opened with ?return_to=<path>, we forward that
+    // param into each provider's authorize URL so the Worker's
+    // handleOAuthStart can round-trip it through the GitHub/Google
+    // OAuth dance and land the user back on the originally-requested
+    // page (e.g. the /oauth-consent screen) after sign-in.
     const API = 'https://api.apilocker.app';
     (async () => {
       const container = document.getElementById('oauth-providers');
+      // Extract return_to from the page URL so we can propagate it
+      // through the Worker's OAuth flow. validateReturnTo() on the
+      // server side enforces the allowlist — we don't need to
+      // sanitize here, but we do need to preserve whatever the
+      // previous page put on the URL.
+      const pageParams = new URLSearchParams(location.search);
+      const returnTo = pageParams.get('return_to');
       try {
         const res = await fetch(`${API}/v1/auth/providers`, {
           credentials: 'omit',
@@ -139,12 +152,17 @@
           return;
         }
 
-        container.innerHTML = providers.map(p => `
-          <a href="${API}${p.auth_url}" class="oauth-btn" style="background: ${p.brand_color}; color: ${p.text_color};">
+        container.innerHTML = providers.map(p => {
+          const href = returnTo
+            ? `${API}${p.auth_url}?return_to=${encodeURIComponent(returnTo)}`
+            : `${API}${p.auth_url}`;
+          return `
+          <a href="${href}" class="oauth-btn" style="background: ${p.brand_color}; color: ${p.text_color};">
             ${p.icon_svg}
             Continue with ${p.display_name}
           </a>
-        `).join('');
+        `;
+        }).join('');
       } catch (e) {
         console.error('Failed to load providers:', e);
         container.innerHTML =
