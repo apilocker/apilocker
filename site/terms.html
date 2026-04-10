@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Terms of Service — API Locker</title>
-  <meta name="description" content="Terms of use for API Locker." />
+  <meta name="description" content="Terms of use for API Locker — credential vault, proxy, MCP server, and OAuth 2.1 authorization for AI agent connections." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,16 +54,16 @@
       <div class="legal-container">
         <span class="eyebrow"><span class="eyebrow-dot"></span> Legal</span>
         <h1 class="legal-h1">Terms of Service</h1>
-        <p class="legal-updated">Last updated: April 8, 2026</p>
+        <p class="legal-updated">Last updated: April 9, 2026</p>
 
         <div class="legal-prose">
           <p class="legal-lede">These terms describe the deal between you and API Locker. By creating an account or using the service, you agree to them. If you don't agree, don't use the service.</p>
 
           <h2>1. What the service is</h2>
-          <p>API Locker is a credential vault and proxy. You store API keys and other secrets with us; we encrypt them; your apps and agents proxy requests through our service to the underlying API providers, and we inject your credentials into those requests automatically. You can manage, rotate, pause, and revoke credentials through your dashboard.</p>
+          <p>API Locker is a credential vault, an outbound proxy, and a Model Context Protocol (MCP) server. You store API keys, service credentials, and OAuth credentials with us; we encrypt them; your apps and agents proxy requests through our service to the underlying API providers, and we inject your credentials into those requests automatically. You can also connect MCP-compatible AI clients (Claude, Cursor, Zed, Continue, and any other client that speaks MCP) so they can read, manage, and act on your vault on your behalf. You can manage, rotate, pause, and revoke credentials through your dashboard, and you can revoke any connected MCP client at any time.</p>
 
           <h2>2. Your account</h2>
-          <p>You must sign in with a supported OAuth provider (currently Google or GitHub). You are responsible for all activity under your account. Keep your refresh tokens and master tokens safe — if they leak, the attacker can reach anything your tokens are scoped to until you revoke them. We provide tools for rotation, pausing, revocation, and hard deletion; use them.</p>
+          <p>You must sign in with a supported OAuth provider (currently Google or GitHub). You are responsible for all activity under your account, including any actions taken by AI agents you have connected via MCP. Keep your refresh tokens and master tokens safe — if they leak, the attacker can reach anything your tokens are scoped to until you revoke them. We provide tools for rotation, pausing, revocation, and hard deletion; use them.</p>
 
           <h2>3. Acceptable use</h2>
           <p>Don't use API Locker to:</p>
@@ -72,33 +72,55 @@
             <li>Proxy traffic that violates the terms of the downstream provider (e.g. using a Stripe key you don't own, or abusing an OpenAI API against its usage policies)</li>
             <li>Generate, distribute, or facilitate illegal content</li>
             <li>Attempt to compromise the service, bypass rate limits, or extract credentials other than your own</li>
+            <li>Authorize MCP clients you don't recognize or trust — the consent screen exists for a reason; don't click Approve on a client you can't identify</li>
+            <li>Use the MCP server to coordinate automated abuse against downstream providers (e.g. running a scripted agent through proxy_request to circumvent OpenAI or Stripe rate limits)</li>
+            <li>Build a competing service that wraps API Locker without permission, or expose API Locker's functionality to your own users without a reseller agreement</li>
             <li>Resell the service to third parties without a reseller agreement</li>
           </ul>
 
-          <h2>4. Pricing and billing</h2>
+          <h2>4. MCP server &amp; AI agent connections</h2>
+          <p>API Locker exposes a Model Context Protocol server at <code>https://api.apilocker.app/v1/mcp</code> with 21 tools mirroring the dashboard and CLI. Two connection paths are supported:</p>
+          <ul>
+            <li><strong>Local MCP (stdio bridge):</strong> the <code>apilocker mcp</code> command in our CLI authenticates with a per-device master token stored at <code>~/.apilocker/config.json</code>. Anyone with that file has the same vault access you do; treat the file as you would an SSH private key.</li>
+            <li><strong>Remote MCP (OAuth 2.1):</strong> third-party MCP clients (e.g. Claude on claude.ai) can authenticate via the OAuth 2.1 authorization code flow with PKCE. When you click <strong>Approve</strong> on the API Locker consent screen, you are granting that specific client an access token (1-hour lifetime) and a refresh token (90-day lifetime, rotated on use) scoped to the permissions you approved.</li>
+          </ul>
+          <p><strong>Your responsibility when approving an OAuth client:</strong> the consent screen displays the client's self-declared name and the scopes it is requesting. We do not verify the identity of third-party clients beyond their ability to complete the OAuth handshake. <em>If you approve a client you don't recognize, you may give it the ability to read every credential in your vault, make API calls on your behalf, or modify vault state.</em> You are solely responsible for vetting any client you authorize. We strongly recommend only approving clients from organizations you know and trust (Anthropic for Claude, your IDE vendor for Cursor / Zed / Continue, etc.).</p>
+          <p><strong>Revocation:</strong> you can revoke any connected client at any time from your dashboard. Revocation invalidates both the current access token and its refresh token; the client must re-authorize to reconnect. If you suspect a client has been compromised, revoke immediately and rotate any credentials it had access to.</p>
+          <p><strong>Tool calls and audit logging:</strong> every MCP tool call (read, write, proxy) is audit-logged in your dashboard with timestamp, source IP, country, status code, and latency. You can review what any connected client has done in real time via <code>apilocker activity --follow</code> or the dashboard's activity feed.</p>
+          <p><strong>Refresh token theft protection:</strong> our refresh tokens rotate on every use. If we detect that an old refresh token is reused (a strong indicator of token theft), we revoke the entire grant family — both the current and the leaked tokens — and the client must re-authorize through the consent screen.</p>
+
+          <h2>5. Pricing and billing</h2>
           <p>API Locker is free during public beta. We will notify you in advance of any move to paid plans, and you'll have the option to export your data or close your account before any charges apply.</p>
 
-          <h2>5. Service availability</h2>
+          <h2>6. Service availability</h2>
           <p>We do our best to keep the service running, but during beta there is no uptime SLA. API Locker runs on Cloudflare's global edge network. If Cloudflare has an incident, we probably do too. We recommend monitoring the health of your critical workflows independently.</p>
 
-          <h2>6. Downstream providers</h2>
+          <h2>7. Downstream providers</h2>
           <p>When you proxy a request, API Locker forwards it to the provider you chose (OpenAI, Stripe, etc.). We are not responsible for the availability, pricing, accuracy, or conduct of those providers. Their terms apply to the portion of your workflow that lives on their infrastructure.</p>
 
-          <h2>7. Data</h2>
+          <h2>8. Data</h2>
           <p>You own your data. We process it on your behalf to provide the service. See our <a href="/privacy">Privacy Policy</a> for details on what we collect, how we store it, and your rights. You can delete your data through the dashboard or by contacting us.</p>
 
-          <h2>8. Termination</h2>
+          <h2>9. Termination</h2>
           <p>You can close your account at any time. We can suspend or terminate accounts that violate these terms, abuse the service, or put other users at risk. In an emergency we may suspend first and investigate after.</p>
 
-          <h2>9. Warranties and liability</h2>
+          <h2>10. Warranties and liability</h2>
           <p>API Locker is provided "as is" during beta. We make no warranties beyond what's legally required. To the maximum extent allowed by law, our liability for any claim arising from your use of the service is limited to the amount you paid us in the 12 months preceding the claim (which during beta is zero).</p>
           <p>API Locker stores and proxies credentials, and the security properties we provide depend on the secrets you store with us being handled correctly on your end. Don't paste your refresh token into public code or unsafe environments.</p>
 
-          <h2>10. Changes</h2>
+          <h2>11. Changes</h2>
           <p>We may update these terms as the service evolves. We'll notify signed-in users about material changes via email or in the dashboard before they take effect. Continued use after an update means you accept the new terms.</p>
 
-          <h2>11. Contact</h2>
-          <p>Questions? Reach out at <a href="mailto:legal@apilocker.app">legal@apilocker.app</a>.</p>
+          <h2>12. Contact</h2>
+          <p>The right address depends on what you want to talk about:</p>
+          <ul>
+            <li><strong>Legal &amp; terms questions:</strong> <a href="mailto:legal@apilocker.app">legal@apilocker.app</a></li>
+            <li><strong>Privacy questions:</strong> <a href="mailto:privacy@apilocker.app">privacy@apilocker.app</a></li>
+            <li><strong>Security disclosures:</strong> <a href="mailto:security@apilocker.app">security@apilocker.app</a> — please don't open public GitHub issues for security findings</li>
+            <li><strong>General support:</strong> <a href="mailto:support@apilocker.app">support@apilocker.app</a></li>
+            <li><strong>Product feedback &amp; feature requests:</strong> <a href="mailto:feedback@apilocker.app">feedback@apilocker.app</a></li>
+            <li><strong>Bug reports:</strong> <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a></li>
+          </ul>
 
           <p class="legal-note">These terms are a starting point for a credential-vault product in public beta. If you need a custom agreement (DPA, MSA, vendor assessment, etc.), contact us before rolling API Locker out across your organization.</p>
         </div>
