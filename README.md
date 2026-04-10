@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://www.apilocker.app/brand/logo-256.png" alt="API Locker mascot" width="180" height="180" />
+<img src="https://www.apilocker.app/brand/logo-256.png?v=2" alt="API Locker mascot" width="180" height="180" />
 
 # API Locker
 
