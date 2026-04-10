@@ -15,7 +15,7 @@
 
 API Locker is an encrypted credential vault for developers. Store your LLM API keys, service API keys, and OAuth credentials in one place — then inject them into any command with `apilocker run -- npm start`. Your raw credentials never touch disk, never live in shell history, never get committed to git.
 
-Free public beta. [Try it →](https://www.apilocker.app)
+Free to use. [Try it →](https://www.apilocker.app)
 
 ---
 
@@ -185,7 +185,7 @@ apilocker/
 
 ## Status
 
-**Free public beta.** Unlimited keys, unlimited tokens, unlimited proxy calls. Beta users get grandfathered into free Pro permanently when pricing kicks in.
+**Free plan available.** Unlimited keys, unlimited tokens, unlimited proxy calls. Early adopters get grandfathered into free Pro permanently when paid plans launch.
 
 - **CLI:** [v1.0.2](https://www.npmjs.com/package/apilocker) on npm
 - **API:** live at `api.apilocker.app`

@@ -175,7 +175,7 @@ apilocker register --url https://api.your-locker.example.com
 
 ## Status
 
-API Locker is in **public beta**. Free forever during beta with unlimited keys, unlimited tokens, and unlimited proxy calls. Beta users get grandfathered into free Pro permanently when pricing kicks in.
+API Locker is **free to use** with unlimited keys, unlimited tokens, and unlimited proxy calls. Early adopters get grandfathered into free Pro permanently when paid plans launch.
 
 ## Links
 

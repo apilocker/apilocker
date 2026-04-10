@@ -90,10 +90,10 @@
           <p><strong>Refresh token theft protection:</strong> our refresh tokens rotate on every use. If we detect that an old refresh token is reused (a strong indicator of token theft), we revoke the entire grant family — both the current and the leaked tokens — and the client must re-authorize through the consent screen.</p>
 
           <h2>5. Pricing and billing</h2>
-          <p>API Locker is free during public beta. We will notify you in advance of any move to paid plans, and you'll have the option to export your data or close your account before any charges apply.</p>
+          <p>API Locker is currently free. We will notify you in advance of any move to paid plans, and you'll have the option to export your data or close your account before any charges apply.</p>
 
           <h2>6. Service availability</h2>
-          <p>We do our best to keep the service running, but during beta there is no uptime SLA. API Locker runs on Cloudflare's global edge network. If Cloudflare has an incident, we probably do too. We recommend monitoring the health of your critical workflows independently.</p>
+          <p>We do our best to keep the service running, but there is currently no uptime SLA. API Locker runs on Cloudflare's global edge network. If Cloudflare has an incident, we probably do too. We recommend monitoring the health of your critical workflows independently.</p>
 
           <h2>7. Downstream providers</h2>
           <p>When you proxy a request, API Locker forwards it to the provider you chose (OpenAI, Stripe, etc.). We are not responsible for the availability, pricing, accuracy, or conduct of those providers. Their terms apply to the portion of your workflow that lives on their infrastructure.</p>
@@ -105,7 +105,7 @@
           <p>You can close your account at any time. We can suspend or terminate accounts that violate these terms, abuse the service, or put other users at risk. In an emergency we may suspend first and investigate after.</p>
 
           <h2>10. Warranties and liability</h2>
-          <p>API Locker is provided "as is" during beta. We make no warranties beyond what's legally required. To the maximum extent allowed by law, our liability for any claim arising from your use of the service is limited to the amount you paid us in the 12 months preceding the claim (which during beta is zero).</p>
+          <p>API Locker is provided "as is". We make no warranties beyond what's legally required. To the maximum extent allowed by law, our liability for any claim arising from your use of the service is limited to the amount you paid us in the 12 months preceding the claim (which on the free plan is zero).</p>
           <p>API Locker stores and proxies credentials, and the security properties we provide depend on the secrets you store with us being handled correctly on your end. Don't paste your refresh token into public code or unsafe environments.</p>
 
           <h2>11. Changes</h2>
@@ -122,7 +122,7 @@
             <li><strong>Bug reports:</strong> <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a></li>
           </ul>
 
-          <p class="legal-note">These terms are a starting point for a credential-vault product in public beta. If you need a custom agreement (DPA, MSA, vendor assessment, etc.), contact us before rolling API Locker out across your organization.</p>
+          <p class="legal-note">These terms are a starting point for a credential-vault product. If you need a custom agreement (DPA, MSA, vendor assessment, etc.), contact us before rolling API Locker out across your organization.</p>
         </div>
       </div>
     </main>

@@ -30,6 +30,22 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
     return corsPreflightResponse(request);
   }
 
+  // HEAD requests: run the matching GET handler but return only headers,
+  // no body. Required by Anthropic's Connectors Directory submission
+  // guide: "Graceful handling of HEAD requests without tokens."
+  if (request.method === 'HEAD') {
+    const getRequest = new Request(request.url, {
+      method: 'GET',
+      headers: request.headers,
+    });
+    const response = await dispatch(getRequest, env);
+    const headResponse = new Response(null, {
+      status: response.status,
+      headers: response.headers,
+    });
+    return applyCorsHeaders(headResponse, request);
+  }
+
   const response = await dispatch(request, env);
   return applyCorsHeaders(response, request);
 }
