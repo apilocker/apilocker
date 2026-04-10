@@ -1,6 +1,6 @@
 {
   "name": "apilocker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "mcpName": "io.github.apilocker/apilocker",
   "description": "Replace your .env file with one token. Encrypted vault, auto-rotating tokens, and a smart proxy for every API your app talks to.",
   "keywords": [

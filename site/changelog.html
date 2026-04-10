@@ -185,6 +185,118 @@
     </div>
 
     <!-- =============================================================
+         v1.0.3
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version">v1.0.3</span>
+        <span class="release-date">2026-04-09</span>
+      </div>
+      <div class="release-tagline">OAuth 2.1 authorization server — Claude connects natively.</div>
+
+      <div class="release-section">
+        <h3>Remote MCP via OAuth 2.1</h3>
+        <ul>
+          <li><strong>Full OAuth 2.1 authorization server</strong> lives at <code>api.apilocker.app</code>. PKCE-mandatory (S256), Dynamic Client Registration per RFC 7591, refresh-token rotation with family-wide reuse detection, RFC 8414 metadata discovery, RFC 9728 protected-resource metadata. Any MCP client that speaks the modern remote-MCP spec can connect over HTTPS with no pasted master tokens — just a consent screen click.</li>
+          <li><strong>Claude Connectors Directory submission-ready.</strong> Matches every technical requirement in Anthropic's submission guide: Streamable HTTP transport, OAuth 2.0 authorization code flow, safety annotations (<code>readOnlyHint</code> / <code>destructiveHint</code> / <code>idempotentHint</code> / <code>openWorldHint</code>) on all 21 MCP tools, CORS allowlisted for claude.ai + claude.com.</li>
+          <li><strong>New consent screen</strong> at <code>/oauth-consent</code> with the brand-new API Locker mascot, scope descriptions in plain English, user-email display, explicit trust warning, and Approve/Deny buttons. Preserves <code>return_to</code> through the OAuth round-trip so users land back on the consent page after sign-in.</li>
+          <li><strong>Three scopes</strong>: <code>vault:read</code> (list/get/reveal/activity/doctor), <code>vault:write</code> (store/rotate/rename/pause/resume/delete/tokens/devices), <code>vault:proxy</code> (make proxied API calls through stored credentials). Enforced per-tool on the MCP endpoint.</li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>Connected MCP clients panel</h3>
+        <ul>
+          <li><strong>New dashboard panel</strong>: view and revoke every remote MCP client you've authorized. Each entry shows the client name, logo, requested scopes, first-authorized timestamp, last-active timestamp, and a one-click Revoke button. Revoking kills every access token AND refresh token in the grant family in a single statement — the client must re-authorize through the consent screen to reconnect.</li>
+          <li><strong>New endpoints</strong>: <code>GET /v1/oauth/grants</code> lists your active grants (grouped by refresh-token family, not raw token rows), and <code>POST /v1/oauth/grants/:id/revoke</code> kills one. Both session-authed, and the <code>user_id</code> check in the revoke query prevents cross-user revocation.</li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>Dynamic OAuth sign-in provider registry</h3>
+        <ul>
+          <li><strong>Adding a new sign-in provider is now a one-object code change.</strong> <code>src/oauth-providers.ts</code> is the canonical registry — each entry defines authorize URL, token URL, user-info URL, scopes, and a mapping function from the provider's user-info response to our normalized shape. Routes <code>/v1/auth/:provider</code> and <code>/v1/auth/:provider/callback</code> dispatch generically.</li>
+          <li><strong>Five providers pre-registered</strong>: Google, GitHub, LinkedIn, Slack, Microsoft. Only Google and GitHub are <em>enabled</em> today (because they have credentials in the vault) — the others are one dashboard click away.</li>
+          <li><strong>Login / signup pages render provider buttons dynamically</strong> from <code>GET /v1/auth/providers</code>. Zero HTML edits needed to enable a new provider. And <code>return_to</code> now round-trips through the OAuth dance correctly, so deep-linked sign-in flows work.</li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>Infrastructure + polish</h3>
+        <ul>
+          <li><strong>CORS bug fix</strong>: cross-origin callers now get the correct <code>Access-Control-Allow-Origin</code> header. Previously every response baked in <code>www.apilocker.app</code> regardless of the caller's Origin, which worked by coincidence for the dashboard but would have blocked Claude and every other cross-origin caller.</li>
+          <li><strong>MCP protocol version negotiation</strong>: the server now supports the 2025-06-18, 2025-03-26, and 2024-11-05 spec versions and echoes back whichever the client asks for.</li>
+          <li><strong>New brand identity</strong>: the API Locker mascot logo is live everywhere — favicons, Open Graph social share image, the consent screen, the dashboard dashboard, and the top of the GitHub + npm READMEs. 9 size variants hosted at <code>/brand/</code>.</li>
+          <li><strong>Multi-lane contact</strong>: new <code>support@</code>, <code>security@</code>, <code>feedback@</code>, <code>privacy@</code>, and <code>legal@</code> email addresses, all routed through Cloudflare Email Routing. Wired into every footer, the docs, the privacy policy, the terms, and the README.</li>
+          <li><strong>Terms of service updated</strong> with a dedicated MCP server section (3a) covering local stdio bridge vs. remote OAuth 2.1 flow, user responsibility when approving third-party clients, revocation semantics, audit logging, and refresh token theft protection.</li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>End-to-end verified</h3>
+        <ul>
+          <li>Every step of the OAuth 2.1 flow has been tested against production: DCR → authorize → consent → token exchange → MCP <code>initialize</code> → <code>tools/list</code> → <code>store_key</code> → <code>reveal_key</code> → <code>delete_key</code> → Connected clients panel → Revoke → access/refresh both rejected. 16/16 steps pass.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =============================================================
+         v1.0.2
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version patch">v1.0.2</span>
+        <span class="release-date">2026-04-09</span>
+      </div>
+      <div class="release-tagline">Published to the official MCP Registry.</div>
+
+      <div class="release-section">
+        <h3>Registry publishing</h3>
+        <ul>
+          <li><strong>Listed on <code>registry.modelcontextprotocol.io</code></strong> as <code>io.github.apilocker/apilocker</code>. Any AI tool that auto-discovers MCP servers via the canonical registry can now find API Locker.</li>
+          <li><strong><code>mcpName</code> field added to <code>package.json</code></strong> — required by the MCP Registry's package-ownership verification flow. No runtime impact; pure metadata.</li>
+          <li><strong>Repo-level <code>server.json</code></strong> describes the stdio bridge for the MCP Registry listing: npm package identifier, transport, and the <code>apilocker mcp</code> positional argument.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =============================================================
+         v1.0.1
+         ============================================================= -->
+    <div class="release">
+      <div class="release-head">
+        <span class="release-version patch">v1.0.1</span>
+        <span class="release-date">2026-04-09</span>
+      </div>
+      <div class="release-tagline">Partial OAuth rotation + seamless vault-backed sign-in.</div>
+
+      <div class="release-section">
+        <h3>Partial OAuth credential rotation</h3>
+        <ul>
+          <li><strong><code>apilocker rotate &lt;alias&gt; --field &lt;name&gt;</code></strong> — rotate just the <code>client_secret</code> or <code>refresh_token</code> of an OAuth credential without touching <code>client_id</code>, authorize URL, token URL, scopes, or redirect URI. The server decrypts the existing blob, merges the new field(s), re-encrypts, and bumps <code>rotated_at</code>. Scoped tokens that reference the credential keep working unchanged.</li>
+          <li><strong>Dashboard Rotate Secret button</strong> on every OAuth credential card. Opens a modal with a "New client secret" password field + an optional "New refresh token" field. Submit goes through the new partial-rotation endpoint. Audit log records which fields were swapped (<code>/rotate:client_secret</code> vs <code>/rotate:client_secret,refresh_token</code>).</li>
+          <li><strong><code>POST /v1/keys/:keyId/rotate</code> extended</strong>: body for <code>api_key</code> still <code>{ key }</code>, body for <code>oauth2</code> now <code>{ client_secret?, refresh_token? }</code>. Response includes <code>rotated_fields</code> so the CLI and dashboard can display what changed.</li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>Vault-backed OAuth sign-in (dogfooding the vault)</h3>
+        <ul>
+          <li><strong>The API Worker now reads its own Google and GitHub OAuth credentials from its own vault at runtime.</strong> A new <code>src/vault-client.ts</code> helper decrypts directly from KV + D1 with a 60-second in-memory cache — no HTTP loopback, no bootstrap token. The only Worker-level config is <code>APILOCKER_SERVICE_USER_ID</code>.</li>
+          <li><strong>Rotating the Worker's own OAuth secrets is now a one-paste operation in the dashboard.</strong> Previously required four manual <code>wrangler secret put</code> calls synchronized across two providers, which bit us three times on the same literal-vs-placeholder paste mistake. That entire failure mode is gone.</li>
+          <li><strong>Wrangler secret cleanup</strong>: <code>GITHUB_CLIENT_ID</code>, <code>GITHUB_CLIENT_SECRET</code>, <code>GOOGLE_CLIENT_ID</code>, and <code>GOOGLE_CLIENT_SECRET</code> are no longer needed as Worker secrets and have been deleted from production.</li>
+        </ul>
+      </div>
+
+      <div class="release-section">
+        <h3>Monorepo + packaging</h3>
+        <ul>
+          <li><strong>Source code now lives at <a href="https://github.com/apilocker/apilocker">github.com/apilocker/apilocker</a></strong> as a monorepo (<code>api/</code>, <code>cli/</code>, <code>site/</code>). The CLI's <code>package.json</code> <code>repository.url</code> points at the monorepo with <code>directory: "cli"</code>, and the npm package page shows the real repo.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =============================================================
          v1.0.0
          ============================================================= -->
     <div class="release">

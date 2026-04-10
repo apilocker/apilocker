@@ -257,7 +257,7 @@
     /* Empty state */
     .empty-state {
       text-align: center;
-      padding: 48px 24px;
+      padding: 52px 24px 44px;
       border: 1.5px dashed var(--line-strong);
       border-radius: 16px;
       background: var(--card);
@@ -265,6 +265,9 @@
       z-index: 1;
     }
     .empty-icon {
+      /* Legacy SVG icon container — kept for backwards compat with
+         any empty states that still use the old pattern. New empty
+         states use .empty-mascot below instead. */
       width: 56px; height: 56px;
       border-radius: 14px;
       background: var(--surface);
@@ -274,6 +277,15 @@
       margin: 0 auto 18px;
       box-shadow: var(--shadow-sm);
     }
+    .empty-mascot {
+      /* v1.0.3: mascot-based empty state illustration. Consistent
+         brand presence across every panel's empty case. */
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 14px;
+      display: block;
+      filter: drop-shadow(0 8px 20px rgba(59, 130, 246, 0.12));
+    }
     .empty-state h3 {
       font-size: 17px;
       font-weight: 700;
@@ -282,9 +294,40 @@
     .empty-state p {
       font-size: 14px;
       color: var(--muted);
-      max-width: 380px;
+      max-width: 420px;
       margin: 0 auto 20px;
       line-height: 1.55;
+    }
+    .empty-state p code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+      color: var(--ink-2);
+      border: 1px solid var(--line);
+    }
+    .empty-state-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 24px -10px var(--glow);
+      transition: transform 0.15s var(--ease), filter 0.15s var(--ease);
+    }
+    .empty-state-cta:hover { transform: translateY(-1px); filter: brightness(1.06); }
+    .empty-state-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
     }
 
     /* Loading state */
@@ -1098,13 +1141,19 @@
       font-size: 11px;
     }
 
-    /* ==================== v1.0.0: Welcome modal (first-run) ==================== */
+    /* ==================== v1.0.3: Welcome modal (first-run) ==================== */
     .welcome-modal {
-      max-width: 540px;
+      max-width: 560px;
     }
     .welcome-head {
       text-align: center;
-      padding: 36px 32px 24px !important;
+      padding: 32px 32px 24px !important;
+    }
+    .welcome-mascot {
+      width: 88px;
+      height: 88px;
+      display: block;
+      margin: 0 auto 10px;
     }
     .welcome-badge {
       display: inline-block;
@@ -1116,7 +1165,7 @@
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       box-shadow: 0 6px 18px -6px var(--glow);
     }
     .welcome-title {
@@ -1170,6 +1219,44 @@
       font-size: 12px;
       color: var(--muted);
     }
+    /* v1.0.3 MCP callout card inside the welcome modal */
+    .welcome-mcp-callout {
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(30,58,138,0.06) 100%);
+      border: 1px solid rgba(59,130,246,0.22);
+      border-radius: 14px;
+      margin-bottom: 20px;
+    }
+    .welcome-mcp-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+    .welcome-mcp-callout p {
+      font-size: 13px;
+      color: var(--ink-2);
+      line-height: 1.55;
+      margin: 0 0 10px;
+    }
+    .welcome-mcp-callout strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .welcome-mcp-link {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .welcome-mcp-link:hover { text-decoration: underline; }
+
     .welcome-cli {
       padding: 18px 20px;
       background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
@@ -1451,11 +1538,14 @@
           </div>
 
           <div id="keys-empty" class="empty-state">
-            <div class="empty-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <h3>No keys yet</h3>
-            <p>Store your first credential — an OpenAI API key, an OAuth client secret, a database password — anything you'd normally drop into a .env file.</p>
+            <img src="/brand/logo-128.png" alt="API Locker mascot" class="empty-mascot" />
+            <h3>Your vault is waiting</h3>
+            <p>Store your first credential — an OpenAI API key, a Stripe secret, a Google OAuth client — anything you'd normally drop into a <code>.env</code> file. Encrypted with AES-256-GCM before it hits disk.</p>
+            <button class="empty-state-cta" data-add-category="llm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add your first credential
+            </button>
+            <div class="empty-state-hint">Or connect an MCP client and let your AI agent add one via <code>store_key</code>.</div>
           </div>
 
           <!-- Filter row (shown only when there are keys) -->
@@ -1562,11 +1652,14 @@
           </div>
 
           <div id="tokens-empty" class="empty-state">
-            <div class="empty-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            </div>
-            <h3>No tokens issued</h3>
-            <p>Once you store a key, issue a scoped token to let an app or AI agent call it through the proxy — without ever seeing the raw credential.</p>
+            <img src="/brand/logo-128.png" alt="API Locker mascot" class="empty-mascot" />
+            <h3>No scoped tokens issued</h3>
+            <p>Scoped tokens let your apps (or AI agents, or CI pipelines) call stored credentials through the proxy <strong>without ever seeing the raw value</strong>. Rotate on a schedule, revoke instantly, audit every call.</p>
+            <button class="empty-state-cta" id="create-token-empty-cta">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create your first token
+            </button>
+            <div class="empty-state-hint">Tokens need at least one key to scope to — add a credential first if you haven't yet.</div>
           </div>
 
           <div id="tokens-list" class="row-list hidden"></div>
@@ -1587,11 +1680,10 @@
           </div>
 
           <div id="activity-empty" class="empty-state">
-            <div class="empty-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
-            </div>
+            <img src="/brand/logo-128.png" alt="API Locker mascot" class="empty-mascot" />
             <h3>Quiet so far</h3>
-            <p>Once your keys start handling traffic, you'll see every request, response code, and latency right here.</p>
+            <p>Every proxied request, credential reveal, rotation, and MCP tool call will show up here in real time — with timestamp, source IP, country, latency, and status code.</p>
+            <div class="empty-state-hint">Flip the <strong>Live</strong> toggle above to stream new events as they arrive.</div>
           </div>
 
           <div id="activity-list" class="row-list hidden"></div>
@@ -1607,11 +1699,12 @@
           </div>
 
           <div id="devices-empty" class="empty-state">
-            <div class="empty-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            </div>
+            <img src="/brand/logo-128.png" alt="API Locker mascot" class="empty-mascot" />
             <h3>No devices registered</h3>
-            <p>Run <code style="font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--card); padding: 2px 6px; border-radius: 4px;">apilocker register</code> on any machine to sign in the CLI and it'll show up here.</p>
+            <p>Every machine that runs the <code>apilocker</code> CLI needs to register once via a browser-based flow (no pasted master tokens, ever). Registered devices can be revoked individually without touching any others.</p>
+            <pre style="display: inline-block; background: #0F172A; color: #F8FAFC; padding: 12px 18px; border-radius: 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; margin: 4px 0 12px;">npm install -g apilocker
+apilocker register</pre>
+            <div class="empty-state-hint">Each device gets its own per-device master token — not shared between machines.</div>
           </div>
 
           <div id="devices-list" class="row-list hidden"></div>
@@ -1947,9 +2040,10 @@
   <div class="modal-backdrop" id="modal-welcome">
     <div class="modal welcome-modal" role="dialog" aria-labelledby="welcome-title">
       <div class="modal-head welcome-head">
-        <div class="welcome-badge">NEW · v1.0.0</div>
+        <img src="/brand/logo-128.png" alt="API Locker mascot" class="welcome-mascot" />
+        <div class="welcome-badge">NEW · v1.0.3</div>
         <h3 id="welcome-title" class="modal-title welcome-title">Welcome to API Locker.</h3>
-        <p class="welcome-sub">One vault, three types of credentials — all production-ready.</p>
+        <p class="welcome-sub">One vault for every credential — plus a 21-tool MCP server so your AI agents can use them.</p>
       </div>
       <div class="modal-body">
         <div class="welcome-pillars">
@@ -1982,8 +2076,17 @@
           </div>
         </div>
 
+        <div class="welcome-mcp-callout">
+          <div class="welcome-mcp-head">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z"/></svg>
+            <span>Let your AI agent handle credentials</span>
+          </div>
+          <p>API Locker's 21-tool MCP server is live. Connect <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, <strong>Claude on claude.ai</strong>, <strong>Cursor</strong>, <strong>Zed</strong>, or <strong>Continue</strong> and your agent can list, reveal, rotate, pause, and proxy through your credentials — with safety prompts for every write operation.</p>
+          <a href="#mcp" class="welcome-mcp-link">Set it up in the MCP panel below →</a>
+        </div>
+
         <div class="welcome-cli">
-          <div class="welcome-cli-title">Ship the full experience in 3 commands</div>
+          <div class="welcome-cli-title">Prefer the command line? Three commands, done.</div>
           <pre class="welcome-cli-code">npm install -g apilocker
 apilocker register
 apilocker run -- npm start</pre>
@@ -4079,14 +4182,18 @@ func main() {
       `).join('');
     }
 
-    $('open-create-token').addEventListener('click', () => {
+    function openCreateTokenModal() {
       $('token-name').value = '';
       $('token-rotation').value = 'static';
       $('create-token-error').classList.remove('shown');
       loadTokenKeyPicker();
       openModal('modal-create-token');
       setTimeout(() => $('token-name').focus(), 200);
-    });
+    }
+    $('open-create-token').addEventListener('click', openCreateTokenModal);
+    // Empty-state CTA for the tokens panel (v1.0.3 polish).
+    const emptyTokenCta = $('create-token-empty-cta');
+    if (emptyTokenCta) emptyTokenCta.addEventListener('click', openCreateTokenModal);
 
     // Context captured at issuance time so the "Show integration code" button
     // in the reveal modal knows which provider/key/token to show examples for.
@@ -4623,9 +4730,10 @@ func main() {
     }
 
     // ============================================================
-    //  WELCOME MODAL (v1.0.0 first-run)
+    //  WELCOME MODAL (refreshed for v1.0.3 — bumped key so existing
+    //  users see the new MCP / OAuth story once, then never again)
     // ============================================================
-    const WELCOME_SEEN_KEY = 'apilocker_welcome_v1_seen';
+    const WELCOME_SEEN_KEY = 'apilocker_welcome_v103_seen';
 
     function maybeShowWelcomeModal() {
       try {

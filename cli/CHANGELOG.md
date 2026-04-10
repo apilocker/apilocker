@@ -4,6 +4,27 @@ All notable changes to the `apilocker` CLI are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] — 2026-04-09 — "OAuth 2.1 authorization server + grant management"
+
+### New CLI commands
+
+- **`apilocker oauth grants list`** — list every remote MCP client currently connected to your vault via OAuth 2.1 (Claude on claude.ai, Cursor remote, etc.). Shows client name, scopes, authorized date, last active date, and rotation count. One line per grant family, not per raw token row.
+- **`apilocker oauth grants revoke <id>`** — revoke a grant by its short or full ID. Confirms before acting (unless `--yes` is passed), then kills every access token AND refresh token in the family in a single statement. The client must re-authorize through the consent screen to reconnect.
+- **Accepts short IDs** — the first 8 hex chars of the grant family ID are enough to identify it, so you don't have to copy-paste a full UUID.
+
+Both commands hit the new `GET /v1/oauth/grants` and `POST /v1/oauth/grants/:id/revoke` endpoints in the API. Three-surface parity restored: grant management now works identically from the CLI, the dashboard's Connected MCP clients panel, and the MCP server's implicit surface.
+
+### What shipped on the server side (context for this CLI release)
+
+- **Full OAuth 2.1 authorization server** at `api.apilocker.app`: RFC 8414 metadata discovery, RFC 9728 protected-resource metadata, RFC 7591 Dynamic Client Registration, `/authorize`, `/token`, `/consent`, `/intent` endpoints with PKCE-mandatory (S256) and refresh token rotation with family-wide reuse detection.
+- **New consent screen** at `/oauth-consent` with the API Locker mascot, scope descriptions in plain English, user-email display, and Approve/Deny buttons. Preserves `return_to` through the OAuth round-trip.
+- **Three OAuth scopes**: `vault:read`, `vault:write`, `vault:proxy`.
+- **Claude Connectors Directory submission-ready**: all 21 MCP tools now carry `readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint` safety annotations per the MCP spec.
+
+### Bug fixes
+
+- `login.html` and `signup.html` previously dropped the `return_to` query param when rendering OAuth provider buttons, which broke the "Add connector" flow for Claude and other remote MCP clients that expected to land back on the consent screen after sign-in. Both pages now propagate `return_to` into the authorize URL correctly.
+
 ## [1.0.2] — 2026-04-09 — "MCP Registry publishing"
 
 ### Registry / discoverability

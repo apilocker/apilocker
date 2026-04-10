@@ -18,6 +18,7 @@ import { pauseCommand, resumeCommand } from './commands/pause';
 import { doctorCommand } from './commands/doctor';
 import { updateCommand } from './commands/update';
 import { mcpCommand } from './commands/mcp';
+import { oauthCommand } from './commands/oauth';
 import { maybeShowFirstRunBanner } from './banner';
 
 // First-run welcome banner — prints once, the very first time any command
@@ -29,7 +30,7 @@ const program = new Command();
 program
   .name('apilocker')
   .description('API Locker — one vault for LLM keys, service API keys, and OAuth credentials')
-  .version('1.0.2');
+  .version('1.0.3');
 
 // Auth / device management
 program.addCommand(registerCommand);
@@ -63,5 +64,8 @@ program.addCommand(updateCommand);
 
 // MCP integration — stdio bridge + config helper (new in 1.0.0)
 program.addCommand(mcpCommand);
+
+// OAuth 2.1 grant management (new in 1.0.3)
+program.addCommand(oauthCommand);
 
 program.parse();
