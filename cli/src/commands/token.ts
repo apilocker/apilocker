@@ -1,5 +1,11 @@
 import { Command } from 'commander';
 import { apiRequest } from '../api';
+import {
+  formatTokenCreateResult,
+  resolveKeyIdentifiers,
+  KeyRef,
+  TokenCreateResponse,
+} from './token-helpers';
 
 export const tokenCommand = new Command('token')
   .description('Manage scoped access tokens');
@@ -12,30 +18,27 @@ tokenCommand
   .option('--rotation <type>', 'Rotation: static, daily, weekly, monthly', 'static')
   .action(async (opts) => {
     try {
-      const res = await apiRequest<{
-        id: string;
-        name: string;
-        token: string;
-        rotation_type: string;
-        expires_at: string | null;
-      }>('/v1/tokens', {
+      const inputs = opts.keys.split(',').map((k: string) => k.trim()).filter(Boolean);
+
+      // The proxy authorizes by key ID only — resolve any names first.
+      let allowedKeys = inputs;
+      if (inputs.some((k: string) => !k.startsWith('key_'))) {
+        const { keys } = await apiRequest<{ keys: KeyRef[] }>('/v1/keys');
+        allowedKeys = resolveKeyIdentifiers(inputs, keys);
+      }
+
+      const res = await apiRequest<TokenCreateResponse>('/v1/tokens', {
         method: 'POST',
         body: JSON.stringify({
           name: opts.name,
-          allowed_keys: opts.keys.split(',').map((k: string) => k.trim()),
+          allowed_keys: allowedKeys,
           rotation_type: opts.rotation,
         }),
       });
 
-      console.log(`Token created successfully.`);
-      console.log(`  ID:       ${res.id}`);
-      console.log(`  Name:     ${res.name}`);
-      console.log(`  Rotation: ${res.rotation_type}`);
-      if (res.expires_at) {
-        console.log(`  Expires:  ${new Date(res.expires_at).toLocaleString()}`);
+      for (const line of formatTokenCreateResult(res)) {
+        console.log(line);
       }
-      console.log(`\n  Token (save this — it won't be shown again):`);
-      console.log(`  ${res.token}`);
     } catch (e: any) {
       console.error(`Failed to create token: ${e.message}`);
       process.exit(1);
