@@ -1,0 +1,15 @@
+{
+  "name": "apilocker",
+  "description": "The API Locker plugin for Claude Code: an encrypted vault for your API keys, OAuth credentials, and tokens.",
+  "owner": {
+    "name": "API Locker",
+    "email": "support@apilocker.app"
+  },
+  "plugins": [
+    {
+      "name": "apilocker",
+      "source": "./plugins/apilocker",
+      "description": "Store API keys in your encrypted API Locker vault, inject them at runtime, rotate leaked keys, and call provider APIs without exposing the raw secret."
+    }
+  ]
+}

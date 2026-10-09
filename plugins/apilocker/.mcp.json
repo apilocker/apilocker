@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "apilocker": {
+      "type": "http",
+      "url": "https://api.apilocker.app/v1/mcp"
+    }
+  }
+}

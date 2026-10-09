@@ -1,0 +1,20 @@
+{
+  "name": "apilocker",
+  "displayName": "API Locker",
+  "version": "1.0.0",
+  "description": "Keep API keys out of code, .env files, and chat: store them in your encrypted API Locker vault, inject them at runtime, rotate leaked keys, and call provider APIs without exposing the raw secret.",
+  "author": {
+    "name": "API Locker",
+    "email": "support@apilocker.app",
+    "url": "https://www.apilocker.app"
+  },
+  "homepage": "https://www.apilocker.app/docs/mcp",
+  "repository": "https://github.com/apilocker/apilocker",
+  "license": "MIT",
+  "keywords": ["secrets", "api-keys", "vault", "credentials", "security", "env", "oauth"],
+  "icon": "https://www.apilocker.app/brand/logo-512.png",
+  "documentationUrl": "https://www.apilocker.app/docs/mcp",
+  "supportUrl": "https://github.com/apilocker/apilocker/issues",
+  "privacyPolicyUrl": "https://www.apilocker.app/privacy",
+  "termsOfServiceUrl": "https://www.apilocker.app/terms"
+}
