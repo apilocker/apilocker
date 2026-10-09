@@ -34,6 +34,12 @@ export interface ProviderTemplate {
    */
   query_param_name?: string;
 
+  /**
+   * Public API reference for the provider. Returned to MCP agents so
+   * they can build correct proxy paths for this provider.
+   */
+  api_docs_url?: string;
+
   // oauth2 shape
   authorize_url?: string;
   token_url?: string;
@@ -49,6 +55,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'llm',
     credential_type: 'api_key',
     base_url: 'https://api.openai.com',
+    api_docs_url: 'https://developers.openai.com/api/reference/overview',
     auth_header_type: 'bearer',
   },
   anthropic: {
@@ -57,6 +64,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'llm',
     credential_type: 'api_key',
     base_url: 'https://api.anthropic.com',
+    api_docs_url: 'https://platform.claude.com/docs/en/api/overview',
     auth_header_type: 'x-api-key',
   },
   'google-ai': {
@@ -65,6 +73,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'llm',
     credential_type: 'api_key',
     base_url: 'https://generativelanguage.googleapis.com',
+    api_docs_url: 'https://ai.google.dev/api',
     auth_header_type: 'query',
     query_param_name: 'key',
   },
@@ -74,6 +83,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'llm',
     credential_type: 'api_key',
     base_url: 'https://api.groq.com/openai/v1',
+    api_docs_url: 'https://console.groq.com/docs/api-reference',
     auth_header_type: 'bearer',
   },
   mistral: {
@@ -82,6 +92,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'llm',
     credential_type: 'api_key',
     base_url: 'https://api.mistral.ai',
+    api_docs_url: 'https://docs.mistral.ai/api',
     auth_header_type: 'bearer',
   },
 
@@ -93,6 +104,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.stripe.com',
+    api_docs_url: 'https://docs.stripe.com/api',
     auth_header_type: 'bearer',
   },
   lemonsqueezy: {
@@ -101,6 +113,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.lemonsqueezy.com/v1',
+    api_docs_url: 'https://docs.lemonsqueezy.com/api',
     auth_header_type: 'bearer',
   },
 
@@ -111,6 +124,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.twilio.com',
+    api_docs_url: 'https://www.twilio.com/docs/usage/api',
     auth_header_type: 'basic',
   },
   sendgrid: {
@@ -119,6 +133,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.sendgrid.com',
+    api_docs_url: 'https://www.twilio.com/docs/sendgrid/api-reference',
     auth_header_type: 'bearer',
   },
   resend: {
@@ -127,6 +142,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.resend.com',
+    api_docs_url: 'https://resend.com/docs/api-reference/introduction',
     auth_header_type: 'bearer',
   },
 
@@ -137,6 +153,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.cloudflare.com',
+    api_docs_url: 'https://developers.cloudflare.com/api/',
     auth_header_type: 'bearer',
   },
   vercel: {
@@ -145,6 +162,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.vercel.com',
+    api_docs_url: 'https://vercel.com/docs/rest-api',
     auth_header_type: 'bearer',
   },
   upstash: {
@@ -153,6 +171,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.upstash.com/v2',
+    api_docs_url: 'https://upstash.com/docs/devops/developer-api/introduction',
     auth_header_type: 'bearer',
   },
 
@@ -163,6 +182,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.github.com',
+    api_docs_url: 'https://docs.github.com/en/rest',
     auth_header_type: 'bearer',
   },
 
@@ -173,6 +193,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.clerk.com/v1',
+    api_docs_url: 'https://clerk.com/docs/reference/backend-api',
     auth_header_type: 'bearer',
   },
 
@@ -183,6 +204,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://sentry.io/api/0',
+    api_docs_url: 'https://docs.sentry.io/api/',
     auth_header_type: 'bearer',
   },
   posthog: {
@@ -191,6 +213,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://app.posthog.com',
+    api_docs_url: 'https://posthog.com/docs/api',
     auth_header_type: 'bearer',
   },
 
@@ -201,6 +224,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.cloudinary.com/v1_1',
+    api_docs_url: 'https://cloudinary.com/documentation/image_upload_api_reference',
     auth_header_type: 'basic',
   },
   mux: {
@@ -209,6 +233,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.mux.com',
+    api_docs_url: 'https://www.mux.com/docs/api-reference',
     auth_header_type: 'basic',
   },
 
@@ -219,6 +244,7 @@ const providers: Record<string, ProviderTemplate> = {
     category: 'service',
     credential_type: 'api_key',
     base_url: 'https://api.elevenlabs.io/v1',
+    api_docs_url: 'https://elevenlabs.io/docs/api-reference/introduction',
     auth_header_type: 'custom',
     auth_header_name: 'xi-api-key',
   },

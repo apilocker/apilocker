@@ -920,12 +920,22 @@ async function issueTokenPair(
     return jsonError('Failed to issue token', 500);
   }
 
-  return jsonOk({
+  const tokenResponse = {
     access_token: accessToken,
-    token_type: 'Bearer',
+    token_type: 'bearer',  // lowercase per RFC 6749 §A.13
     expires_in: OAUTH_ACCESS_TOKEN_TTL_SECONDS,
     refresh_token: refreshToken,
     scope: grant.scopes.join(' '),
+  };
+
+  // RFC 6749 §5.1: token responses MUST include Cache-Control: no-store
+  return new Response(JSON.stringify(tokenResponse), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'Pragma': 'no-cache',
+    },
   });
 }
 

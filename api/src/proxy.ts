@@ -55,7 +55,13 @@ export async function handleProxy(
 
   // Build the target URL
   const forwardPath = request.headers.get('X-Locker-Forward-Path') || '';
-  const targetUrl = `${metadata.base_url}${forwardPath}`;
+  const targetUrl = buildProxyTargetUrl(metadata.base_url, forwardPath);
+  if (!targetUrl) {
+    return jsonError(
+      `X-Locker-Forward-Path must be a path on ${metadata.base_url}, starting with "/" (for example "/v1/models").`,
+      400
+    );
+  }
 
   // Build outgoing headers — pass through relevant headers, strip locker-specific ones
   const outgoingHeaders = new Headers();
@@ -205,7 +211,29 @@ export async function handleProxy(
   });
 }
 
-function injectApiKey(
+/**
+ * Join a credential's base URL with a caller-supplied path, refusing any
+ * result that leaves the base URL's origin. Without this check a path
+ * like ".evil.com/x" or "@evil.com/x" turns "https://api.openai.com" +
+ * path into a URL on another host, and the proxy would inject the real
+ * key into a request to that host. Returns null when the path escapes.
+ */
+export function buildProxyTargetUrl(baseUrl: string, path: string): string | null {
+  let base: URL;
+  let target: URL;
+  try {
+    base = new URL(baseUrl);
+    target = new URL(`${baseUrl}${path}`);
+  } catch {
+    return null;
+  }
+  if (target.origin !== base.origin || target.username || target.password) {
+    return null;
+  }
+  return target.toString();
+}
+
+export function injectApiKey(
   headers: Headers,
   metadata: KeyMetadata,
   customHeaderName: string | null,
@@ -238,7 +266,7 @@ function injectApiKey(
   }
 }
 
-function appendQueryParam(url: string, key: string, value: string): string {
+export function appendQueryParam(url: string, key: string, value: string): string {
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
 }

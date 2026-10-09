@@ -13,7 +13,7 @@
  *   1. **Scoped tokens** — same kind apps use for the proxy. Has a
  *      pre-approved `allowedKeys` whitelist. Agents using a scoped
  *      token can only call read tools (list_keys, get_key_metadata,
- *      reveal_key, proxy_request) and only for keys in their scope.
+ *      reveal_key, the proxy_* tools) and only for keys in their scope.
  *      All write/management tools are rejected.
  *
  *   2. **Master tokens** — same kind the CLI uses. Full account access.
@@ -29,7 +29,12 @@
  *
  * Read tools (any token type):
  *   - list_keys, get_key_metadata, reveal_key, list_providers,
- *     get_activity, run_doctor, proxy_request
+ *     get_activity, run_doctor
+ *
+ * Proxy tools (any token type; OAuth callers need vault:proxy):
+ *   - proxy_get, proxy_post, proxy_put, proxy_patch, proxy_delete
+ *     One tool per HTTP method so reads and writes are separate tools.
+ *     proxy-policy.ts decides which hosts and endpoints each may reach.
  *
  * Write tools (master token only):
  *   - store_key, store_oauth_credential, rotate_key, rename_key,
@@ -75,6 +80,8 @@ import { validateScopedToken, validateSession } from './auth';
 import { validateOAuthAccessToken } from './oauth-server';
 import { getOAuthAccessToken } from './oauth-proxy';
 import { getProviderTemplate, listProviders, listProvidersByCategory } from './providers';
+import { appendQueryParam, buildProxyTargetUrl, injectApiKey } from './proxy';
+import { checkProxyPolicy, ProxyMethod, PROXY_PROVIDERS_DOCS_URL } from './proxy-policy';
 import { jsonOk, jsonError } from './responses';
 
 // ==================== TYPES ====================
@@ -109,6 +116,57 @@ interface MCPAuthContext {
 }
 
 // ==================== TOOL CATALOG ====================
+
+/**
+ * One proxy tool per HTTP method. Anthropic's directory rejects a single
+ * tool that takes both safe and unsafe methods through a `method`
+ * parameter, and separate tools let Claude auto-run reads while always
+ * confirming writes. Its review criteria also require a custom query
+ * tool's description to name or link the target API, hence the
+ * provider examples and docs link.
+ */
+function proxyTool(
+  method: ProxyMethod,
+  title: string,
+  summary: string,
+  annotations: { readOnlyHint: boolean; destructiveHint?: boolean; idempotentHint?: boolean }
+) {
+  const properties: Record<string, unknown> = {
+    key_id: { type: 'string', description: 'ID of the credential to use (e.g. key_abc123), from list_keys.' },
+    path: {
+      type: 'string',
+      description: "Path and optional query string appended to the credential's base URL, starting with \"/\" (e.g. /v1/models).",
+    },
+  };
+  if (method !== 'GET') {
+    properties.body = { type: 'object', description: 'JSON request body.' };
+  }
+  properties.headers = {
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description: 'Extra request headers, e.g. {"anthropic-version": "2023-06-01"}. API Locker adds the authentication header itself.',
+  };
+
+  const writeLimits =
+    method === 'GET'
+      ? ''
+      : ' Writes only reach vetted provider APIs: payment APIs (such as Stripe), purchase endpoints, and AI image, video, or audio generation endpoints are refused.';
+
+  return {
+    name: `proxy_${method.toLowerCase()}`,
+    description:
+      `${summary} The request goes to the REST API of the provider the credential belongs to (its base URL plus \`path\`), ` +
+      `for example the OpenAI API, GitHub REST API, or Resend API. Each provider's base URL and API reference are listed at ` +
+      `${PROXY_PROVIDERS_DOCS_URL} and returned by get_key_metadata. API Locker injects the stored secret server-side, so the ` +
+      `raw key is never returned, and every call is recorded in the audit log.${writeLimits}`,
+    inputSchema: {
+      type: 'object',
+      properties,
+      required: ['key_id', 'path'],
+    },
+    annotations: { title, ...annotations, openWorldHint: true },
+  };
+}
 
 const TOOLS = [
   // ---- Read tools ----
@@ -173,7 +231,7 @@ const TOOLS = [
   {
     name: 'reveal_key',
     description:
-      'Reveal the decrypted value of a credential by alias. For api_key credentials, returns the single secret string. For oauth2 credentials, returns the full multi-field object (client_id, client_secret, refresh_token, etc.). The agent should treat the response as sensitive — log it, store it, or pass it carefully.',
+      'Return the decrypted value of one credential by alias. For api_key credentials this is the secret string; for oauth2 credentials it is every stored field (client_id, client_secret, refresh_token, etc.). The value is a live secret, and every reveal is recorded in the audit log.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -236,30 +294,35 @@ const TOOLS = [
       openWorldHint: false,
     },
   },
-  {
-    name: 'proxy_request',
-    description:
-      'Make an API request through the locker proxy. The real API key is injected automatically — the agent never sees the raw secret. Use this when you need to call an external API (OpenAI, Stripe, etc.) using a stored credential.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        key_id: { type: 'string', description: 'The key ID to use for this request (e.g. key_abc123).' },
-        path: { type: 'string', description: 'The API path to call (e.g. /v1/chat/completions).' },
-        method: { type: 'string', description: 'HTTP method (GET, POST, PUT, DELETE).', default: 'POST' },
-        body: { type: 'object', description: 'Request body (will be JSON-encoded).' },
-        headers: { type: 'object', description: 'Additional headers to include.' },
-      },
-      required: ['key_id', 'path'],
-    },
-    annotations: {
-      title: 'Proxy external API request',
-      // Not read-only: forwards to an external API which itself may
-      // mutate state (e.g. Stripe charges, OpenAI embeddings billed).
-      readOnlyHint: false,
-      destructiveHint: true,
-      openWorldHint: true,
-    },
-  },
+
+  // ---- Proxy tools ----
+  proxyTool('GET', 'Proxy read request (GET)', 'Send a read-only HTTP GET request to a provider API using a credential stored in API Locker.', {
+    readOnlyHint: true,
+  }),
+  proxyTool(
+    'POST',
+    'Proxy create request (POST)',
+    'Send an HTTP POST request (create a resource or run an action, such as an OpenAI chat completion) to a provider API using a credential stored in API Locker.',
+    { readOnlyHint: false, destructiveHint: true }
+  ),
+  proxyTool(
+    'PUT',
+    'Proxy replace request (PUT)',
+    'Send an HTTP PUT request (create or replace a resource) to a provider API using a credential stored in API Locker.',
+    { readOnlyHint: false, destructiveHint: true, idempotentHint: true }
+  ),
+  proxyTool(
+    'PATCH',
+    'Proxy update request (PATCH)',
+    'Send an HTTP PATCH request (update part of a resource) to a provider API using a credential stored in API Locker.',
+    { readOnlyHint: false, destructiveHint: true }
+  ),
+  proxyTool(
+    'DELETE',
+    'Proxy delete request (DELETE)',
+    'Send an HTTP DELETE request (delete a resource) to a provider API using a credential stored in API Locker.',
+    { readOnlyHint: false, destructiveHint: true, idempotentHint: true }
+  ),
 
   // ---- Write tools (master token only) ----
   {
@@ -603,9 +666,15 @@ export async function handleMCP(
 ): Promise<Response> {
   // GET = server info / discovery (unauthenticated)
   if (request.method === 'GET') {
+    // MCP clients send GET with Accept: text/event-stream to open a
+    // server-to-client stream. We never push server-initiated messages,
+    // and the Streamable HTTP spec says to answer that GET with 405.
+    if (request.headers.get('Accept')?.includes('text/event-stream')) {
+      return jsonError('This MCP server does not offer a server-to-client stream', 405);
+    }
     return jsonOk({
       name: 'apilocker',
-      version: '1.0.0',
+      version: '1.1.0',
       description:
         'API Locker — one vault for LLM keys, service API keys, and OAuth credentials. Manage credentials, run health checks, and proxy API calls.',
       tools: TOOLS,
@@ -619,21 +688,40 @@ export async function handleMCP(
   // Auth — accepts either scoped or master tokens
   const auth = await validateMCPAuth(request, env);
   if (!auth) {
-    return jsonError(
-      'Unauthorized — provide a scoped token or master token via Authorization: Bearer header',
-      401
+    // MCP spec requires 401 responses to include WWW-Authenticate with
+    // a pointer to the protected resource metadata. Without this header,
+    // Claude.ai's MCP client can't discover the authorization server and
+    // the connector flow silently fails even though our OAuth endpoints
+    // work correctly. This was the root cause of the "Authorization with
+    // the MCP server failed" error — Claude completed OAuth and got a
+    // token, but couldn't link it back to the resource. `scope` tells the
+    // client which scopes to request.
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized' }),
+      {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'WWW-Authenticate':
+            'Bearer resource_metadata="https://api.apilocker.app/.well-known/oauth-protected-resource", scope="vault:read vault:write vault:proxy"',
+        },
+      }
     );
   }
 
   let rpc: MCPRequest;
   try {
-    rpc = await request.json();
+    const body = await request.json();
+    // Handle JSON-RPC batch (array) — some MCP clients send batched
+    // requests. For now, process only the first message. Full batch
+    // support is a future enhancement.
+    rpc = (Array.isArray(body) ? body[0] : body) as MCPRequest;
   } catch {
     return jsonOk(rpcError(0, -32700, 'Parse error'));
   }
 
-  if (rpc.jsonrpc !== '2.0' || !rpc.method) {
-    return jsonOk(rpcError(rpc.id || 0, -32600, 'Invalid request'));
+  if (!rpc || rpc.jsonrpc !== '2.0' || !rpc.method) {
+    return jsonOk(rpcError(rpc?.id || 0, -32600, 'Invalid request'));
   }
 
   switch (rpc.method) {
@@ -661,20 +749,23 @@ export async function handleMCP(
           serverInfo: {
             name: 'apilocker',
             title: 'API Locker',
-            version: '1.0.2',
+            version: '1.1.0',
           },
           capabilities: {
             tools: { listChanged: false },
           },
           instructions:
-            'API Locker — encrypted credential vault. Use list_keys to discover what credentials the user has stored, reveal_key to read a secret value (only when the user explicitly asks), proxy_request to make an API call through the vault without ever seeing the raw key, and run_doctor to audit vault health. Treat all reveal_key responses as highly sensitive; do not log or echo them.',
+            'API Locker — encrypted credential vault. Use list_keys to discover what credentials the user has stored, the proxy tools (proxy_get for reads; proxy_post, proxy_put, proxy_patch, proxy_delete for writes) to call a provider API with a stored credential without ever seeing the raw key, reveal_key to read a secret value (only when the user explicitly asks), and run_doctor to audit vault health. Treat all reveal_key responses as highly sensitive; do not log or echo them.',
         })
       );
     }
     case 'notifications/initialized':
-      // Notification (no id) — return empty success for HTTP transport.
-      // stdio transport clients ignore this response entirely.
-      return jsonOk({ jsonrpc: '2.0' });
+      // Notification (no id) — per MCP Streamable HTTP spec, notifications
+      // should be acknowledged with HTTP 204 No Content, not a JSON body.
+      // Returning JSON here caused Claude.ai's connector flow to fail
+      // because the client treated the non-standard response as a protocol
+      // error, even though the OAuth token exchange completed successfully.
+      return new Response(null, { status: 204 });
     case 'ping':
       return jsonOk(rpcResult(rpc.id, {}));
 
@@ -722,8 +813,28 @@ async function handleToolCall(
         return await toolGetActivity(rpc, env, auth, args);
       case 'run_doctor':
         return await toolRunDoctor(rpc, env, auth);
-      case 'proxy_request':
-        return await toolProxyRequest(rpc, env, auth, args, originalRequest);
+
+      // ---- Proxy tools (OAuth callers need vault:proxy) ----
+      case 'proxy_get':
+      case 'proxy_post':
+      case 'proxy_put':
+      case 'proxy_patch':
+      case 'proxy_delete':
+        if (auth.oauthScopes !== undefined && !auth.oauthScopes.includes('vault:proxy')) {
+          return mcpText(
+            rpc.id,
+            'Error: this connection was not granted the vault:proxy scope. Reconnect API Locker and approve proxy access to use the proxy tools.',
+            true
+          );
+        }
+        return await toolProxyRequest(
+          rpc,
+          env,
+          auth,
+          args,
+          originalRequest,
+          toolName.slice('proxy_'.length).toUpperCase() as ProxyMethod
+        );
 
       // ---- Write tools (master token required) ----
       case 'store_key':
@@ -847,6 +958,7 @@ async function toolGetKeyMetadata(
     credential_type: row.credential_type ?? 'api_key',
     tags: safeParseJSON(row.tags, []),
     base_url: row.base_url || null,
+    api_docs_url: getProviderTemplate(row.provider)?.api_docs_url ?? null,
     paused: row.paused_at != null,
     rotated_at: row.rotated_at,
     created_at: row.created_at,
@@ -872,8 +984,8 @@ async function toolRevealKey(
   const encrypted: EncryptedKeyRecord = JSON.parse(blob);
   const plaintext = await decrypt(encrypted, env);
 
-  // Audit log
-  insertAuditLog(env, {
+  // Audit log (awaited: Workers drop unawaited promises once the response returns)
+  await insertAuditLog(env, {
     id: generateId('log'),
     user_id: auth.userId,
     token_id: auth.tokenId,
@@ -923,6 +1035,7 @@ function toolListProviders(rpc: MCPRequest, args: any): Response {
       category: p.category,
       credential_type: p.credential_type,
       base_url: p.base_url,
+      api_docs_url: p.api_docs_url,
       auth_header_type: p.auth_header_type,
       auth_header_name: p.auth_header_name,
       authorize_url: p.authorize_url,
@@ -1035,15 +1148,24 @@ async function toolRunDoctor(
   });
 }
 
+/** Proxied responses above this size are truncated before reaching the agent. */
+const MAX_PROXY_RESPONSE_CHARS = 50_000;
+
 async function toolProxyRequest(
   rpc: MCPRequest,
   env: Env,
   auth: MCPAuthContext,
   args: any,
-  request: Request
+  request: Request,
+  method: ProxyMethod
 ): Promise<Response> {
-  const { key_id, path, method = 'POST', body, headers: extraHeaders } = args;
-  if (!key_id || !path) return mcpText(rpc.id, 'Error: key_id and path are required', true);
+  const { key_id, path, headers: extraHeaders } = args;
+  // GET never carries a body, even if one is passed.
+  const body = method === 'GET' ? undefined : args.body;
+  if (!key_id || typeof path !== 'string') return mcpText(rpc.id, 'Error: key_id and path are required', true);
+  if (!path.startsWith('/')) {
+    return mcpText(rpc.id, `Error: path must start with "/" (for example "/v1/models"), got "${path}"`, true);
+  }
 
   if (auth.allowedKeys !== null && !auth.allowedKeys.includes(key_id)) {
     return mcpText(rpc.id, 'Token does not have access to this key', true);
@@ -1055,11 +1177,19 @@ async function toolProxyRequest(
     return mcpText(rpc.id, `Key "${metadata.name}" is paused. Resume it before proxying.`, true);
   if (!metadata.base_url)
     return mcpText(rpc.id, 'This credential has no base_url configured (vault-only).', true);
-  const targetUrl = `${metadata.base_url}${path}`;
+
+  const targetUrl = buildProxyTargetUrl(metadata.base_url, path);
+  if (!targetUrl) {
+    return mcpText(rpc.id, `Error: path "${path}" must stay on ${metadata.base_url} (for example "/v1/models").`, true);
+  }
+
+  const blocked = checkProxyPolicy({ method, url: new URL(targetUrl), headers: extraHeaders, body });
+  if (blocked) return mcpText(rpc.id, blocked, true);
+
   const outgoingHeaders = new Headers();
   outgoingHeaders.set('Content-Type', 'application/json');
-  if (extraHeaders) {
-    for (const [k, v] of Object.entries(extraHeaders)) outgoingHeaders.set(k, v as string);
+  if (extraHeaders && typeof extraHeaders === 'object') {
+    for (const [k, v] of Object.entries(extraHeaders)) outgoingHeaders.set(k, String(v));
   }
 
   let finalUrl: string;
@@ -1076,66 +1206,37 @@ async function toolProxyRequest(
     outgoingHeaders.set('Authorization', `Bearer ${accessToken}`);
     finalUrl = targetUrl;
   } else {
-    // api_key credential: decrypt and inject directly
+    // api_key credential: decrypt and inject directly, the same way the
+    // app-facing proxy does.
     const blob = await env.KEYS.get(key_id);
     if (!blob) return mcpText(rpc.id, 'Encrypted blob missing', true);
     const encrypted: EncryptedKeyRecord = JSON.parse(blob);
     const realKey = await decrypt(encrypted, env);
 
-    // Inject auth header (respecting custom header name from template)
     const template = getProviderTemplate(metadata.provider);
-    if (template?.auth_header_name) {
-      outgoingHeaders.set(template.auth_header_name, realKey);
-    } else {
-      switch (metadata.auth_header_type) {
-        case 'bearer':
-          outgoingHeaders.set('Authorization', `Bearer ${realKey}`);
-          break;
-        case 'x-api-key':
-          outgoingHeaders.set('X-API-Key', realKey);
-          break;
-        case 'basic':
-          outgoingHeaders.set('Authorization', `Basic ${realKey}`);
-          break;
-      }
-    }
-
+    injectApiKey(outgoingHeaders, metadata, template?.auth_header_name ?? null, realKey);
     finalUrl =
       metadata.auth_header_type === 'query'
-        ? `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}${
-            template?.query_param_name ?? 'api_key'
-          }=${encodeURIComponent(realKey)}`
+        ? appendQueryParam(targetUrl, template?.query_param_name ?? 'api_key', realKey)
         : targetUrl;
   }
 
   const startTime = Date.now();
-  let providerResponse: Response;
-  let statusCode: number;
+  let providerResponse: Response | null = null;
+  let fetchError: string | null = null;
   try {
     providerResponse = await fetch(finalUrl, {
       method,
       headers: outgoingHeaders,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-    statusCode = providerResponse.status;
   } catch (e: any) {
-    insertAuditLog(env, {
-      id: generateId('log'),
-      user_id: auth.userId,
-      token_id: auth.tokenId,
-      key_id,
-      provider: metadata.provider,
-      forward_path: path,
-      source_ip: request.headers.get('CF-Connecting-IP'),
-      country: request.headers.get('CF-IPCountry') || null,
-      status_code: 502,
-      latency_ms: Date.now() - startTime,
-      timestamp: new Date().toISOString(),
-    }).catch(() => {});
-    return mcpText(rpc.id, `Failed to reach provider — ${e.message}`, true);
+    fetchError = e.message;
   }
 
-  insertAuditLog(env, {
+  // Awaited: Workers drop unawaited promises once the response returns,
+  // and the audit log is part of the tool's contract.
+  await insertAuditLog(env, {
     id: generateId('log'),
     user_id: auth.userId,
     token_id: auth.tokenId,
@@ -1144,13 +1245,21 @@ async function toolProxyRequest(
     forward_path: path,
     source_ip: request.headers.get('CF-Connecting-IP'),
     country: request.headers.get('CF-IPCountry') || null,
-    status_code: statusCode,
+    status_code: providerResponse ? providerResponse.status : 502,
     latency_ms: Date.now() - startTime,
     timestamp: new Date().toISOString(),
   }).catch(() => {});
 
-  const responseText = await providerResponse.text();
-  return mcpText(rpc.id, `Status: ${statusCode}\n\n${responseText}`, false);
+  if (!providerResponse) return mcpText(rpc.id, `Failed to reach provider — ${fetchError}`, true);
+
+  const statusCode = providerResponse.status;
+  let responseText = await providerResponse.text();
+  if (responseText.length > MAX_PROXY_RESPONSE_CHARS) {
+    responseText =
+      `${responseText.slice(0, MAX_PROXY_RESPONSE_CHARS)}\n\n[Truncated: the response was ${responseText.length} characters; ` +
+      `showing the first ${MAX_PROXY_RESPONSE_CHARS}. Narrow the request with filters or pagination to see the rest.]`;
+  }
+  return mcpText(rpc.id, `Status: ${statusCode}\n\n${responseText}`, statusCode >= 400);
 }
 
 async function toolStoreKey(
@@ -1277,7 +1386,7 @@ async function toolRotateKey(
   await env.KEYS.put(row.id, JSON.stringify(encrypted));
   await markKeyRotated(env, row.id, auth.userId);
 
-  insertAuditLog(env, {
+  await insertAuditLog(env, {
     id: generateId('log'),
     user_id: auth.userId,
     token_id: null,
