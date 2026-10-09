@@ -116,7 +116,7 @@ New users? The same flow handles signup — your first OAuth click with GitHub/G
 
 ## MCP integration — connect your AI assistant
 
-API Locker exposes a full **Model Context Protocol** server with 21 tools so Claude Code, Claude Desktop, Cursor, Zed, Continue, and any other MCP-compatible client can read and manage your vault directly.
+API Locker exposes a full **Model Context Protocol** server with 25 tools so Claude Code, Claude Desktop, Cursor, Zed, Continue, and any other MCP-compatible client can read and manage your vault directly.
 
 ### Claude Code — one command
 
@@ -149,7 +149,7 @@ The bridge reads your master token from `~/.apilocker/config.json` automatically
 apilocker mcp config --client claude-desktop   # or claude-code, cursor, continue, zed, generic
 ```
 
-**Full docs:** https://www.apilocker.app/docs/mcp — includes config file locations for each client, troubleshooting, and the full 21-tool catalog.
+**Full docs:** https://www.apilocker.app/docs/mcp — includes config file locations for each client, troubleshooting, and the full 25-tool catalog.
 
 **Visual status:** the dashboard has a dedicated MCP panel at https://www.apilocker.app/dashboard#mcp showing server status, a test-connection button, copy-pasteable config for every major client, and a live feed of recent MCP activity.
 

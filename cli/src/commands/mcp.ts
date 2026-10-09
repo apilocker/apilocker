@@ -222,8 +222,8 @@ function getConfigSnippet(client: string): ConfigSnippet | null {
 If the file already has an "mcpServers" key, merge the "apilocker" entry
 into it. Restart Claude Desktop after saving.
 
-Once connected, Claude Desktop will have all 21 API Locker tools
-available (list_keys, reveal_key, run_doctor, proxy_request, etc.).`,
+Once connected, Claude Desktop will have all 25 API Locker tools
+available (list_keys, reveal_key, run_doctor, proxy_get, etc.).`,
       };
 
     case 'claude-code':

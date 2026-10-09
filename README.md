@@ -120,7 +120,7 @@ Under the hood, LLM and Service credentials share the same single-string encrypt
 - **Audit logs** — Every reveal, every proxy call, every rotation, every rename logged with source IP, country, and timestamp. Stream live with `apilocker activity --follow`.
 - **Vault health check** — `apilocker doctor` surfaces stale rotations, unused keys, expiring tokens, and local config permission issues.
 - **Import from `.env`** — `apilocker import .env` migrates an existing project into the vault in one command.
-- **First-class MCP server** — Works with Claude Code, Claude Desktop, Cursor, Zed, Continue, and any other MCP-compatible client. 21 tools give your AI agent the same surface as the CLI.
+- **First-class MCP server** — Works with Claude Code, Claude Desktop, Cursor, Zed, Continue, and any other MCP-compatible client. 25 tools give your AI agent the same surface as the CLI.
 
 ## Connect your AI assistant (MCP)
 
@@ -143,7 +143,7 @@ claude mcp add apilocker -- apilocker mcp
 }
 ```
 
-**Full MCP docs with the 21-tool catalog and per-client setup instructions:** [apilocker.app/docs/mcp](https://www.apilocker.app/docs/mcp)
+**Full MCP docs with the 25-tool catalog and per-client setup instructions:** [apilocker.app/docs/mcp](https://www.apilocker.app/docs/mcp)
 
 ## Repository layout
 
@@ -168,7 +168,7 @@ apilocker/
 3. **Your app uses credentials in one of three ways:**
    - **Runtime injection:** `apilocker run -- npm start` reveals the needed credentials for one command and exports them as env vars.
    - **Proxy:** Your app holds a scoped token, calls `POST /v1/proxy/:keyId`, and the API Locker Worker injects the raw key into the upstream call server-side. Your app never sees the secret.
-   - **AI agent:** An MCP-compatible client (Claude Code, Cursor, etc.) connects through the `apilocker mcp` stdio bridge and gets the same 21-tool surface as the CLI.
+   - **AI agent:** An MCP-compatible client (Claude Code, Cursor, etc.) connects through the `apilocker mcp` stdio bridge and gets the same 25-tool surface as the CLI.
 4. **Rotation, rename, pause, revoke are all one-click.** Credentials in use stay in use — scoped tokens are unaffected by rotation, `.apilockerrc` files are unaffected by rename, and revoking a device never touches any other device.
 
 ## Security posture
