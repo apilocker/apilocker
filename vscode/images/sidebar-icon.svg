@@ -1,0 +1,7 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Vault/lock icon matching API Locker brand -->
+  <rect x="4" y="10" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <path d="M8 10V7a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <circle cx="12" cy="15.5" r="1.5" fill="currentColor"/>
+  <line x1="12" y1="17" x2="12" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

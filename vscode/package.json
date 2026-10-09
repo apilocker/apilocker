@@ -1,0 +1,313 @@
+{
+  "name": "apilocker",
+  "displayName": "API Locker",
+  "description": "Manage your encrypted credential vault directly from the editor. Store, reveal, rotate, and proxy API keys, service credentials, and OAuth secrets.",
+  "version": "0.1.1",
+  "publisher": "apilocker",
+  "license": "MIT",
+  "author": "Mayer Sancivieri",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apilocker/apilocker",
+    "directory": "vscode"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "api-keys",
+    "vault",
+    "secrets",
+    "credentials",
+    "env",
+    "environment-variables",
+    "oauth",
+    "proxy",
+    "openai",
+    "anthropic",
+    "stripe"
+  ],
+  "icon": "images/icon.png",
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "apilocker",
+          "title": "API Locker",
+          "icon": "images/sidebar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "apilocker": [
+        {
+          "id": "apilocker.keys",
+          "name": "Credentials"
+        },
+        {
+          "id": "apilocker.tokens",
+          "name": "Scoped Tokens"
+        },
+        {
+          "id": "apilocker.devices",
+          "name": "Devices"
+        },
+        {
+          "id": "apilocker.health",
+          "name": "Vault Health"
+        },
+        {
+          "id": "apilocker.activity",
+          "name": "Activity"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "apilocker.refreshKeys",
+        "title": "Refresh",
+        "category": "API Locker",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "apilocker.storeKey",
+        "title": "Store Credential",
+        "category": "API Locker",
+        "icon": "$(add)"
+      },
+      {
+        "command": "apilocker.revealKey",
+        "title": "Reveal",
+        "category": "API Locker",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "apilocker.copyKey",
+        "title": "Copy to Clipboard",
+        "category": "API Locker",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "apilocker.rotateKey",
+        "title": "Rotate Secret",
+        "category": "API Locker",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "apilocker.renameKey",
+        "title": "Rename",
+        "category": "API Locker",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "apilocker.pauseKey",
+        "title": "Pause",
+        "category": "API Locker",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "apilocker.resumeKey",
+        "title": "Resume",
+        "category": "API Locker",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "apilocker.deleteKey",
+        "title": "Delete",
+        "category": "API Locker",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "apilocker.refreshActivity",
+        "title": "Refresh",
+        "category": "API Locker",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "apilocker.createToken",
+        "title": "Create Token",
+        "category": "API Locker",
+        "icon": "$(add)"
+      },
+      {
+        "command": "apilocker.refreshTokens",
+        "title": "Refresh",
+        "category": "API Locker",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "apilocker.pauseToken",
+        "title": "Pause Token",
+        "category": "API Locker",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "apilocker.resumeToken",
+        "title": "Resume Token",
+        "category": "API Locker",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "apilocker.revokeToken",
+        "title": "Revoke Token",
+        "category": "API Locker",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "apilocker.refreshDevices",
+        "title": "Refresh",
+        "category": "API Locker",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "apilocker.revokeDevice",
+        "title": "Revoke Device",
+        "category": "API Locker",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "apilocker.refreshHealth",
+        "title": "Refresh",
+        "category": "API Locker",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "apilocker.openDashboard",
+        "title": "Open Dashboard",
+        "category": "API Locker",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "apilocker.runDoctor",
+        "title": "Run Doctor",
+        "category": "API Locker"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "apilocker.refreshKeys",
+          "when": "view == apilocker.keys",
+          "group": "navigation@2"
+        },
+        {
+          "command": "apilocker.storeKey",
+          "when": "view == apilocker.keys",
+          "group": "navigation@1"
+        },
+        {
+          "command": "apilocker.createToken",
+          "when": "view == apilocker.tokens",
+          "group": "navigation@1"
+        },
+        {
+          "command": "apilocker.refreshTokens",
+          "when": "view == apilocker.tokens",
+          "group": "navigation@2"
+        },
+        {
+          "command": "apilocker.refreshDevices",
+          "when": "view == apilocker.devices",
+          "group": "navigation"
+        },
+        {
+          "command": "apilocker.refreshHealth",
+          "when": "view == apilocker.health",
+          "group": "navigation"
+        },
+        {
+          "command": "apilocker.refreshActivity",
+          "when": "view == apilocker.activity",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "apilocker.revealKey",
+          "when": "view == apilocker.keys && viewItem =~ /^key/",
+          "group": "inline@1"
+        },
+        {
+          "command": "apilocker.copyKey",
+          "when": "view == apilocker.keys && viewItem =~ /^key/",
+          "group": "inline@2"
+        },
+        {
+          "command": "apilocker.revealKey",
+          "when": "view == apilocker.keys && viewItem =~ /^key/",
+          "group": "1_read@1"
+        },
+        {
+          "command": "apilocker.copyKey",
+          "when": "view == apilocker.keys && viewItem =~ /^key/",
+          "group": "1_read@2"
+        },
+        {
+          "command": "apilocker.rotateKey",
+          "when": "view == apilocker.keys && viewItem =~ /^key/",
+          "group": "2_manage@1"
+        },
+        {
+          "command": "apilocker.renameKey",
+          "when": "view == apilocker.keys && viewItem =~ /^key/",
+          "group": "2_manage@2"
+        },
+        {
+          "command": "apilocker.pauseKey",
+          "when": "view == apilocker.keys && viewItem == key",
+          "group": "2_manage@3"
+        },
+        {
+          "command": "apilocker.resumeKey",
+          "when": "view == apilocker.keys && viewItem == key-paused",
+          "group": "2_manage@3"
+        },
+        {
+          "command": "apilocker.deleteKey",
+          "when": "view == apilocker.keys && viewItem =~ /^key/",
+          "group": "3_danger@1"
+        },
+        {
+          "command": "apilocker.pauseToken",
+          "when": "view == apilocker.tokens && viewItem == token",
+          "group": "1_manage@1"
+        },
+        {
+          "command": "apilocker.resumeToken",
+          "when": "view == apilocker.tokens && viewItem == token-paused",
+          "group": "1_manage@1"
+        },
+        {
+          "command": "apilocker.revokeToken",
+          "when": "view == apilocker.tokens && viewItem =~ /^token/",
+          "group": "2_danger@1"
+        },
+        {
+          "command": "apilocker.revokeDevice",
+          "when": "view == apilocker.devices && viewItem == device",
+          "group": "1_danger@1"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "vsce package",
+    "publish": "vsce publish",
+    "publish:ovsx": "ovsx publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.21.0",
+    "ovsx": "^0.9.0",
+    "typescript": "^5.4.0"
+  }
+}
