@@ -9,88 +9,144 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=8">
 
   <style>
-    body { background: var(--bg); }
+    body { background-color: var(--bg-dark); }
+
+    /* ---- Nav overrides for inner pages ---- */
+    .nav-links a[data-active] {
+      color: #fff;
+    }
+
+    /* ---- Docs shell ---- */
     .docs-shell {
       max-width: 820px;
       margin: 0 auto;
       padding: 140px 32px 100px;
     }
+
+    /* Eyebrow */
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-solid);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-solid);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    }
+
     .docs-shell h1 {
       font-size: clamp(36px, 5vw, 56px);
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.028em;
       line-height: 1.05;
       margin: 8px 0 16px;
-      background: linear-gradient(180deg, #0F172A 0%, #334155 100%);
+      background: linear-gradient(180deg, #FFFFFF 0%, #A1A1AA 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .docs-shell h2 {
       font-size: 24px;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.02em;
       margin: 48px 0 12px;
-      color: var(--ink);
+      color: var(--text-main);
+    }
+    .docs-shell h2 span {
+      color: var(--text-muted);
+      font-weight: 400;
     }
     .docs-shell h3 {
       font-size: 17px;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.01em;
       margin: 28px 0 10px;
-      color: var(--ink);
+      color: var(--text-main);
     }
     .docs-shell p {
-      color: var(--ink-2);
+      color: var(--text-muted);
       font-size: 15px;
       line-height: 1.7;
       margin: 0 0 14px;
     }
     .docs-shell p.lede {
       font-size: 18px;
-      color: var(--muted);
+      color: var(--text-muted);
       line-height: 1.55;
       max-width: 620px;
       margin-bottom: 28px;
     }
+    .docs-shell a {
+      color: var(--accent-solid);
+      text-decoration: underline;
+      text-decoration-color: rgba(59, 130, 246, 0.3);
+      text-underline-offset: 3px;
+    }
+    .docs-shell a:hover {
+      color: #60A5FA;
+      text-decoration-color: rgba(59, 130, 246, 0.6);
+    }
+    .docs-shell strong {
+      color: var(--text-main);
+    }
     .docs-shell code {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      background: var(--card);
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
       padding: 2px 6px;
       border-radius: 5px;
       font-size: 13px;
-      color: var(--ink-2);
+      color: #93C5FD;
     }
     .docs-shell pre {
-      background: #0F172A;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-light);
       color: #F8FAFC;
       padding: 18px 22px;
       border-radius: 12px;
       overflow-x: auto;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-family: var(--font-mono);
       font-size: 13px;
       line-height: 1.6;
       margin: 16px 0 24px;
     }
     .docs-shell pre code {
       background: transparent;
+      border: none;
       color: inherit;
       padding: 0;
       font-size: inherit;
     }
-    .docs-shell ul {
+    /* Syntax tokens inside pre */
+    .docs-shell pre .tok-key { color: #93C5FD; }
+    .docs-shell pre .tok-str { color: #86EFAC; }
+    .docs-shell pre .tok-cmd { color: #FDE68A; }
+    .docs-shell pre .tok-flag { color: #C4B5FD; }
+    .docs-shell pre .tok-comment { color: #6B7280; font-style: italic; }
+
+    .docs-shell ul, .docs-shell ol {
       font-size: 15px;
-      color: var(--ink-2);
+      color: var(--text-muted);
       line-height: 1.8;
       padding-left: 22px;
     }
-    .docs-shell ul li {
+    .docs-shell ul li, .docs-shell ol li {
       margin-bottom: 6px;
     }
+
+    /* Tool grid */
     .docs-tool-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -100,39 +156,84 @@
     @media (max-width: 720px) { .docs-tool-list { grid-template-columns: repeat(2, 1fr); } }
     .docs-tool {
       padding: 10px 14px;
-      background: var(--card);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-light);
       border-radius: 8px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-family: var(--font-mono);
       font-size: 12px;
-      color: var(--ink-2);
+      color: #93C5FD;
       text-align: center;
+      transition: var(--transition-smooth);
     }
+    .docs-tool:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-glow);
+    }
+
+    /* Provider table */
+    .docs-table-wrap {
+      overflow-x: auto;
+      margin: 16px 0 24px;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+    }
+    .docs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .docs-table th,
+    .docs-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .docs-table th {
+      color: var(--text-main);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .docs-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* CTA button */
     .docs-cta {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 12px 22px;
       border-radius: 999px;
-      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
-      color: white;
+      background: #fff;
+      color: #000;
       font-size: 14px;
-      font-weight: 700;
-      box-shadow: 0 10px 28px -10px var(--glow);
+      font-weight: 600;
       text-decoration: none;
-      margin: 8px 0;
+      transition: var(--transition-smooth);
     }
     .docs-cta:hover {
-      transform: translateY(-1px);
+      background: #e2e2e5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+      color: #000;
+      text-decoration: none;
     }
+
+    /* Blockquote */
     .docs-shell blockquote {
-      border-left: 3px solid var(--blue);
+      border-left: 3px solid var(--accent-solid);
       margin: 20px 0;
       padding: 12px 20px;
-      background: rgba(59, 130, 246, 0.05);
+      background: rgba(59, 130, 246, 0.06);
       border-radius: 0 10px 10px 0;
-      color: var(--ink-2);
+      color: var(--text-muted);
       font-size: 14px;
       line-height: 1.6;
+    }
+    .docs-shell blockquote strong {
+      color: var(--text-main);
     }
   </style>
 
@@ -149,28 +250,16 @@
 <body>
 
   <!-- ===================== NAV ===================== -->
-  <nav class="nav" id="nav">
-    <div class="container nav-inner">
-      <a href="/" class="logo">
-        <span class="logo-mark">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </span>
-        API Locker
-      </a>
-      <div class="nav-links">
-        <a href="/#pillars">What's stored</a>
-        <a href="/#features">Features</a>
-        <a href="/#pricing">Pricing</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/docs/mcp" style="color: var(--ink);">Docs</a>
-      </div>
-      <div style="display: flex; align-items: center; gap: 18px;">
-        <a href="/login" class="nav-signin">Log in</a>
-        <a href="/signup" class="nav-cta">
-          Sign up
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-      </div>
+  <nav id="floating-nav" class="nav">
+    <div class="nav-brand">API Locker</div>
+    <div class="nav-links">
+      <a href="/#problem">Problem</a>
+      <a href="/#solution">Solution</a>
+      <a href="/docs/mcp" data-active>Docs</a>
+    </div>
+    <div class="nav-cta">
+      <a href="/login" class="btn btn-secondary btn-small">Sign In</a>
+      <a href="/signup" class="btn btn-primary btn-small">Get Started Free</a>
     </div>
   </nav>
 
@@ -186,35 +275,35 @@
       <li><strong>Local MCP (stdio bridge):</strong> For Claude Desktop, Claude Code, Cursor, Zed, and Continue. Install the <code>apilocker</code> CLI, run <code>apilocker register</code> once, then point your client at <code>apilocker mcp</code>. Covered further down this page.</li>
     </ul>
 
-    <h2>Remote MCP <span style="color: var(--muted); font-weight: 400;">— for Claude web + Claude Code</span></h2>
+    <h2>Remote MCP <span>— for Claude web + Claude Code</span></h2>
     <p>API Locker is a compliant OAuth 2.1 remote MCP server. When Claude's Connectors Directory supports API Locker, users can add it in three clicks:</p>
     <ol>
       <li>Open Claude settings → <strong>Connectors</strong> → <strong>Add connector</strong></li>
       <li>Search for <strong>API Locker</strong> and click <strong>Add</strong></li>
       <li>Sign in with your API Locker account (GitHub or Google) and click <strong>Approve</strong> on the consent screen</li>
     </ol>
-    <p>After approval, Claude has full access to your vault through the same 21 tools listed below. Claude shows a safety label on every tool call (read vs. write vs. external request) before executing. You can revoke the connection at any time from your <a href="/dashboard">dashboard</a>.</p>
+    <p>After approval, Claude has full access to your vault through the same 25 tools listed below. Claude shows a safety label on every tool call (read vs. write vs. external request) before executing. You can revoke the connection at any time from your <a href="/dashboard">dashboard</a>.</p>
 
     <blockquote>
       <strong>Is API Locker in the directory yet?</strong> Submission is in progress with Anthropic. Until it's listed, you can still add API Locker manually by pasting this URL into Claude's <em>Add custom connector</em> flow: <code>https://api.apilocker.app/v1/mcp</code> — Claude will handle the OAuth handshake and consent screen automatically.
     </blockquote>
 
-    <h2>Install in 3 steps <span style="color: var(--muted); font-weight: 400;">— for local MCP clients</span></h2>
+    <h2>Install in 3 steps <span>— for local MCP clients</span></h2>
 
     <h3>1. Install the CLI</h3>
-<pre><code>npm install -g apilocker</code></pre>
+<pre><code><span class="tok-cmd">npm</span> <span class="tok-flag">install -g</span> apilocker</code></pre>
     <p>Requires Node 18+. Works on macOS, Linux, Windows.</p>
 
     <h3>2. Register your device</h3>
-<pre><code>apilocker register</code></pre>
+<pre><code><span class="tok-cmd">apilocker</span> register</code></pre>
     <p>Opens your browser, you click Authorize once, done. The CLI stores a per-device master token in <code>~/.apilocker/config.json</code> (mode 0600). The MCP bridge picks it up automatically — you never paste a token into your AI client's config.</p>
 
     <h3>3. Connect your AI client</h3>
     <p>Pick your tool. Every flow uses the same <code>apilocker mcp</code> stdio bridge; only the config shape differs.</p>
 
-    <h2>Claude Code <span style="color: var(--muted); font-weight: 400;">— one command</span></h2>
+    <h2>Claude Code <span>— one command</span></h2>
     <p>This is the fastest path. Claude Code ships with a built-in MCP add command:</p>
-<pre><code>claude mcp add apilocker -- apilocker mcp</code></pre>
+<pre><code><span class="tok-cmd">claude</span> mcp add apilocker <span class="tok-flag">--</span> apilocker mcp</code></pre>
     <p>That's the entire install. Verify with <code>claude mcp list</code> — you should see <code>apilocker: apilocker mcp - ✓ Connected</code>. The server is available in your next Claude Code session automatically.</p>
 
     <h2>Claude Desktop</h2>
@@ -226,10 +315,10 @@
       <li>Linux: <code>~/.config/Claude/claude_desktop_config.json</code></li>
     </ul>
 <pre><code>{
-  "mcpServers": {
-    "apilocker": {
-      "command": "apilocker",
-      "args": ["mcp"]
+  <span class="tok-key">"mcpServers"</span>: {
+    <span class="tok-key">"apilocker"</span>: {
+      <span class="tok-key">"command"</span>: <span class="tok-str">"apilocker"</span>,
+      <span class="tok-key">"args"</span>: [<span class="tok-str">"mcp"</span>]
     }
   }
 }</code></pre>
@@ -240,12 +329,12 @@
     <h2>Zed</h2>
     <p>Open your Zed <code>settings.json</code> and add a <code>context_servers</code> entry:</p>
 <pre><code>{
-  "context_servers": {
-    "apilocker": {
-      "command": {
-        "path": "apilocker",
-        "args": ["mcp"],
-        "env": {}
+  <span class="tok-key">"context_servers"</span>: {
+    <span class="tok-key">"apilocker"</span>: {
+      <span class="tok-key">"command"</span>: {
+        <span class="tok-key">"path"</span>: <span class="tok-str">"apilocker"</span>,
+        <span class="tok-key">"args"</span>: [<span class="tok-str">"mcp"</span>],
+        <span class="tok-key">"env"</span>: {}
       }
     }
   }
@@ -254,7 +343,7 @@
     <h2>Continue (VS Code)</h2>
     <p>Edit <code>~/.continue/config.json</code> and add an <code>mcpServers</code> entry (same shape as Claude Desktop).</p>
 
-    <h2>The 21 tools your agent gets</h2>
+    <h2>The 25 tools your agent gets</h2>
     <p>Every vault operation is exposed as an MCP tool. Your agent can do anything the CLI can do:</p>
     <div class="docs-tool-list">
       <div class="docs-tool">list_keys</div>
@@ -263,7 +352,11 @@
       <div class="docs-tool">list_providers</div>
       <div class="docs-tool">get_activity</div>
       <div class="docs-tool">run_doctor</div>
-      <div class="docs-tool">proxy_request</div>
+      <div class="docs-tool">proxy_get</div>
+      <div class="docs-tool">proxy_post</div>
+      <div class="docs-tool">proxy_put</div>
+      <div class="docs-tool">proxy_patch</div>
+      <div class="docs-tool">proxy_delete</div>
       <div class="docs-tool">store_key</div>
       <div class="docs-tool">store_oauth_credential</div>
       <div class="docs-tool">rotate_key</div>
@@ -280,6 +373,48 @@
       <div class="docs-tool">revoke_device</div>
     </div>
 
+    <h2 id="providers">Proxy tools and supported providers</h2>
+    <p>The proxy tools call a provider's API with a credential from your vault. API Locker injects the secret server-side, so the agent never sees the raw key, and every call is audit-logged. There's one tool per HTTP method: <code>proxy_get</code> is read-only, while <code>proxy_post</code>, <code>proxy_put</code>, <code>proxy_patch</code>, and <code>proxy_delete</code> are writes that Claude confirms with you before running.</p>
+    <p>Each request goes to the credential's base URL plus the <code>path</code> you pass. These are the providers with built-in templates, the base URL each one uses, and its API reference:</p>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead>
+          <tr><th>Provider</th><th>Base URL</th><th>API reference</th><th>Writes through MCP</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>OpenAI</td><td><code>https://api.openai.com</code></td><td><a href="https://developers.openai.com/api/reference/overview">OpenAI API</a></td><td>Yes, except image, audio, and video generation</td></tr>
+          <tr><td>Anthropic</td><td><code>https://api.anthropic.com</code></td><td><a href="https://platform.claude.com/docs/en/api/overview">Claude API</a></td><td>Yes</td></tr>
+          <tr><td>Google AI (Gemini)</td><td><code>https://generativelanguage.googleapis.com</code></td><td><a href="https://ai.google.dev/api">Gemini API</a></td><td>Yes, except image, audio, and video generation</td></tr>
+          <tr><td>Groq</td><td><code>https://api.groq.com/openai/v1</code></td><td><a href="https://console.groq.com/docs/api-reference">Groq API</a></td><td>Yes, except text-to-speech</td></tr>
+          <tr><td>Mistral</td><td><code>https://api.mistral.ai</code></td><td><a href="https://docs.mistral.ai/api">Mistral API</a></td><td>Yes, except image generation</td></tr>
+          <tr><td>Stripe</td><td><code>https://api.stripe.com</code></td><td><a href="https://docs.stripe.com/api">Stripe API</a></td><td>No (read-only)</td></tr>
+          <tr><td>Lemon Squeezy</td><td><code>https://api.lemonsqueezy.com/v1</code></td><td><a href="https://docs.lemonsqueezy.com/api">Lemon Squeezy API</a></td><td>No (read-only)</td></tr>
+          <tr><td>Twilio</td><td><code>https://api.twilio.com</code></td><td><a href="https://www.twilio.com/docs/usage/api">Twilio REST API</a></td><td>Yes, except buying phone numbers</td></tr>
+          <tr><td>SendGrid</td><td><code>https://api.sendgrid.com</code></td><td><a href="https://www.twilio.com/docs/sendgrid/api-reference">SendGrid API</a></td><td>Yes</td></tr>
+          <tr><td>Resend</td><td><code>https://api.resend.com</code></td><td><a href="https://resend.com/docs/api-reference/introduction">Resend API</a></td><td>Yes</td></tr>
+          <tr><td>Cloudflare</td><td><code>https://api.cloudflare.com</code></td><td><a href="https://developers.cloudflare.com/api/">Cloudflare API</a></td><td>Yes, except domain purchases and AI image or audio models</td></tr>
+          <tr><td>Vercel</td><td><code>https://api.vercel.com</code></td><td><a href="https://vercel.com/docs/rest-api">Vercel REST API</a></td><td>Yes, except domain purchases</td></tr>
+          <tr><td>Upstash</td><td><code>https://api.upstash.com/v2</code></td><td><a href="https://upstash.com/docs/devops/developer-api/introduction">Upstash Developer API</a></td><td>Yes</td></tr>
+          <tr><td>GitHub</td><td><code>https://api.github.com</code></td><td><a href="https://docs.github.com/en/rest">GitHub REST API</a></td><td>Yes, except Sponsors payments</td></tr>
+          <tr><td>Clerk</td><td><code>https://api.clerk.com/v1</code></td><td><a href="https://clerk.com/docs/reference/backend-api">Clerk Backend API</a></td><td>Yes</td></tr>
+          <tr><td>Sentry</td><td><code>https://sentry.io/api/0</code></td><td><a href="https://docs.sentry.io/api/">Sentry API</a></td><td>Yes</td></tr>
+          <tr><td>PostHog</td><td><code>https://app.posthog.com</code></td><td><a href="https://posthog.com/docs/api">PostHog API</a></td><td>Yes</td></tr>
+          <tr><td>Cloudinary</td><td><code>https://api.cloudinary.com/v1_1</code></td><td><a href="https://cloudinary.com/documentation/image_upload_api_reference">Cloudinary Upload API</a></td><td>Yes, except generative AI transformations</td></tr>
+          <tr><td>Mux</td><td><code>https://api.mux.com</code></td><td><a href="https://www.mux.com/docs/api-reference">Mux API</a></td><td>Yes</td></tr>
+          <tr><td>ElevenLabs</td><td><code>https://api.elevenlabs.io/v1</code></td><td><a href="https://elevenlabs.io/docs/api-reference/introduction">ElevenLabs API</a></td><td>No (read-only)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>OAuth credentials (Google, GitHub, Slack, Microsoft, Notion, Spotify, X, LinkedIn, Discord, Zoom, Dropbox, Salesforce, HubSpot) are proxied to the API base URL you set on the credential, and writes work for each of those providers' main API hosts.</p>
+    <p><strong>What the proxy tools won't do.</strong> To meet Anthropic's directory policy, write requests from AI agents are refused when they would move money or generate AI media:</p>
+    <ul>
+      <li>Payment APIs such as Stripe and Lemon Squeezy are read-only through MCP.</li>
+      <li>Purchase endpoints (domain registration, phone number purchases, sponsorships) are blocked.</li>
+      <li>AI image, video, and audio generation endpoints and models are blocked.</li>
+      <li>Credentials with a custom base URL outside the hosts above are read-only through MCP.</li>
+    </ul>
+    <p>These limits apply only to AI agents using the MCP tools. Your own apps calling the API Locker proxy with a scoped token can still make any of these requests.</p>
+
     <h2>Usage examples</h2>
     <p>Once API Locker is connected, your AI agent can handle credential-related tasks in plain English. Here are three concrete flows, each showing the kinds of prompts that work well and which MCP tools get called under the hood:</p>
 
@@ -293,7 +428,7 @@
       <li>Calls <code>list_keys</code> to enumerate every credential you have stored</li>
       <li>Calls <code>run_doctor</code> to get the built-in health report (stale rotations, unused keys, expiring tokens, local config permission checks)</li>
       <li>Calls <code>list_tokens</code> to see which scoped tokens exist and their rotation cadence</li>
-      <li>Summarizes the findings: "You have 4 keys over 90 days old (OPENAI_API_KEY last rotated 2025-11-08, …). Your daily-rotating <code>web-app-prod</code> token expires in 3 days unless refreshed."</li>
+      <li>Summarizes the findings: "You have 4 keys over 90 days old (OPENAI_API_KEY last rotated 2025-11-08, ...). Your daily-rotating <code>web-app-prod</code> token expires in 3 days unless refreshed."</li>
     </ul>
     <p>All three tools are <em>read-only</em> — no state changes, nothing consumed, nothing charged. This is the safest entry point for a new connection.</p>
 
@@ -320,16 +455,16 @@
     <p><strong>What Claude does:</strong></p>
     <ul>
       <li>Calls <code>list_keys</code> filtered by <code>category: "llm"</code> to find the OpenAI credential's <code>key_id</code></li>
-      <li>Calls <code>proxy_request</code> with <code>key_id</code> + <code>path: "/v1/chat/completions"</code> + the request body — API Locker's proxy handler injects the raw key into the outbound call <em>server-side</em>, forwards to OpenAI, and returns the response</li>
+      <li>Calls <code>proxy_post</code> with <code>key_id</code> + <code>path: "/v1/chat/completions"</code> + the request body — API Locker's proxy handler injects the raw key into the outbound call <em>server-side</em>, forwards to OpenAI, and returns the response</li>
       <li>Shows you the haiku</li>
     </ul>
-    <p>At no point did Claude see your OpenAI API key. The <code>proxy_request</code> tool carries <code>openWorldHint: true</code> and <code>destructiveHint: true</code> because it makes an outbound call that can affect billing or state on the target service. Every call is audit-logged with the source IP, latency, and response status.</p>
+    <p>At no point did Claude see your OpenAI API key. <code>proxy_post</code> carries <code>openWorldHint: true</code> and <code>destructiveHint: true</code> because it makes an outbound call that can affect billing or state on the target service, so Claude asks before running it. Read-only lookups go through <code>proxy_get</code> instead. Every call is audit-logged with the source IP, latency, and response status.</p>
 
     <h2>Privacy &amp; data handling</h2>
     <p>API Locker's MCP server handles sensitive data. Here's exactly what we do and don't store:</p>
     <ul>
-      <li><strong>Credential values:</strong> encrypted with AES-256-GCM before ever touching disk. Stored in Cloudflare KV as ciphertext only. The plaintext is only ever assembled inside the Worker for one of three reasons: an authenticated <code>reveal_key</code> call, an authenticated <code>proxy_request</code> call, or the Worker's own OAuth sign-in flow reading its own credentials from the vault. Plaintext is never logged, cached, or persisted outside of encrypted storage.</li>
-      <li><strong>Request bodies sent through <code>proxy_request</code>:</strong> forwarded to the target upstream API unchanged. We do not log, store, or retain request bodies or responses — only metadata (timestamp, target host, status code, latency, response size).</li>
+      <li><strong>Credential values:</strong> encrypted with AES-256-GCM before ever touching disk. Stored in Cloudflare KV as ciphertext only. The plaintext is only ever assembled inside the Worker for one of three reasons: an authenticated <code>reveal_key</code> call, an authenticated proxy tool call (<code>proxy_get</code>, <code>proxy_post</code>, etc.), or the Worker's own OAuth sign-in flow reading its own credentials from the vault. Plaintext is never logged, cached, or persisted outside of encrypted storage.</li>
+      <li><strong>Request bodies sent through the proxy tools:</strong> forwarded to the target upstream API unchanged. We do not log, store, or retain request bodies or responses — only metadata (timestamp, target host, status code, latency, response size).</li>
       <li><strong>Audit logs:</strong> every credential reveal, rotation, rename, pause/resume, proxy call, and MCP tool invocation is logged with <code>{user_id, timestamp, source_ip, country, status_code, latency_ms}</code>. Logs are retained indefinitely for the user's own visibility (<code>GET /v1/activity</code>, <code>apilocker activity</code>) and are never shared externally.</li>
       <li><strong>OAuth session data from MCP clients:</strong> when a client like Claude authenticates via the OAuth 2.1 flow, we store a hashed access token and refresh token plus the approved scopes, client ID, and user ID. The refresh token rotates on every use; old tokens are held one rotation back for reuse detection and then discarded. We do not store the access token plaintext.</li>
       <li><strong>Conversation content:</strong> API Locker does not see, log, or store any conversation history between you and Claude. Only the individual MCP tool calls reach the Worker, and only their arguments (e.g. "rotate key alias OPENAI_API_KEY") — never the surrounding conversation context.</li>
@@ -338,8 +473,8 @@
 
     <h2>Security</h2>
     <p>The MCP bridge reads your master token from <code>~/.apilocker/config.json</code>. This gives the connected MCP client <strong>full vault access</strong> — the same permissions you have at the CLI. Only connect MCP clients you own and trust completely (Claude Desktop on your own laptop, your own Cursor instance, etc.).</p>
-    <p>For more restricted scenarios, use the scoped-token auth path: pass a scoped token in the Authorization header when calling the MCP server directly over HTTP. Scoped tokens can only call read tools (<code>list_keys</code>, <code>reveal_key</code>, <code>proxy_request</code>, etc.) and only for credentials in their pre-approved <code>allowed_keys</code> list. Write tools (<code>store_key</code>, <code>rotate_key</code>, <code>delete_key</code>, device/token management) are rejected for scoped tokens.</p>
-    <p>For remote MCP connections (OAuth 2.1), scopes are enforced at the token level: <code>vault:read</code> is required for any MCP call, <code>vault:write</code> is additionally required for tools that modify vault state, and <code>vault:proxy</code> is required for <code>proxy_request</code>. Refresh tokens rotate on use and reuse is treated as token theft (the entire grant family is revoked immediately).</p>
+    <p>For more restricted scenarios, use the scoped-token auth path: pass a scoped token in the Authorization header when calling the MCP server directly over HTTP. Scoped tokens can only call read tools and the proxy tools (<code>list_keys</code>, <code>reveal_key</code>, <code>proxy_get</code>, etc.) and only for credentials in their pre-approved <code>allowed_keys</code> list. Write tools (<code>store_key</code>, <code>rotate_key</code>, <code>delete_key</code>, device/token management) are rejected for scoped tokens.</p>
+    <p>For remote MCP connections (OAuth 2.1), scopes are enforced at the token level: <code>vault:read</code> is required for any MCP call, <code>vault:write</code> is additionally required for tools that modify vault state, and <code>vault:proxy</code> is required for the proxy tools. Refresh tokens rotate on use and reuse is treated as token theft (the entire grant family is revoked immediately).</p>
 
     <h2>Support</h2>
     <p>Questions, bug reports, feedback, and security disclosures all have a home:</p>
@@ -377,7 +512,7 @@
   </div>
 
   <script>
-    const nav = document.getElementById('nav');
+    const nav = document.getElementById('floating-nav');
     const onScroll = () => {
       if (window.scrollY > 8) nav.classList.add('scrolled');
       else nav.classList.remove('scrolled');

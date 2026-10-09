@@ -9,8 +9,162 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=8">
+
+  <style>
+    /* Legal page styles — dark theme */
+    .legal-main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 140px 28px 80px;
+    }
+    .legal-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-solid);
+      margin-bottom: 16px;
+    }
+    .legal-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-solid);
+    }
+    .legal-h1 {
+      font-size: clamp(36px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin: 0 0 12px;
+      background: linear-gradient(180deg, #fff 0%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .legal-updated {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+    .legal-lede {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 32px;
+    }
+    .legal-prose h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #f1f5f9;
+      margin: 40px 0 14px;
+      line-height: 1.3;
+    }
+    .legal-prose p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+    .legal-prose ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+    .legal-prose li {
+      position: relative;
+      padding: 5px 0 5px 22px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #cbd5e1;
+    }
+    .legal-prose li::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 14px;
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--accent-solid);
+    }
+    .legal-prose li strong {
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+    .legal-prose a {
+      color: var(--accent-solid);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .legal-prose a:hover {
+      color: #60a5fa;
+    }
+    .legal-prose code {
+      font-family: var(--font-mono);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+    .legal-note {
+      margin-top: 48px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      font-size: 14px;
+      line-height: 1.65;
+      color: #94a3b8;
+    }
+
+    /* Footer */
+    .page-footer {
+      border-top: 1px solid var(--border-light);
+      padding: 48px 28px 32px;
+      max-width: 720px;
+      margin: 60px auto 0;
+    }
+    .page-footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .page-footer-brand {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-main);
+    }
+    .page-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .page-footer-links a {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .page-footer-links a:hover { color: #fff; }
+    .page-footer-copy {
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+  </style>
 
   <!-- API Locker brand assets (mascot logo) -->
   <link rel="icon" type="image/png" sizes="32x32" href="/brand/logo-32.png">
@@ -23,171 +177,167 @@
   <meta name="twitter:image" content="https://www.apilocker.app/brand/og-image.png">
 </head>
 <body>
+  <div id="cursor-halo"></div>
 
-  <div class="auth-shell">
+  <!-- Nav -->
+  <nav id="floating-nav" class="nav">
+    <div class="nav-brand">API Locker</div>
+    <div class="nav-links">
+      <a href="/#problem">Problem</a>
+      <a href="/#solution">Solution</a>
+      <a href="/#how-it-works">How It Works</a>
+      <a href="/changelog">Changelog</a>
+    </div>
+    <div class="nav-cta">
+      <a href="/login" class="btn btn-secondary btn-small">Sign In</a>
+      <a href="/signup" class="btn btn-primary btn-small">Get Started Free</a>
+    </div>
+  </nav>
 
-    <!-- ===================== NAV ===================== -->
-    <nav class="nav" id="nav">
-      <div class="container nav-inner">
-        <a href="/" class="logo">
-          <span class="logo-mark">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          API Locker
-        </a>
-        <div class="nav-links">
-          <a href="/#features">Features</a>
-          <a href="/#vault">Vault</a>
-          <a href="/#proxy">Proxy</a>
-          <a href="/#pricing">Pricing</a>
-        </div>
-        <div style="display: flex; align-items: center; gap: 18px;">
-          <a href="/login" class="nav-signin">Log in</a>
-          <a href="/signup" class="nav-cta">
-            Sign up
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </a>
-        </div>
+  <main class="legal-main">
+    <span class="legal-eyebrow"><span class="legal-eyebrow-dot"></span> Legal</span>
+    <h1 class="legal-h1">Privacy Policy</h1>
+    <p class="legal-updated">Last updated: April 9, 2026</p>
+
+    <div class="legal-prose">
+      <p class="legal-lede">API Locker is a credential vault and proxy. Our entire product exists to keep sensitive data secure, so we take privacy seriously. This page explains what we collect, what we do with it, and what we never touch.</p>
+
+      <h2>TL;DR</h2>
+      <ul>
+        <li>We store your encrypted API keys and proxy requests to the providers you choose.</li>
+        <li>Your raw credentials are encrypted with AES-256-GCM before they hit our database, and the encryption key never leaves our server-side runtime.</li>
+        <li>We do not read, sell, or share the contents of your API calls or responses.</li>
+        <li>We collect the minimum data needed to run the service: your email, your OAuth provider ID, and request metadata for audit logging.</li>
+        <li>You can delete your account and all associated data at any time.</li>
+      </ul>
+
+      <h2>1. What we collect</h2>
+      <p>When you sign up with Google or GitHub, we receive and store:</p>
+      <ul>
+        <li>Your email address</li>
+        <li>Your display name and avatar URL</li>
+        <li>A unique identifier from the OAuth provider</li>
+      </ul>
+      <p>When you store a credential, we collect:</p>
+      <ul>
+        <li>The friendly name you give it</li>
+        <li>The provider type (OpenAI, Stripe, etc.) so we know how to inject it</li>
+        <li>The encrypted ciphertext of the credential itself</li>
+      </ul>
+      <p>When your apps or agents proxy a request through API Locker, we record:</p>
+      <ul>
+        <li>The key and token used</li>
+        <li>The target provider and path</li>
+        <li>The HTTP status code and latency</li>
+        <li>The timestamp and source IP</li>
+      </ul>
+
+      <h2>2. What we do NOT collect</h2>
+      <ul>
+        <li>We do not log the request body you send to providers.</li>
+        <li>We do not log the response body from providers.</li>
+        <li>We do not decrypt or inspect your stored credentials for any purpose other than injecting them into the outbound request you authorized.</li>
+        <li>We do not sell any data to third parties.</li>
+        <li>We do not use your data to train machine learning models.</li>
+      </ul>
+
+      <h2>3. How we store it</h2>
+      <p>Encrypted credential blobs live in Cloudflare Workers KV, encrypted at rest with AES-256-GCM. The encryption key is stored as an environment secret on Cloudflare Workers and is never exposed to the database or logs. Metadata (your user record, token records, audit logs) lives in Cloudflare D1.</p>
+      <p>All data in transit is protected by TLS 1.3 via Cloudflare's edge.</p>
+
+      <h2>4. How we use it</h2>
+      <ul>
+        <li>To authenticate you when you sign in</li>
+        <li>To proxy requests to the providers you have stored credentials for</li>
+        <li>To enforce token scopes, rotation policies, and revocations</li>
+        <li>To detect anomalous traffic patterns (refresh-token reuse, abnormal request volume)</li>
+        <li>To generate audit logs you can review in your own dashboard</li>
+      </ul>
+
+      <h2>5. Third parties</h2>
+      <p>API Locker itself uses the following third-party services:</p>
+      <ul>
+        <li><strong>Cloudflare</strong> — hosting, DNS, edge compute, database, and key-value storage</li>
+        <li><strong>Google and GitHub</strong> — OAuth sign-in only (we never access data beyond your email and profile)</li>
+      </ul>
+      <p>When you proxy a request through API Locker, that request is forwarded to the API provider you chose (OpenAI, Stripe, Anthropic, etc.). Those providers have their own privacy policies and terms that apply to your usage of their services.</p>
+
+      <h2>5a. MCP clients (Claude, Cursor, Zed, etc.)</h2>
+      <p>API Locker runs a Model Context Protocol (MCP) server that lets AI coding and chat agents read and manage your vault on your behalf. Two connection modes exist, and the privacy implications differ slightly:</p>
+      <ul>
+        <li><strong>Local MCP (stdio bridge).</strong> You install the <code>apilocker</code> CLI, register your device, and configure a local MCP client (Claude Desktop, Claude Code, Cursor, Zed, Continue) to run <code>apilocker mcp</code> as a subprocess. The bridge forwards your requests to <code>https://api.apilocker.app/v1/mcp</code> over HTTPS authenticated with a device master token stored at <code>~/.apilocker/config.json</code>. Only the JSON-RPC messages reach our servers; your conversation content with the AI model never does.</li>
+        <li><strong>Remote MCP (OAuth 2.1).</strong> You click an "Add connector" button in a supported MCP client (e.g. Claude web) and authorize the client on our consent screen. The client then holds an access token it uses to call our MCP endpoint directly. We store the token in hashed form, along with the client ID, the user ID, the approved scopes, and the refresh-token rotation history. We do not see or store the underlying conversation you have with the AI model; only the individual tool calls.</li>
+      </ul>
+      <p><strong>What MCP tool calls we log:</strong> the same metadata we log for proxy calls — tool name, key ID (if any), timestamp, source IP, country, status code, and latency. We do not log tool call arguments or responses.</p>
+      <p><strong>What we never see:</strong> your chat history with the AI, system prompts, model outputs unrelated to a tool call, or any content that doesn't flow through a specific MCP tool invocation.</p>
+      <p><strong>Revoking a connected MCP client:</strong> you can revoke any connected client at any time from your <a href="/dashboard">dashboard</a>. Revocation takes effect on the next authenticated request (within seconds). Revoking the grant invalidates both the current access token and its refresh token; the client must re-authorize to reconnect.</p>
+
+      <h2>5b. OAuth-connected third-party clients (Dynamic Client Registration)</h2>
+      <p>When you approve a new MCP client via the consent screen, that client goes through RFC 7591 Dynamic Client Registration. We record the client's self-declared name, logo URL (if provided), homepage URL (if provided), and the redirect URIs it registered. We display the self-declared name on the consent screen so you can identify the caller before approving. We do not verify the client's identity beyond its ability to complete the OAuth handshake — you are responsible for only approving clients you recognize and trust.</p>
+
+      <h2>6. Your rights</h2>
+      <ul>
+        <li><strong>Access:</strong> you can view all your stored keys, tokens, and activity logs in the dashboard.</li>
+        <li><strong>Deletion:</strong> you can delete individual keys and tokens from the dashboard. To delete your entire account, contact us.</li>
+        <li><strong>Export:</strong> activity logs are queryable via the dashboard and API.</li>
+      </ul>
+
+      <h2>7. Retention</h2>
+      <p>We retain your data as long as your account is active. Audit logs are retained for up to 12 months. Deleted keys and tokens are removed from the database immediately; audit log entries referencing deleted resources remain for the retention window.</p>
+
+      <h2>8. Contact</h2>
+      <p>The right address depends on what you want to talk about:</p>
+      <ul>
+        <li><strong>Privacy questions:</strong> <a href="mailto:privacy@apilocker.app">privacy@apilocker.app</a></li>
+        <li><strong>Security disclosures:</strong> <a href="mailto:security@apilocker.app">security@apilocker.app</a> — please don't open public GitHub issues for security findings</li>
+        <li><strong>General support:</strong> <a href="mailto:support@apilocker.app">support@apilocker.app</a></li>
+        <li><strong>Product feedback &amp; feature requests:</strong> <a href="mailto:feedback@apilocker.app">feedback@apilocker.app</a></li>
+        <li><strong>Bug reports:</strong> <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a></li>
+      </ul>
+
+      <p class="legal-note">This policy is a starting point for a credential-vault product. If you're planning to use API Locker for regulated data (PCI, HIPAA, GDPR-sensitive data, etc.), contact us before you do — we want to make sure the service fits your compliance needs.</p>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <div class="page-footer-inner">
+      <div class="page-footer-brand">API Locker</div>
+      <div class="page-footer-links">
+        <a href="/docs/mcp">Docs</a>
+        <a href="https://github.com/apilocker/apilocker">GitHub</a>
+        <a href="https://www.npmjs.com/package/apilocker">npm</a>
+        <a href="mailto:feedback@apilocker.app">Feedback</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
       </div>
-    </nav>
-
-    <main class="legal-main">
-      <div class="legal-container">
-        <span class="eyebrow"><span class="eyebrow-dot"></span> Legal</span>
-        <h1 class="legal-h1">Privacy Policy</h1>
-        <p class="legal-updated">Last updated: April 9, 2026</p>
-
-        <div class="legal-prose">
-          <p class="legal-lede">API Locker is a credential vault and proxy. Our entire product exists to keep sensitive data secure, so we take privacy seriously. This page explains what we collect, what we do with it, and what we never touch.</p>
-
-          <h2>TL;DR</h2>
-          <ul>
-            <li>We store your encrypted API keys and proxy requests to the providers you choose.</li>
-            <li>Your raw credentials are encrypted with AES-256-GCM before they hit our database, and the encryption key never leaves our server-side runtime.</li>
-            <li>We do not read, sell, or share the contents of your API calls or responses.</li>
-            <li>We collect the minimum data needed to run the service: your email, your OAuth provider ID, and request metadata for audit logging.</li>
-            <li>You can delete your account and all associated data at any time.</li>
-          </ul>
-
-          <h2>1. What we collect</h2>
-          <p>When you sign up with Google or GitHub, we receive and store:</p>
-          <ul>
-            <li>Your email address</li>
-            <li>Your display name and avatar URL</li>
-            <li>A unique identifier from the OAuth provider</li>
-          </ul>
-          <p>When you store a credential, we collect:</p>
-          <ul>
-            <li>The friendly name you give it</li>
-            <li>The provider type (OpenAI, Stripe, etc.) so we know how to inject it</li>
-            <li>The encrypted ciphertext of the credential itself</li>
-          </ul>
-          <p>When your apps or agents proxy a request through API Locker, we record:</p>
-          <ul>
-            <li>The key and token used</li>
-            <li>The target provider and path</li>
-            <li>The HTTP status code and latency</li>
-            <li>The timestamp and source IP</li>
-          </ul>
-
-          <h2>2. What we do NOT collect</h2>
-          <ul>
-            <li>We do not log the request body you send to providers.</li>
-            <li>We do not log the response body from providers.</li>
-            <li>We do not decrypt or inspect your stored credentials for any purpose other than injecting them into the outbound request you authorized.</li>
-            <li>We do not sell any data to third parties.</li>
-            <li>We do not use your data to train machine learning models.</li>
-          </ul>
-
-          <h2>3. How we store it</h2>
-          <p>Encrypted credential blobs live in Cloudflare Workers KV, encrypted at rest with AES-256-GCM. The encryption key is stored as an environment secret on Cloudflare Workers and is never exposed to the database or logs. Metadata (your user record, token records, audit logs) lives in Cloudflare D1.</p>
-          <p>All data in transit is protected by TLS 1.3 via Cloudflare's edge.</p>
-
-          <h2>4. How we use it</h2>
-          <ul>
-            <li>To authenticate you when you sign in</li>
-            <li>To proxy requests to the providers you have stored credentials for</li>
-            <li>To enforce token scopes, rotation policies, and revocations</li>
-            <li>To detect anomalous traffic patterns (refresh-token reuse, abnormal request volume)</li>
-            <li>To generate audit logs you can review in your own dashboard</li>
-          </ul>
-
-          <h2>5. Third parties</h2>
-          <p>API Locker itself uses the following third-party services:</p>
-          <ul>
-            <li><strong>Cloudflare</strong> — hosting, DNS, edge compute, database, and key-value storage</li>
-            <li><strong>Google and GitHub</strong> — OAuth sign-in only (we never access data beyond your email and profile)</li>
-          </ul>
-          <p>When you proxy a request through API Locker, that request is forwarded to the API provider you chose (OpenAI, Stripe, Anthropic, etc.). Those providers have their own privacy policies and terms that apply to your usage of their services.</p>
-
-          <h2>5a. MCP clients (Claude, Cursor, Zed, etc.)</h2>
-          <p>API Locker runs a Model Context Protocol (MCP) server that lets AI coding and chat agents read and manage your vault on your behalf. Two connection modes exist, and the privacy implications differ slightly:</p>
-          <ul>
-            <li><strong>Local MCP (stdio bridge).</strong> You install the <code>apilocker</code> CLI, register your device, and configure a local MCP client (Claude Desktop, Claude Code, Cursor, Zed, Continue) to run <code>apilocker mcp</code> as a subprocess. The bridge forwards your requests to <code>https://api.apilocker.app/v1/mcp</code> over HTTPS authenticated with a device master token stored at <code>~/.apilocker/config.json</code>. Only the JSON-RPC messages reach our servers; your conversation content with the AI model never does.</li>
-            <li><strong>Remote MCP (OAuth 2.1).</strong> You click an "Add connector" button in a supported MCP client (e.g. Claude web) and authorize the client on our consent screen. The client then holds an access token it uses to call our MCP endpoint directly. We store the token in hashed form, along with the client ID, the user ID, the approved scopes, and the refresh-token rotation history. We do not see or store the underlying conversation you have with the AI model; only the individual tool calls.</li>
-          </ul>
-          <p><strong>What MCP tool calls we log:</strong> the same metadata we log for proxy calls — tool name, key ID (if any), timestamp, source IP, country, status code, and latency. We do not log tool call arguments or responses.</p>
-          <p><strong>What we never see:</strong> your chat history with the AI, system prompts, model outputs unrelated to a tool call, or any content that doesn't flow through a specific MCP tool invocation.</p>
-          <p><strong>Revoking a connected MCP client:</strong> you can revoke any connected client at any time from your <a href="/dashboard">dashboard</a>. Revocation takes effect on the next authenticated request (within seconds). Revoking the grant invalidates both the current access token and its refresh token; the client must re-authorize to reconnect.</p>
-
-          <h2>5b. OAuth-connected third-party clients (Dynamic Client Registration)</h2>
-          <p>When you approve a new MCP client via the consent screen, that client goes through RFC 7591 Dynamic Client Registration. We record the client's self-declared name, logo URL (if provided), homepage URL (if provided), and the redirect URIs it registered. We display the self-declared name on the consent screen so you can identify the caller before approving. We do not verify the client's identity beyond its ability to complete the OAuth handshake — you are responsible for only approving clients you recognize and trust.</p>
-
-          <h2>6. Your rights</h2>
-          <ul>
-            <li><strong>Access:</strong> you can view all your stored keys, tokens, and activity logs in the dashboard.</li>
-            <li><strong>Deletion:</strong> you can delete individual keys and tokens from the dashboard. To delete your entire account, contact us.</li>
-            <li><strong>Export:</strong> activity logs are queryable via the dashboard and API.</li>
-          </ul>
-
-          <h2>7. Retention</h2>
-          <p>We retain your data as long as your account is active. Audit logs are retained for up to 12 months. Deleted keys and tokens are removed from the database immediately; audit log entries referencing deleted resources remain for the retention window.</p>
-
-          <h2>8. Contact</h2>
-          <p>The right address depends on what you want to talk about:</p>
-          <ul>
-            <li><strong>Privacy questions:</strong> <a href="mailto:privacy@apilocker.app">privacy@apilocker.app</a></li>
-            <li><strong>Security disclosures:</strong> <a href="mailto:security@apilocker.app">security@apilocker.app</a> — please don't open public GitHub issues for security findings</li>
-            <li><strong>General support:</strong> <a href="mailto:support@apilocker.app">support@apilocker.app</a></li>
-            <li><strong>Product feedback &amp; feature requests:</strong> <a href="mailto:feedback@apilocker.app">feedback@apilocker.app</a></li>
-            <li><strong>Bug reports:</strong> <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a></li>
-          </ul>
-
-          <p class="legal-note">This policy is a starting point for a credential-vault product. If you're planning to use API Locker for regulated data (PCI, HIPAA, GDPR-sensitive data, etc.), contact us before you do — we want to make sure the service fits your compliance needs.</p>
-        </div>
-      </div>
-    </main>
-
-    <footer>
-      <div class="container footer-inner">
-        <div class="logo">
-          <span class="logo-mark">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          API Locker
-        </div>
-        <div class="footer-links">
-          <a href="/docs/mcp">Docs</a>
-          <a href="https://github.com/apilocker/apilocker">GitHub</a>
-          <a href="https://www.npmjs.com/package/apilocker">npm</a>
-          <a href="mailto:feedback@apilocker.app">Feedback</a>
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
-        </div>
-        <div class="footer-copy">© 2026 API Locker</div>
-      </div>
-    </footer>
-
-  </div>
+      <div class="page-footer-copy">&copy; 2026 API Locker</div>
+    </div>
+  </footer>
 
   <script>
-    const nav = document.getElementById('nav');
+    const nav = document.getElementById('floating-nav');
     const onScroll = () => {
       if (window.scrollY > 8) nav.classList.add('scrolled');
       else nav.classList.remove('scrolled');
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+
+    // Cursor halo
+    const halo = document.getElementById('cursor-halo');
+    let mouseX = 0, mouseY = 0;
+    let haloX = 0, haloY = 0;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+    function animateHalo() {
+      haloX += (mouseX - haloX) * 0.15;
+      haloY += (mouseY - haloY) * 0.15;
+      halo.style.transform = `translate3d(${haloX}px, ${haloY}px, 0)`;
+      requestAnimationFrame(animateHalo);
+    }
+    animateHalo();
   </script>
 </body>
 </html>

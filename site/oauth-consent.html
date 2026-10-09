@@ -10,25 +10,39 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=8">
 
   <style>
+    .world-map-bg {
+      position: fixed;
+      inset: -10%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.25;
+      background: url('/assets/world-dot-map.svg') center center / cover no-repeat;
+    }
     .consent-shell {
       min-height: 100vh;
       display: grid;
       place-items: center;
       padding: 40px 20px;
-      background: var(--bg);
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+        var(--bg-dark);
     }
+
+    /* Glassmorphic consent card */
     .consent-card {
       width: 100%;
       max-width: 540px;
-      background: var(--surface);
+      background: rgba(20, 22, 30, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-radius: 20px;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
       padding: 40px 36px 32px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--border-light);
     }
     .consent-head {
       text-align: center;
@@ -47,23 +61,25 @@
     }
     .consent-title {
       font-size: 22px;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.02em;
-      color: var(--ink);
+      color: var(--text-main);
       margin: 0 0 8px;
     }
     .consent-sub {
       font-size: 14px;
-      color: var(--muted);
+      color: var(--text-muted);
       margin: 0;
       line-height: 1.55;
     }
+
+    /* Client row */
     .consent-client {
       margin: 24px 0 20px;
       padding: 16px 18px;
-      background: var(--card);
+      background: rgba(255, 255, 255, 0.04);
       border-radius: 12px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--border-light);
       display: flex;
       align-items: center;
       gap: 14px;
@@ -72,10 +88,11 @@
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
       display: grid;
       place-items: center;
-      color: var(--muted);
+      color: var(--text-muted);
       font-size: 13px;
       font-weight: 700;
       flex-shrink: 0;
@@ -89,20 +106,22 @@
     .consent-client-name {
       font-size: 15px;
       font-weight: 700;
-      color: var(--ink);
+      color: var(--text-main);
       margin: 0;
     }
     .consent-client-sub {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--text-muted);
       margin: 2px 0 0;
     }
+
+    /* Scopes */
     .consent-scopes-label {
       font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: var(--muted);
+      color: var(--text-muted);
       margin: 0 0 10px;
     }
     .consent-scopes {
@@ -114,7 +133,7 @@
       display: flex;
       gap: 10px;
       padding: 10px 0;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid var(--border-light);
     }
     .consent-scopes li:last-child { border-bottom: none; }
     .consent-scope-icon {
@@ -126,48 +145,57 @@
       display: block;
       font-size: 13px;
       font-weight: 700;
-      color: var(--ink);
+      color: #93C5FD;
       margin: 0 0 2px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-family: var(--font-mono);
     }
     .consent-scope-desc {
       font-size: 13px;
-      color: var(--ink-2);
+      color: var(--text-muted);
       margin: 0;
       line-height: 1.55;
     }
+
+    /* Account badge */
     .consent-account {
       margin: 0 0 18px;
       padding: 10px 14px;
-      background: rgba(16,185,129,0.06);
+      background: rgba(16, 185, 129, 0.06);
       border-radius: 10px;
-      border: 1px solid rgba(16,185,129,0.18);
+      border: 1px solid rgba(16, 185, 129, 0.18);
       font-size: 13px;
-      color: var(--ink-2);
+      color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+    .consent-account strong {
+      color: var(--text-main);
     }
     .consent-account svg {
       color: #10B981;
       flex-shrink: 0;
     }
+
+    /* Warning */
     .consent-warning {
       margin: 0 0 22px;
       padding: 12px 14px;
-      background: rgba(251,191,36,0.08);
+      background: rgba(251, 191, 36, 0.06);
       border-radius: 10px;
-      border: 1px solid rgba(251,191,36,0.24);
+      border: 1px solid rgba(251, 191, 36, 0.15);
       font-size: 12px;
-      color: var(--ink-2);
+      color: var(--text-muted);
       line-height: 1.55;
     }
     .consent-warning strong {
-      color: #92400E;
+      color: #FBBF24;
       display: block;
       margin-bottom: 3px;
       font-size: 12px;
     }
+
+    /* Buttons */
     .consent-actions {
       display: flex;
       gap: 10px;
@@ -180,49 +208,54 @@
       font-weight: 700;
       cursor: pointer;
       border: none;
-      transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), filter 0.15s var(--ease);
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .consent-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
     .consent-btn-primary {
-      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      background: linear-gradient(135deg, var(--accent-solid) 0%, var(--accent-secondary) 100%);
       color: white;
-      box-shadow: 0 10px 24px -12px var(--glow);
+      box-shadow: 0 10px 24px -12px rgba(59, 130, 246, 0.4);
     }
     .consent-btn-primary:hover:not(:disabled) {
       transform: translateY(-1px);
       filter: brightness(1.06);
+      box-shadow: 0 14px 32px -12px rgba(59, 130, 246, 0.5);
     }
     .consent-btn-secondary {
-      background: var(--card);
-      color: var(--ink);
-      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .consent-btn-secondary:hover:not(:disabled) {
-      border-color: var(--line-strong);
-      background: var(--surface);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
     }
+
+    /* Loading / error */
     .consent-loading, .consent-error {
       text-align: center;
       padding: 60px 20px;
-      color: var(--muted);
+      color: var(--text-muted);
       font-size: 14px;
     }
     .consent-error {
-      color: #dc2626;
+      color: #ef4444;
     }
     .consent-spinner {
       width: 28px;
       height: 28px;
-      border: 3px solid var(--line);
-      border-top-color: var(--blue);
+      border: 3px solid var(--border-light);
+      border-top-color: var(--accent-solid);
       border-radius: 50%;
       animation: consent-spin 0.9s linear infinite;
       margin: 0 auto 16px;
     }
     @keyframes consent-spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
   </style>
 
   <!-- API Locker brand assets (mascot logo) -->
@@ -237,6 +270,7 @@
 </head>
 <body>
 
+  <div class="world-map-bg"></div>
   <div class="consent-shell">
     <div class="consent-card" id="card">
       <!-- Loading state (shown first) -->

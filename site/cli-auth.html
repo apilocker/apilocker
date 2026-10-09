@@ -10,8 +10,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=8">
 
   <style>
     body {
@@ -20,8 +20,12 @@
       place-items: center;
       background:
         radial-gradient(ellipse 80% 60% at 50% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
-        var(--bg);
+        var(--bg-dark);
     }
+
+    /* ---- Nav overrides ---- */
+    .nav { position: absolute; }
+
     .page {
       width: min(100%, 520px);
       padding: 32px 20px 60px;
@@ -35,23 +39,28 @@
       letter-spacing: -0.02em;
       justify-content: center;
       margin-bottom: 28px;
+      color: var(--text-main);
     }
     .brand .logo-mark {
       width: 32px;
       height: 32px;
       border-radius: 9px;
-      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      background: linear-gradient(135deg, var(--accent-solid) 0%, var(--accent-secondary) 100%);
       display: grid;
       place-items: center;
       color: white;
-      box-shadow: 0 8px 20px -8px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 20px -8px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
+
+    /* Card - glassmorphic dark */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--line);
+      background: rgba(20, 22, 30, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
       border-radius: 20px;
       padding: 32px;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
     .eyebrow {
       display: inline-flex;
@@ -59,7 +68,7 @@
       gap: 8px;
       font-size: 12px;
       font-weight: 600;
-      color: var(--blue);
+      color: var(--accent-solid);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 12px;
@@ -68,32 +77,49 @@
       width: 6px;
       height: 6px;
       border-radius: 999px;
-      background: var(--blue);
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+      background: var(--accent-solid);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
     }
     h1 {
       font-size: 24px;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 6px;
+      color: var(--text-main);
     }
     .sub {
       font-size: 14px;
-      color: var(--muted);
+      color: var(--text-muted);
       margin-bottom: 24px;
+      line-height: 1.55;
     }
+    .sub strong {
+      color: var(--text-main);
+    }
+    .sub code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #93C5FD;
+    }
+
+    /* Device info grid */
     .device-row {
       display: grid;
       grid-template-columns: auto 1fr;
       gap: 10px 14px;
       padding: 18px;
-      background: var(--card);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-light);
       border-radius: 12px;
       margin-bottom: 20px;
     }
     .device-row dt {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--text-muted);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -102,35 +128,39 @@
     .device-row dd {
       font-size: 14px;
       font-weight: 500;
-      color: var(--ink);
+      color: var(--text-main);
       word-break: break-word;
     }
     .code-row dd {
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-family: var(--font-mono);
       font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.04em;
-      color: var(--blue-deep);
+      color: var(--accent-solid);
     }
+
+    /* Countdown */
     .countdown {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 12px;
-      color: var(--muted);
+      color: var(--text-muted);
       margin-bottom: 16px;
     }
     .countdown-dot {
       width: 6px;
       height: 6px;
       border-radius: 999px;
-      background: var(--blue);
+      background: var(--accent-solid);
       animation: pulse 1.6s ease-in-out infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.35; }
     }
+
+    /* Buttons */
     .btn {
       display: flex;
       align-items: center;
@@ -141,36 +171,40 @@
       border-radius: 12px;
       font-size: 15px;
       font-weight: 600;
-      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
+      border: none;
     }
     .btn[disabled] {
       opacity: 0.5;
       cursor: not-allowed;
     }
     .btn-primary {
-      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      background: linear-gradient(135deg, var(--accent-solid) 0%, var(--accent-secondary) 100%);
       color: white;
-      box-shadow: 0 10px 28px -10px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      box-shadow: 0 10px 28px -10px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
     .btn-primary:hover:not([disabled]) {
       transform: translateY(-1px);
-      box-shadow: 0 16px 36px -12px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      box-shadow: 0 16px 36px -12px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
     .btn-secondary {
       background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--line-strong);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .btn-secondary:hover:not([disabled]) {
-      background: var(--card);
-      color: var(--ink);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
     }
     .btn-group {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
+    /* OAuth provider buttons */
     .oauth-btn {
       display: flex;
       align-items: center;
@@ -181,32 +215,42 @@
       border-radius: 12px;
       font-size: 15px;
       font-weight: 600;
-      border: 1px solid var(--line-strong);
-      background: var(--surface);
-      color: var(--ink);
-      transition: all 0.2s var(--ease);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .oauth-btn:hover {
-      border-color: var(--ink);
+      border-color: rgba(255, 255, 255, 0.2);
       transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
     }
+    .oauth-loading {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      padding: 12px 0;
+    }
+
+    /* Fine print */
     .fineprint {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--text-muted);
       text-align: center;
       margin-top: 18px;
       line-height: 1.6;
     }
     .fineprint a {
-      color: var(--muted);
+      color: var(--text-muted);
       text-decoration: underline;
-      text-decoration-color: var(--line-strong);
+      text-decoration-color: rgba(255, 255, 255, 0.15);
       text-underline-offset: 3px;
     }
     .fineprint a:hover {
-      color: var(--ink);
+      color: var(--text-main);
     }
+
+    /* State icons */
     .state-icon {
       width: 56px;
       height: 56px;
@@ -217,15 +261,15 @@
     }
     .state-success .state-icon {
       background: rgba(34, 197, 94, 0.12);
-      color: #16a34a;
+      color: #22c55e;
     }
     .state-error .state-icon {
       background: rgba(239, 68, 68, 0.12);
-      color: #dc2626;
+      color: #ef4444;
     }
     .state-pending .state-icon {
       background: rgba(59, 130, 246, 0.12);
-      color: var(--blue);
+      color: var(--accent-solid);
     }
     .state-center {
       text-align: center;
@@ -233,11 +277,13 @@
     .state-center h1 {
       font-size: 22px;
     }
+
+    /* Spinner */
     .spinner {
       width: 22px;
       height: 22px;
       border: 3px solid rgba(59, 130, 246, 0.18);
-      border-top-color: var(--blue);
+      border-top-color: var(--accent-solid);
       border-radius: 999px;
       animation: spin 0.9s linear infinite;
       margin: 0 auto 14px;
@@ -245,18 +291,53 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
     .hidden {
       display: none !important;
     }
+
+    /* Code input */
+    #code-input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-align: center;
+      text-transform: uppercase;
+      color: var(--accent-solid);
+      background: rgba(255, 255, 255, 0.04);
+      transition: border-color 0.2s ease;
+    }
+    #code-input::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+    }
+    #code-input:focus {
+      outline: none;
+      border-color: var(--accent-solid);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
     .back-link {
       display: block;
       text-align: center;
       margin-top: 18px;
       font-size: 13px;
-      color: var(--muted);
+      color: var(--text-muted);
     }
     .back-link:hover {
-      color: var(--ink);
+      color: var(--text-main);
+    }
+    .world-map-bg {
+      position: fixed;
+      inset: -10%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.25;
+      background: url('/assets/world-dot-map.svg') center center / cover no-repeat;
     }
   </style>
 
@@ -271,6 +352,21 @@
   <meta name="twitter:image" content="https://www.apilocker.app/brand/og-image.png">
 </head>
 <body>
+
+  <div class="world-map-bg"></div>
+
+  <!-- ===================== NAV ===================== -->
+  <nav id="floating-nav" class="nav" style="position: absolute;">
+    <div class="nav-brand">API Locker</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs/mcp">Docs</a>
+    </div>
+    <div class="nav-cta">
+      <a href="/login" class="btn btn-secondary btn-small">Sign In</a>
+      <a href="/signup" class="btn btn-primary btn-small">Get Started Free</a>
+    </div>
+  </nav>
 
   <div class="page">
 
@@ -297,7 +393,7 @@
       <h1>Enter your code</h1>
       <p class="sub">Paste the code your terminal showed you.</p>
       <form id="code-form" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-        <input type="text" id="code-input" placeholder="XXXX-XXXX" autocomplete="off" spellcheck="false" style="width: 100%; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--line-strong); font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-align: center; text-transform: uppercase; color: var(--blue-deep); background: var(--surface);" />
+        <input type="text" id="code-input" placeholder="XXXX-XXXX" autocomplete="off" spellcheck="false" />
         <button type="submit" class="btn btn-primary">Continue</button>
       </form>
     </div>
@@ -308,7 +404,7 @@
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </div>
       <h1>Code expired</h1>
-      <p class="sub">That authorization code has expired. Run <code style="font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--card); padding: 2px 6px; border-radius: 4px;">apilocker register</code> again in your terminal to get a fresh one.</p>
+      <p class="sub">That authorization code has expired. Run <code>apilocker register</code> again in your terminal to get a fresh one.</p>
     </div>
 
     <!-- ---------- State: authorize (signed in) ---------- -->
@@ -378,7 +474,7 @@
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       </div>
       <h1>Authorization cancelled</h1>
-      <p class="sub">We did not connect this device. Your terminal will show an error — run <code style="font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--card); padding: 2px 6px; border-radius: 4px;">apilocker register</code> again if you want to try once more.</p>
+      <p class="sub">We did not connect this device. Your terminal will show an error — run <code>apilocker register</code> again if you want to try once more.</p>
     </div>
 
     <!-- ---------- State: generic error ---------- -->
@@ -500,7 +596,7 @@
             }
           } catch (e) {
             console.error('Failed to load providers:', e);
-            $('cli-oauth-providers').innerHTML = '<div class="oauth-loading" style="color:#dc2626;">Could not load sign-in options.</div>';
+            $('cli-oauth-providers').innerHTML = '<div class="oauth-loading" style="color:#ef4444;">Could not load sign-in options.</div>';
           }
 
           if (!isSignedIn) {

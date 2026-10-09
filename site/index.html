@@ -1,509 +1,1012 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>API Locker — One vault for LLM keys, service API keys, and OAuth credentials</title>
-  <meta name="description" content="One encrypted vault, three types of credentials: LLM API keys, service API keys, and OAuth credentials. Replace your .env file with one token. Smart proxy, automatic rotation, and AI-agent access included." />
+    <script>if(location.hostname==="apilocker.app"){location.replace("https://www.apilocker.app"+location.pathname+location.search+location.hash);}</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Locker — One vault for LLM keys, service API keys, and OAuth credentials</title>
+    <meta name="description" content="One encrypted vault manages every API key, service credential, and OAuth secret — without ever exposing raw keys to your codebase.">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <style>
-    /* ==================== v1.0.0: THREE PILLARS ==================== */
-    .pillars-section {
-      padding: 80px 0 40px;
-    }
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 48px;
-    }
-    @media (max-width: 960px) {
-      .pillars-grid { grid-template-columns: 1fr; gap: 20px; }
-    }
-    .pillar-card {
-      padding: 32px 28px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      box-shadow: var(--shadow-md);
-      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
-    }
-    .pillar-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg);
-    }
-    .pillar-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      color: white;
-      margin-bottom: 18px;
-    }
-    .pillar-icon-llm {
-      background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
-      box-shadow: 0 10px 28px -10px rgba(139, 92, 246, 0.45);
-    }
-    .pillar-icon-service {
-      background: linear-gradient(135deg, #3B82F6 0%, #1E3A8A 100%);
-      box-shadow: 0 10px 28px -10px rgba(59, 130, 246, 0.45);
-    }
-    .pillar-icon-oauth {
-      background: linear-gradient(135deg, #10B981 0%, #047857 100%);
-      box-shadow: 0 10px 28px -10px rgba(16, 185, 129, 0.45);
-    }
-    .pillar-title {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.015em;
-      color: var(--ink);
-      margin: 0 0 4px 0;
-    }
-    .pillar-sub {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-      margin: 0 0 14px 0;
-    }
-    .pillar-body {
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--ink-2);
-      margin: 0 0 16px 0;
-    }
-    .pillar-body code {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      background: var(--card);
-      padding: 2px 6px;
-      border-radius: 5px;
-      font-size: 12px;
-    }
-    .pillar-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .pillar-list li {
-      font-size: 13px;
-      color: var(--ink-2);
-      padding: 5px 0 5px 20px;
-      position: relative;
-    }
-    .pillar-list li::before {
-      content: "";
-      position: absolute;
-      left: 2px;
-      top: 10px;
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-      background: var(--blue);
-      opacity: 0.35;
-    }
-    .pillar-llm .pillar-list li::before { background: #8B5CF6; }
-    .pillar-service .pillar-list li::before { background: var(--blue); }
-    .pillar-oauth .pillar-list li::before { background: #10B981; }
-  </style>
+    <link rel="stylesheet" href="style.css?v=8">
 
-
-  <!-- API Locker brand assets (mascot logo) -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/brand/logo-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/brand/logo-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/brand/logo-180.png">
-  <meta property="og:image" content="https://www.apilocker.app/brand/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.apilocker.app/brand/og-image.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/logo-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/brand/logo-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/logo-180.png">
+    <meta property="og:image" content="https://www.apilocker.app/brand/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.apilocker.app/brand/og-image.png">
 </head>
 <body>
+    <div id="cursor-halo"></div>
+    <!-- 1. Nav -->
+    <nav id="floating-nav" class="nav">
+        <div class="nav-brand">API Locker</div>
+        <div class="nav-links">
+            <a href="#problem">Problem</a>
+            <a href="#solution">Solution</a>
+            <a href="#extension">IDE Extension</a>
+            <a href="#security">Security</a>
+            <a href="#pricing">Pricing</a>
+        </div>
+        <div class="nav-cta">
+            <a href="/login" class="btn btn-secondary btn-small">Sign In</a>
+            <a href="/signup" class="btn btn-primary btn-small">Get Started Free</a>
+        </div>
+    </nav>
 
-  <!-- ===================== NAV ===================== -->
-  <nav class="nav" id="nav">
-    <div class="container nav-inner">
-      <a href="#" class="logo">
-        <span class="logo-mark">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </span>
-        API Locker
-      </a>
-      <div class="nav-links">
-        <a href="#pillars">What's stored</a>
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="/docs/mcp">Docs</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div style="display: flex; align-items: center; gap: 18px;">
-        <a href="/login" class="nav-signin">Log in</a>
-        <a href="/signup" class="nav-cta">
-          Sign up
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-      </div>
+    <div class="page-background">
+        <div class="glow-blob top-blob"></div>
     </div>
-  </nav>
 
-  <!-- ===================== HERO ===================== -->
-  <header class="hero">
-    <div class="container hero-inner">
-      <span class="eyebrow reveal"><span class="eyebrow-dot"></span> Now available</span>
-      <h1 class="h1 reveal delay-1">Replace your <span class="h1-mono">.env</span> file<br>with one token.</h1>
-      <p class="lede reveal delay-2">Encrypted vault, automatic rotation, and a smart proxy for every API your app talks to. One credential in, every provider out — your raw keys never leave the vault.</p>
-      <div class="cta-row reveal delay-3">
-        <a href="/signup" class="btn btn-primary">
-          Get started free
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <a href="#features" class="btn btn-secondary">
-          See how it works
-        </a>
-      </div>
-
-      <!-- Before/after .env comparison -->
-      <div class="env-compare reveal delay-4">
-        <div class="env-card env-before">
-          <div class="env-card-head">
-            <span class="env-label">Before</span>
-            <span class="env-count">14 secrets · plain text · scattered</span>
-          </div>
-<pre class="env-body"><span class="env-dim"># .env</span>
-<span class="env-key">OPENAI_API_KEY</span>=<span class="env-val">sk-proj-••••••••••••••</span>
-<span class="env-key">ANTHROPIC_API_KEY</span>=<span class="env-val">sk-ant-••••••••••••••</span>
-<span class="env-key">STRIPE_SECRET_KEY</span>=<span class="env-val">sk_live_•••••••••••••</span>
-<span class="env-key">STRIPE_WEBHOOK_SECRET</span>=<span class="env-val">whsec_••••••••••••</span>
-<span class="env-key">RESEND_API_KEY</span>=<span class="env-val">re_••••••••••••••••••</span>
-<span class="env-key">SUPABASE_SERVICE_ROLE_KEY</span>=<span class="env-val">eyJhb••••••••</span>
-<span class="env-key">SENTRY_DSN</span>=<span class="env-val">https://•••••••••••••••</span>
-<span class="env-key">GITHUB_TOKEN</span>=<span class="env-val">ghp_••••••••••••••••••</span>
-<span class="env-key">POSTHOG_API_KEY</span>=<span class="env-val">phc_••••••••••••••••</span>
-<span class="env-key">CLOUDINARY_API_SECRET</span>=<span class="env-val">••••••••••••</span>
-<span class="env-key">TWILIO_AUTH_TOKEN</span>=<span class="env-val">••••••••••••••••••••</span>
-<span class="env-key">GOOGLE_CLIENT_SECRET</span>=<span class="env-val">GOCSPX-••••••••••••</span>
-<span class="env-key">GROQ_API_KEY</span>=<span class="env-val">gsk_•••••••••••••••••</span>
-<span class="env-key">MUX_TOKEN_SECRET</span>=<span class="env-val">••••••••••••••••••••</span></pre>
-        </div>
-
-        <div class="env-arrow">
-          <div class="env-arrow-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </div>
-        </div>
-
-        <div class="env-card env-after">
-          <div class="env-card-head">
-            <span class="env-label env-label-ok">After</span>
-            <span class="env-count">1 token · encrypted · auto-rotating</span>
-          </div>
-<pre class="env-body"><span class="env-dim"># .env</span>
-<span class="env-key">APILOCKER_REFRESH_TOKEN</span>=<span class="env-val">rtk_••••••••</span>
-
-
-
-
-
-
-
-
-<span class="env-dim"># that's it.</span>
-<span class="env-dim"># every provider above is reachable</span>
-<span class="env-dim"># through one SDK call:</span>
-<span class="env-dim"># </span><span class="env-comment">await apilocker.proxy('openai', ...)</span>
-<span class="env-dim"># </span><span class="env-comment">await apilocker.proxy('stripe', ...)</span>
-<span class="env-dim"># </span><span class="env-comment">await apilocker.proxy('resend', ...)</span></pre>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- ===================== THREE PILLARS (v1.0.0) ===================== -->
-  <section class="section pillars-section" id="pillars">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="tag"><span class="eyebrow-dot"></span> Three pillars</span>
-        <h2 class="h2">One vault, three types of credentials.</h2>
-        <p class="h2-sub">Every secret a developer needs to keep safe, organized into categories that match how real apps are built.</p>
-      </div>
-
-      <div class="pillars-grid">
-
-        <!-- Pillar 1: LLM keys -->
-        <div class="pillar-card pillar-llm reveal">
-          <div class="pillar-icon pillar-icon-llm">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3 3 3 0 0 0-2 5.5A3 3 0 0 0 6.5 14a3 3 0 0 0 2 5.5 3 3 0 0 0 3 2.5 3 3 0 0 0 3-2.5 3 3 0 0 0 2-5.5 3 3 0 0 0 .5-3.5A3 3 0 0 0 15 5a3 3 0 0 0-3-3z"/><path d="M12 9v6"/><path d="M9 12h6"/></svg>
-          </div>
-          <h3 class="pillar-title">LLM API Keys</h3>
-          <p class="pillar-sub">OpenAI, Anthropic, Gemini, Groq, Mistral.</p>
-          <p class="pillar-body">Keep your AI workloads secure while you ship. Inject model keys directly into your code with <code>apilocker run</code> — no more OpenAI keys in <code>.env</code> files or accidentally committed to git.</p>
-          <ul class="pillar-list">
-            <li>Zero-config provider templates for every major LLM</li>
-            <li>Rotate keys without redeploying</li>
-            <li>Per-key usage telemetry and anomaly alerts</li>
-          </ul>
-        </div>
-
-        <!-- Pillar 2: Service API keys -->
-        <div class="pillar-card pillar-service reveal delay-1">
-          <div class="pillar-icon pillar-icon-service">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          </div>
-          <h3 class="pillar-title">Service API Keys</h3>
-          <p class="pillar-sub">Stripe, Twilio, Resend, ElevenLabs, Sentry, and everything else.</p>
-          <p class="pillar-body">Replace every <code>.env</code> file in your project with one token. 15+ provider templates come pre-configured; anything else works via "Custom." Your code still reads <code>process.env.STRIPE_SECRET_KEY</code> — just don't put it in a file anymore.</p>
-          <ul class="pillar-list">
-            <li>19+ built-in provider templates, custom for the rest</li>
-            <li>Smart proxy route with audit logs on every call</li>
-            <li>Pause/resume individual keys during incident response</li>
-          </ul>
-        </div>
-
-        <!-- Pillar 3: OAuth credentials -->
-        <div class="pillar-card pillar-oauth reveal delay-2">
-          <div class="pillar-icon pillar-icon-oauth">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          </div>
-          <h3 class="pillar-title">OAuth Credentials</h3>
-          <p class="pillar-sub">Google, GitHub, Slack, Microsoft, Notion, Spotify, and more.</p>
-          <p class="pillar-body">Store full OAuth credential sets — client ID, client secret, refresh token, scopes — as a single named credential. <code>apilocker run</code> injects every field as its own env var. Nango-quality OAuth management at solo-dev prices.</p>
-          <ul class="pillar-list">
-            <li>14 OAuth provider templates with pre-filled endpoints</li>
-            <li>Multi-field encrypted storage, per-field reveal</li>
-            <li>One-command injection via <code>apilocker run</code></li>
-          </ul>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== FEATURES INTRO ===================== -->
-  <section class="section" id="features">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="tag"><span class="eyebrow-dot"></span> Features</span>
-        <h2 class="h2">Built for how you ship.</h2>
-        <p class="h2-sub">A quiet layer between your apps and the APIs they call. Encrypted, observable, and invisible by default.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== SPLIT 1 : VAULT ===================== -->
-  <section class="section" id="vault" style="padding-top: 0;">
-    <div class="container">
-      <div class="split">
-        <div class="split-text reveal">
-          <span class="label">Encrypted vault</span>
-          <h3>Your keys, locked behind device-bound auth.</h3>
-          <p>Every credential is encrypted at rest with a master token bound to your machine. Rotate on a schedule, issue scoped tokens per project, and revoke instantly — without touching the underlying key.</p>
-          <div class="split-ctas">
-            <a href="https://www.npmjs.com/package/apilocker" class="btn btn-primary btn-sm">Install the CLI</a>
-            <a href="#" class="btn btn-secondary btn-sm">Read the docs</a>
-          </div>
-        </div>
-        <div class="ui-card reveal delay-1">
-          <div class="ui-card-head">
-            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
-            <span class="ui-card-title">vault.enc</span>
-          </div>
-          <div class="vault">
-            <div class="vault-item">
-              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></div>
-              <div>
-                <div class="vault-name">openai</div>
-                <div class="vault-meta">sk-proj-••••</div>
-              </div>
+    <main>
+        <!-- 2. Hero -->
+        <section class="hero slide-up-element">
+            <div class="hero-content">
+                <div class="hero-label">Secure your secrets</div>
+                <h1 class="hero-headline">Replace your <span class="highlight-code">.env</span> file <br/>with one token.</h1>
+                <p class="hero-subtitle">
+                    Encrypted vault, automatic rotation, and a smart proxy for every API your app talks to. <br>
+                    One credential in, every provider out.
+                </p>
+                <div class="hero-actions">
+                    <a href="/signup" class="btn btn-primary btn-large">Get started free</a>
+                    <a href="#how-it-works" class="btn btn-secondary btn-large">See how it works</a>
+                </div>
             </div>
-            <div class="vault-item">
-              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/></svg></div>
-              <div>
-                <div class="vault-name">anthropic</div>
-                <div class="vault-meta">sk-ant-••••</div>
-              </div>
+            
+            <div class="hero-proxy-visual">
+                <svg class="proxy-svg-flow" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid meet">
+                    <!-- Connecting paths -->
+                    <path d="M 0 200 C 100 200, 150 200, 250 200" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+                    
+                    <path d="M 250 200 C 300 200, 320 80, 400 80" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+                    <path d="M 250 200 C 300 200, 350 200, 400 200" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+                    <path d="M 250 200 C 300 200, 320 320, 400 320" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+                    
+                    <!-- Animated packets -->
+                    <circle id="packet-in" r="4" fill="#3B82F6" filter="drop-shadow(0 0 4px #3B82F6)" />
+                    <circle id="packet-out-1" r="3" fill="#4ade80" filter="drop-shadow(0 0 4px #4ade80)" />
+                    <circle id="packet-out-2" r="3" fill="#38bdf8" filter="drop-shadow(0 0 4px #38bdf8)" />
+                    <circle id="packet-out-3" r="3" fill="#fb923c" filter="drop-shadow(0 0 4px #fb923c)" />
+                </svg>
+
+                <!-- HTML Overlays -->
+                <div class="flow-node flow-app" style="top: 200px; left: -40px;">
+                    <div class="flow-badge">Your App</div>
+                    <div class="flow-code">
+                        <span class="keyword">await</span> AL.fetch(<span class="string">'openai'</span>)
+                    </div>
+                </div>
+
+                <div class="flow-node flow-vault" style="top: 200px; left: 250px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <div class="vault-pulse"></div>
+                </div>
+
+                <div class="flow-node flow-target t-1" style="top: 80px; left: 400px;">
+                    <div class="target-head"><img src="assets/openai-logo.svg" width="14" alt="OpenAI"> OpenAI</div>
+                    <div class="injected-key">inject: sk-proj-...</div>
+                </div>
+                
+                <div class="flow-node flow-target t-2" style="top: 200px; left: 400px;">
+                    <div class="target-head"><img src="https://cdn.simpleicons.org/stripe/white" width="14" alt="Stripe"> Stripe</div>
+                    <div class="injected-key">inject: sk_live-...</div>
+                </div>
+                
+                <div class="flow-node flow-target t-3" style="top: 320px; left: 400px;">
+                    <div class="target-head"><img src="https://cdn.simpleicons.org/resend/ffffff" width="14" alt="Resend"> Resend</div>
+                    <div class="injected-key">inject: re_...</div>
+                </div>
             </div>
-            <div class="vault-item">
-              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div>
-              <div>
-                <div class="vault-name">stripe</div>
-                <div class="vault-meta">sk_live_••••</div>
-              </div>
+        </section>
+
+        <!-- 3. Logo Ticker -->
+        <section class="logo-ticker slide-up-element">
+            <div class="section-container text-center">
+                <div class="hero-label">Integrations</div>
+                <h2 class="section-title">Works with every API, LLM, and OAuth service you use.</h2>
+                <p class="section-subtitle">
+                    34 provider templates built in. Anything else works via "Custom."
+                </p>
             </div>
-            <div class="vault-item">
-              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
-              <div>
-                <div class="vault-name">supabase</div>
-                <div class="vault-meta">eyJhbG••••</div>
-              </div>
+            <div class="ticker-container">
+                <div class="ticker-track">
+                    <div class="ticker-logos">
+                        <img src="assets/openai-logo.svg" alt="OpenAI" class="ticker-logo-img">
+                        <img src="assets/anthropic-logo.svg" alt="Anthropic" class="ticker-logo-img">
+                        <img src="assets/gemini-logo.svg" alt="Google Gemini" class="ticker-logo-img">
+                        <img src="assets/grok-logo.svg" alt="Grok" class="ticker-logo-img">
+                        <img src="assets/mistral-logo.svg" alt="Mistral" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/stripe" alt="Stripe" class="ticker-logo-img">
+                        <img src="assets/twilio-logo.svg" alt="Twilio" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/resend/ffffff" alt="Resend" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/cloudflare/F38020" alt="Cloudflare" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/vercel/ffffff" alt="Vercel" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/supabase" alt="Supabase" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/sentry/ffffff" alt="Sentry" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/clerk/ffffff" alt="Clerk" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/elevenlabs/ffffff" alt="ElevenLabs" class="ticker-logo-img">
+                        <img src="assets/sendgrid-logo.svg" alt="SendGrid" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/posthog/ffffff" alt="PostHog" class="ticker-logo-img">
+                    </div>
+                    <!-- Duplicate for infinite scroll -->
+                    <div class="ticker-logos" aria-hidden="true">
+                        <img src="assets/openai-logo.svg" alt="OpenAI" class="ticker-logo-img">
+                        <img src="assets/anthropic-logo.svg" alt="Anthropic" class="ticker-logo-img">
+                        <img src="assets/gemini-logo.svg" alt="Google Gemini" class="ticker-logo-img">
+                        <img src="assets/grok-logo.svg" alt="Grok" class="ticker-logo-img">
+                        <img src="assets/mistral-logo.svg" alt="Mistral" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/stripe" alt="Stripe" class="ticker-logo-img">
+                        <img src="assets/twilio-logo.svg" alt="Twilio" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/resend/ffffff" alt="Resend" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/cloudflare/F38020" alt="Cloudflare" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/supabase" alt="Supabase" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/sentry/ffffff" alt="Sentry" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/clerk/ffffff" alt="Clerk" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/elevenlabs/ffffff" alt="ElevenLabs" class="ticker-logo-img">
+                        <img src="assets/sendgrid-logo.svg" alt="SendGrid" class="ticker-logo-img">
+                        <img src="https://cdn.simpleicons.org/posthog/ffffff" alt="PostHog" class="ticker-logo-img">
+                    </div>
+                </div>
             </div>
-            <div class="vault-item">
-              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l4-8 5 16 4-12 5 8"/></svg></div>
-              <div>
-                <div class="vault-name">resend</div>
-                <div class="vault-meta">re_••••</div>
-              </div>
+        </section>
+
+        <!-- 4. The Problem -->
+        <section id="problem" class="section problem-section">
+            <div class="section-container">
+                <div class="problem-grid">
+                    <div class="problem-text slide-up-element">
+                        <h2>The reality of <br/>secrets management.</h2>
+                        <p class="problem-description">
+                            Putting API keys directly into your source code is a ticking time bomb. 
+                            When you hardcode secrets into your frontend, mobile app, or public repository, 
+                            hackers can easily decompile and extract them.
+                        </p>
+                        <p class="problem-description">
+                            The result? <strong>Massive API abuse</strong> and thousands of dollars in stolen usage running up your bill before you even notice.
+                        </p>
+                        <hr class="divider">
+                        <p class="closing-statement">
+                            You already know this is a problem.<br>
+                            You just haven’t had a solution that’s <em>easier</em> than the problem.
+                        </p>
+                    </div>
+                    
+                    <div class="problem-visual slide-up-element delay-2">
+                        <div class="code-leak-box">
+                            <div class="mock-editor">
+                                <div class="editor-header">
+                                    <div class="dots"><i></i><i></i><i></i></div>
+                                    <div class="filename">main.js</div>
+                                </div>
+                                <div class="editor-body">
+                                    <code>
+                                        <span class="keyword">const</span> OPENAI_KEY = <span class="exposed-key">"sk-proj-xyz9..."</span>;<br>
+                                        <br>
+                                        <span class="comment">// TODO: Replace with secure backend call later</span><br>
+                                        fetch(<span class="string">'https://api.openai.com'</span>, { ... })
+                                    </code>
+                                </div>
+                                <div class="hacker-beam"></div>
+                            </div>
+                            
+                            <div class="consequence-box">
+                                <div class="alert-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                </div>
+                                <div class="bill-info">
+                                    <span class="bill-label">Unauthorized API Usage</span>
+                                    <span class="bill-amount" id="bill-counter">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="vault-item">
-              <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
-              <div>
-                <div class="vault-name">cloudflare</div>
-                <div class="vault-meta">••••••</div>
-              </div>
+        </section>
+
+        <!-- 5. The Solution -->
+        <section id="solution" class="section solution-section">
+            <div class="section-container">
+                <div class="text-center slide-up-element">
+                    <div class="hero-label">Architecture</div>
+                    <h2 class="section-title">Engineered for absolute control.</h2>
+                    <p class="section-subtitle">
+                        Centralize your workflow, rotate keys with zero downtime, and completely decouple credentials from your codebase.
+                    </p>
+                </div>
+                
+                <div class="cards-grid-3">
+                    <div class="glass-card enhanced-card slide-up-element delay-1">
+                        <div class="card-visual-wrapper">
+                            <div class="cv-store">
+                                <div class="cv-env dev">.env.dev</div>
+                                <div class="cv-env stg">.env.staging</div>
+                                <div class="cv-env prd">.env.prod</div>
+                                <div class="cv-micro-vault">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <h3>Store everything in one place</h3>
+                        <p>A single source of truth for all environments. No more syncing files over Slack or hunting through DMs.</p>
+                    </div>
+                    
+                    <div class="glass-card enhanced-card slide-up-element delay-2">
+                        <div class="card-visual-wrapper">
+                            <div class="cv-secure">
+                                <div class="key-box raw">sk_live_x9z2...</div>
+                                <div class="shield-filter">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                </div>
+                                <div class="key-box safe">al_prod_q8p...</div>
+                            </div>
+                        </div>
+                        <h3>Apps never see raw keys</h3>
+                        <p>Your application processes request temporary access tokens on the fly. Raw API keys stay safely encrypted.</p>
+                    </div>
+                    
+                    <div class="glass-card enhanced-card slide-up-element delay-3">
+                        <div class="card-visual-wrapper">
+                            <div class="cv-logs">
+                                <div class="cv-log-line l1"><span class="time">13:01</span> <span class="tag vercel">APP</span> <span class="msg">Req OpenAI key</span></div>
+                                <div class="cv-log-line l2"><span class="time">13:04</span> <span class="tag system">SYS</span> <span class="msg">Key rotated</span></div>
+                                <div class="cv-log-line l3"><span class="time">13:12</span> <span class="tag admin">USR</span> <span class="msg">Viewed token</span></div>
+                            </div>
+                        </div>
+                        <h3>Full visibility</h3>
+                        <p>Know exactly which environment, user, or service accessed each key, right down to the millisecond.</p>
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
+
+        <!-- 6. How It Works (Before/After) -->
+        <section id="how-it-works" class="section transform-section">
+            <div class="section-container">
+                <div class="transform-header slide-up-element text-center">
+                    <h2 class="section-title">Stop managing secrets the wrong way.</h2>
+                    <p class="section-subtitle">See the immediate impact of adopting a centralized proxy architecture.</p>
+                    
+                    <div class="toggle-container">
+                        <div class="ba-toggle" id="ba-toggle">
+                            <div class="toggle-bg" id="toggle-bg"></div>
+                            <button class="toggle-btn active" data-target="before">Before</button>
+                            <button class="toggle-btn" data-target="after">After API Locker</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transform-content slide-up-element delay-1">
+                    <!-- BEFORE STATE -->
+                    <div class="t-state state-before active" id="state-before">
+                        <div class="scenario-grid">
+                            <div class="scenario-card mockup-slack">
+                                <h4>1. Slack DMs</h4>
+                                <div class="mock-ui">
+                                    <div class="slack-msg user">Hey can you send me the Stripe key?</div>
+                                    <div class="slack-msg other"><span class="exposed-key">sk_live_4eC39HqLyjWD...</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-notes">
+                                <h4>2. Notes App</h4>
+                                <div class="mock-ui notes-bg">
+                                    <h5>📝 API Keys</h5>
+                                    <div class="note-line">OpenAI - production:<br><span class="mock-text danger">sk-proj-a1b2...</span></div>
+                                    <div class="note-line">Stripe - don't delete:<br><span class="mock-text danger">sk_live_8xyz...</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-env">
+                                <h4>3. .env File</h4>
+                                <div class="mock-ui term-bg">
+                                    <div class="term-head"><i></i><i></i><i></i> .env</div>
+                                    <code>
+                                        <span class="comment"># DO NOT COMMIT</span><br>
+                                        OPENAI_API_KEY=<span class="danger">sk_...</span><br>
+                                        AWS_SECRET=<span class="danger">AKIA...</span><br>
+                                        STRIPE_KEY=<span class="danger">sk_liv...</span>
+                                    </code>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-git">
+                                <h4>4. Git History</h4>
+                                <div class="mock-ui term-bg diff">
+                                    <code>
+                                        <span class="diff-add">+ OPENAI_API_KEY=sk-proj...</span><br>
+                                        <span class="diff-del">- // No keys were here</span>
+                                    </code>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-scatter">
+                                <h4>5. The Scatter Problem</h4>
+                                <div class="mock-ui scatter-ui">
+                                    <div class="scatter-file">frontend/.env</div>
+                                    <div class="scatter-file">backend/.env</div>
+                                    <div class="scatter-file">worker/.env</div>
+                                    <div class="scatter-text">3 sync points. No rotation.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technical flow Diagram (Before) -->
+                        <div class="technical-flow mt-xl bad-flow">
+                            <h4 class="text-center mb-md danger">The Broken Architecture</h4>
+                            <div class="flow-steps-diagram">
+                                <div class="f-step danger-box">1. App stores raw key</div>
+                                <div class="f-arrow">→</div>
+                                <div class="f-step danger-box">2. Commits leak keys</div>
+                                <div class="f-arrow">→</div>
+                                <div class="f-step danger-box">3. Rotation is manual</div>
+                                <div class="f-arrow">→</div>
+                                <div class="f-step danger-box">4. High risk of abuse</div>
+                            </div>
+                            <p class="flow-subtext text-center mt-sm danger-text">Raw credentials are tied directly to your source code, creating multiple points of vulnerability and zero visibility.</p>
+                        </div>
+                    </div>
+
+                    <!-- AFTER STATE -->
+                    <div class="t-state state-after" id="state-after">
+                        <div class="scenario-grid">
+                            <div class="scenario-card mockup-slack after">
+                                <h4>1. Team Sharing</h4>
+                                <div class="mock-ui">
+                                    <div class="slack-msg user">Hey can you send me the Stripe key?</div>
+                                    <div class="slack-msg other safe-msg">Done — I added you as a scoped token. Check your dashboard.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-notes after">
+                                <h4>2. Documentation</h4>
+                                <div class="mock-ui dash-bg">
+                                    <h5>🛡️ Vault Credentials</h5>
+                                    <div class="dash-item">LLM Keys <span class="badge">Encrypted</span></div>
+                                    <div class="dash-item">Service Keys <span class="badge">Encrypted</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-env after">
+                                <h4>3. Local Config</h4>
+                                <div class="mock-ui term-bg">
+                                    <div class="term-head"><i></i><i></i><i></i> .env</div>
+                                    <code>
+                                        APILOCKER_REFRESH_TOKEN=<span class="safe">rtk_••••••••</span><br>
+                                        <span class="comment"># that's it. every provider is reachable.</span>
+                                    </code>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-git after">
+                                <h4>4. Version Control</h4>
+                                <div class="mock-ui term-bg diff-clean">
+                                    <code>
+                                        <span class="diff-clean-text">✓ Clean history. Nothing sensitive to commit.</span>
+                                    </code>
+                                </div>
+                            </div>
+                            
+                            <div class="scenario-card mockup-scatter after">
+                                <h4>5. One Source of Truth</h4>
+                                <div class="mock-ui one-vault">
+                                    <div class="cv-micro-vault center-vault" style="position: relative; left:0; top:0; transform:none; margin: 0 auto 10px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    </div>
+                                    <div class="vault-log">Rotated instantly. Logged cleanly.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technical flow Diagram -->
+                        <div class="technical-flow mt-xl">
+                            <h4 class="text-center mb-md">Technical Flow</h4>
+                            <div class="flow-steps-diagram">
+                                <div class="f-step">1. App sends scoped token</div>
+                                <div class="f-arrow">→</div>
+                                <div class="f-step">2. Proxy decrypts key</div>
+                                <div class="f-arrow">→</div>
+                                <div class="f-step">3. Injected outbound</div>
+                                <div class="f-arrow">→</div>
+                                <div class="f-step">4. Audit Logged</div>
+                            </div>
+                            <p class="flow-subtext text-center mt-sm">The raw key was never exposed to your application — it existed only in memory for the duration of the call.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 7. Setup Section -->
+        <section id="setup" class="section setup-section">
+            <div class="section-container">
+                <div class="text-center slide-up-element">
+                    <div class="hero-label">Integration</div>
+                    <h2 class="section-title">Zero friction.</h2>
+                    <p class="section-subtitle">
+                        Three steps. Five minutes. Done.
+                    </p>
+                </div>
+                
+                <div class="setup-grid slide-up-element delay-1">
+                    <div class="setup-steps-vertical">
+                        <div class="s-step-v active">
+                            <div class="s-num">1</div>
+                            <div class="s-info">
+                                <h4>Install the CLI</h4>
+                                <code><span class="cmd">npm install</span> -g apilocker</code>
+                            </div>
+                        </div>
+                        <div class="s-step-v">
+                            <div class="s-num">2</div>
+                            <div class="s-info">
+                                <h4>Authenticate securely</h4>
+                                <code><span class="cmd">apilocker</span> register</code>
+                            </div>
+                        </div>
+                        <div class="s-step-v">
+                            <div class="s-num">3</div>
+                            <div class="s-info">
+                                <h4>Run your app</h4>
+                                <code><span class="cmd">apilocker</span> run -- node index.js</code>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="setup-visual-box">
+                        <div class="term-anim-box">
+                            <div class="term-header">
+                                <span class="dot d-r"></span><span class="dot d-y"></span><span class="dot d-g"></span>
+                                <div class="term-title">~ /dev/project</div>
+                            </div>
+                            <div class="term-body">
+                                <div class="tl line-1"><span class="prompt">❯</span> npm install -g apilocker</div>
+                                <div class="tl line-2 dim">+ apilocker@1.1.0</div>
+                                <div class="tl line-3 dim mt-sm">added 1 package, and audited 2 packages in 1s</div>
+                                
+                                <div class="tl line-4 mt-md"><span class="prompt">❯</span> apilocker register</div>
+                                <div class="tl line-5 dim">Opening browser for authentication...</div>
+                                <div class="tl line-6 success mt-sm">✔ Successfully authenticated as dev@company.com</div>
+                                
+                                <div class="tl line-7 mt-md"><span class="prompt">❯</span> apilocker run -- node index.js</div>
+                                <div class="tl line-8 success-glow mt-sm">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 
+                                    [API Locker] Proxy injected. Vault unlocked.
+                                </div>
+                                <div class="tl line-9 dim mt-sm">Server listening on port 3000...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. Four Ways In -->
+        <section class="section ways-in-section">
+            <div class="section-container">
+                <div class="text-center slide-up-element">
+                    <div class="hero-label">Access</div>
+                    <h2 class="section-title">Your vault. Everywhere you work.</h2>
+                    <p class="section-subtitle">Manage your credentials natively through beautifully engineered interfaces.</p>
+                </div>
+                
+                <div class="ways-grid slide-up-element delay-1">
+                    <!-- Way 1: CLI -->
+                    <div class="way-card">
+                        <div class="way-visual">
+                            <div class="mini-term">
+                                <div><span class="prompt" style="color:#3B82F6">❯</span> apilocker run -- node app.js</div>
+                                <div class="dim" style="margin-top:8px; color:#6b7280">Injecting 14 credentials...</div>
+                                <div class="success" style="margin-top:4px; color:#4ade80">✔ Server listening on port 3000</div>
+                            </div>
+                        </div>
+                        <div class="way-text">
+                            <h3>CLI</h3>
+                            <p>Native terminal commands for seamless local development, quick script injections, and CI/CD pipelines.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Way 2: Web Portal -->
+                    <div class="way-card">
+                        <div class="way-visual">
+                            <div class="mini-dash">
+                                <div style="width:100%; padding: 8px; display:flex; flex-direction:column; gap:5px;">
+                                    <div style="display:flex; gap:3px;">
+                                        <div style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:4px; padding:4px 6px;">
+                                            <div style="font-size:4px; color:#64748b; text-transform:uppercase;">Keys</div>
+                                            <div style="font-size:10px; font-weight:700; color:#f1f5f9;">12</div>
+                                        </div>
+                                        <div style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:4px; padding:4px 6px;">
+                                            <div style="font-size:4px; color:#64748b; text-transform:uppercase;">Tokens</div>
+                                            <div style="font-size:10px; font-weight:700; color:#f1f5f9;">4</div>
+                                        </div>
+                                        <div style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:4px; padding:4px 6px;">
+                                            <div style="font-size:4px; color:#64748b; text-transform:uppercase;">Calls</div>
+                                            <div style="font-size:10px; font-weight:700; color:#f1f5f9;">847</div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:2px;">
+                                        <div style="font-size:5px; padding:2px 5px; border-radius:3px; background:rgba(59,130,246,0.15); color:#f1f5f9; border:1px solid rgba(59,130,246,0.25);">Keys</div>
+                                        <div style="font-size:5px; padding:2px 5px; color:#64748b;">Tokens</div>
+                                        <div style="font-size:5px; padding:2px 5px; color:#64748b;">Activity</div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:4px; padding:3px 4px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:3px;">
+                                        <div style="width:6px; height:6px; border-radius:2px; background:#8B5CF6;"></div>
+                                        <div style="font-size:5px; color:#f1f5f9; font-weight:600;">OpenAI</div>
+                                        <div style="font-size:4px; color:#64748b; font-family:monospace;">sk-proj-••••</div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:4px; padding:3px 4px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:3px;">
+                                        <div style="width:6px; height:6px; border-radius:2px; background:#3B82F6;"></div>
+                                        <div style="font-size:5px; color:#f1f5f9; font-weight:600;">Stripe</div>
+                                        <div style="font-size:4px; color:#64748b; font-family:monospace;">sk_live-••••</div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:4px; padding:3px 4px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:3px;">
+                                        <div style="width:6px; height:6px; border-radius:2px; background:#10B981;"></div>
+                                        <div style="font-size:5px; color:#f1f5f9; font-weight:600;">GitHub</div>
+                                        <div style="font-size:4px; color:#64748b; font-family:monospace;">client_id-••••</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="way-text">
+                            <h3>Web Portal</h3>
+                            <p>A visual command center for your vault. Manage credentials, tokens, devices, and activity — all from your browser.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Way 3: MCP Server -->
+                    <div class="way-card">
+                        <div class="way-visual">
+                            <div class="mcp-flow">
+                                <div class="mcp-node ai llm-cycler">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" alt="ChatGPT">
+                                    <svg viewBox="0 0 24 24" fill="#D4A083"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="#8E75B2"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>
+                                </div>
+                                <div class="mcp-line"><div class="mcp-packet"></div></div>
+                                <div class="mcp-node srv">MCP</div>
+                            </div>
+                        </div>
+                        <div class="way-text">
+                            <h3>MCP Server</h3>
+                            <p>Natively expose your vault securely to your local AI agents using the Model Context Protocol standard.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Way 4: IDE Integration -->
+                    <div class="way-card">
+                        <div class="way-visual ide-visual">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg" title="VS Code">
+                            <img src="https://www.cursor.com/assets/images/logo.svg" title="Cursor">
+                            <img src="https://cdn.simpleicons.org/windsurf/0ea5e9" title="Windsurf">
+                            <img src="assets/antigravity-logo.png" title="Antigravity">
+                        </div>
+                        <div class="way-text">
+                            <h3>IDE Integration</h3>
+                            <p>Native extensions for Google Antigravity, Cursor, Windsurf, & VS Code. Inject keys without leaving the editor.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. IDE Extension Spotlight -->
+        <section id="extension" class="section spotlight-section">
+            <div class="spotlight-bg-glow"></div>
+            <div class="section-container">
+                <div class="spotlight-header slide-up-element">
+                    <div class="ide-logos">
+                        <!-- VS Code -->
+                        <div class="ide-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg" alt="VS Code" style="width: 100%; height: 100%;">
+                        </div>
+                        <!-- Cursor IDE -->
+                        <div class="ide-logo bg-dark">
+                            <img src="https://www.cursor.com/assets/images/logo.svg" alt="Cursor" style="width: 100%; height: 100%;">
+                        </div>
+                        <!-- Windsurf IDE -->
+                        <div class="ide-logo bg-dark">
+                            <img src="https://cdn.simpleicons.org/windsurf/0ea5e9" alt="Windsurf" style="width: 100%; height: 100%;">
+                        </div>
+                        <!-- Google Antigravity -->
+                        <div class="ide-logo bg-light">
+                            <img src="assets/antigravity-logo.png" alt="Antigravity" style="width: 100%; height: 100%;">
+                        </div>
+                    </div>
+                    <h2 class="section-title">Your vault, inside <span class="dynamic-ide"></span></h2>
+                    <p class="subtitle">
+                        Browse credentials, reveal secrets, rotate keys, create tokens, and monitor vault health — all without leaving your editor.
+                    </p>
+                </div>
+                
+                <div class="cards-grid-4 spotlight-cards">
+                    <!-- Card 1 -->
+                    <div class="glass-card compact slide-up-element delay-1">
+                        <div class="spotlight-visual">
+                            <div class="ide-ring-anim">
+                                <div class="orbit-path"></div>
+                                <div class="center-lock">🔒</div>
+                                <div class="orbit-icon pos-1 bg-code"><img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg" alt="VS Code" style="width: 14px; height: 14px;"></div>
+                                <div class="orbit-icon pos-2 bg-cursor"><img src="https://www.cursor.com/assets/images/logo.svg" alt="Cursor" style="width: 14px; height: 14px;"></div>
+                                <div class="orbit-icon pos-3 bg-wind"><img src="https://cdn.simpleicons.org/windsurf/0ea5e9" alt="Windsurf" style="width: 16px; height: 16px;"></div>
+                                <div class="orbit-icon pos-4 bg-anti"><img src="assets/antigravity-logo.png" alt="Antigravity" style="width: 16px; height: 16px;"></div>
+                            </div>
+                        </div>
+                        <h3>Works in your IDE today</h3>
+                        <p>Native extensions for VS Code, Cursor, Windsurf, and Antigravity.</p>
+                    </div>
+                    
+                    <!-- Card 2 -->
+                    <div class="glass-card compact slide-up-element delay-2">
+                        <div class="spotlight-visual">
+                            <div class="extension-search-anim">
+                                <div class="search-bar">
+                                    <span class="search-icon">🔍</span>
+                                    <span class="search-text">API L<span class="blink">|</span></span>
+                                </div>
+                                <div class="search-result">
+                                    <div class="res-icon">🔒</div>
+                                    <div class="res-text">API Locker</div>
+                                    <div class="res-btn btn-install">Install</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h3>Install in seconds</h3>
+                        <p>Search "API Locker" in your extensions marketplace and authenticate with one click.</p>
+                    </div>
+                    
+                    <!-- Card 3 -->
+                    <div class="glass-card compact slide-up-element delay-3">
+                        <div class="spotlight-visual">
+                            <div class="sidebar-anim">
+                                <div class="sb-header">VAULT EXPLORER</div>
+                                <div class="sb-env">Env: Production</div>
+                                <div class="sb-item">
+                                    <span>DB_PASS</span>
+                                    <div class="sb-val masked">••••••••</div>
+                                </div>
+                                <div class="sb-item active-val">
+                                    <span>STRIPE_KEY</span>
+                                    <div class="sb-val revealed">sk_live_19...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h3>Everything in the sidebar</h3>
+                        <p>Manage environments, view secret status, and copy values with zero context switching.</p>
+                    </div>
+                    
+                    <!-- Card 4 -->
+                    <div class="glass-card compact slide-up-element delay-4">
+                        <div class="spotlight-visual">
+                            <div class="sync-anim">
+                                <div class="sync-node cloud">☁️</div>
+                                <div class="sync-stream">
+                                    <div class="stream-line"></div>
+                                    <div class="sync-particle p1"></div>
+                                    <div class="sync-particle p2"></div>
+                                    <div class="sync-particle p3"></div>
+                                </div>
+                                <div class="sync-node laptop">💻</div>
+                            </div>
+                        </div>
+                        <h3>Your existing vault, instantly</h3>
+                        <p>Already using the CLI or dashboard? Your credentials appear automatically. Same vault, new surface — zero reconfiguration.</p>
+                    </div>
+                </div>
+
+                <div class="spotlight-actions slide-up-element delay-5">
+                    <a href="https://marketplace.visualstudio.com/items?itemName=apilocker.apilocker" target="_blank" class="btn btn-outline btn-large">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        Install for VS Code
+                    </a>
+                    <a href="https://open-vsx.org/extension/apilocker/apilocker" target="_blank" class="btn btn-primary btn-large">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/></svg>
+                        Install via Open VSX
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Security Section -->
+        <section id="security" class="section security-section">
+            <div class="section-container">
+                <div class="security-intro slide-up-element text-center" style="margin-bottom: 3rem;">
+                    <h2 class="section-title">Engineered <br/>for peace of mind.</h2>
+                </div>
+                
+                <div class="apple-sec-card slide-up-element delay-1">
+                    <div class="sec-tabs-col">
+                        <button class="sec-tab active" data-target="vis-aes">
+                            <div class="sec-pill">
+                                <span class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                                <span class="sec-label">AES-256 Encryption</span>
+                            </div>
+                            <div class="sec-details">
+                                <p>Every credential is encrypted at rest with AES-256 before being stored. The encryption key lives as an infrastructure secret that never leaves the Cloudflare edge.</p>
+                            </div>
+                        </button>
+                        
+                        <button class="sec-tab" data-target="vis-auth">
+                            <div class="sec-pill">
+                                <span class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                                <span class="sec-label">Device Auth</span>
+                            </div>
+                            <div class="sec-details">
+                                <p>Device-bound authentication via RFC 8628. Each device gets its own master token that can be independently revoked. Lose a laptop? Kill access in one click.</p>
+                            </div>
+                        </button>
+
+                        <button class="sec-tab" data-target="vis-audit">
+                            <div class="sec-pill">
+                                <span class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                                <span class="sec-label">Audit Logs</span>
+                            </div>
+                            <div class="sec-details">
+                                <p>Every reveal, proxy call, rotation, and management action is logged with timestamp, IP address, and geographic location. Full visibility into who accessed what and when.</p>
+                            </div>
+                        </button>
+
+                        <button class="sec-tab" data-target="vis-rotation">
+                            <div class="sec-pill">
+                                <span class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                                <span class="sec-label">Auto-Rotation</span>
+                            </div>
+                            <div class="sec-details">
+                                <p>Painless, zero-downtime secret cycling with over 30 external provider integrations natively supported.</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="sec-visual-col">
+                        <div class="sec-vis active" id="vis-aes">
+                            <div class="vis-wrapper aes-vis">
+                                <div class="lock-container">
+                                    <div class="glow-ring"></div>
+                                    <div class="glow-ring delay"></div>
+                                    <svg class="master-lock" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </div>
+                                <div class="encryption-stream">
+                                    <div class="enc-line">sk_live_83hf...  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>  ENCRYPTED</div>
+                                    <div class="enc-line delay-1">DATABASE_U...  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>  ENCRYPTED</div>
+                                    <div class="enc-line delay-2">OPENAI_API...  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>  ENCRYPTED</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sec-vis" id="vis-auth">
+                            <div class="vis-wrapper auth-vis">
+                                <div class="hologram-laptop">
+                                    <div class="laptop-screen">
+                                        <div class="scan-beam"></div>
+                                        <div class="auth-success">
+                                            <div class="ripple"></div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </div>
+                                        <div class="code-lines">
+                                            <i></i><i></i><i></i><i></i>
+                                        </div>
+                                    </div>
+                                    <div class="laptop-base"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sec-vis" id="vis-audit">
+                            <div class="vis-wrapper audit-vis">
+                                <div class="audit-terminal">
+                                    <div class="term-header">
+                                        <span></span><span></span><span></span>
+                                        <div class="term-title">log_stream.sh</div>
+                                    </div>
+                                    <div class="term-body">
+                                        <div class="log-scroll">
+                                            <div class="log-line"><span class="time">14:02:11</span> <span class="action">FETCH</span> 'STRIPE_LIVE' <span class="ip">[192.168.1.1]</span></div>
+                                            <div class="log-line"><span class="time">14:15:00</span> <span class="action rotate">ROTATE</span> 'AWS_ACCESS' <span class="ip">[Cron]</span></div>
+                                            <div class="log-line"><span class="time">15:00:21</span> <span class="action">FETCH</span> 'OPENAI_API' <span class="ip">[10.0.0.5]</span></div>
+                                            <div class="log-line"><span class="time">15:12:05</span> <span class="action">REVOKE</span> 'GITHUB_PAT' <span class="ip">[Admin UI]</span></div>
+                                            <div class="log-line"><span class="time">14:02:11</span> <span class="action">FETCH</span> 'STRIPE_LIVE' <span class="ip">[192.168.1.1]</span></div>
+                                            <div class="log-line"><span class="time">14:15:00</span> <span class="action rotate">ROTATE</span> 'AWS_ACCESS' <span class="ip">[Cron]</span></div>
+                                            <div class="log-line"><span class="time">15:00:21</span> <span class="action">FETCH</span> 'OPENAI_API' <span class="ip">[10.0.0.5]</span></div>
+                                            <div class="log-line"><span class="time">15:12:05</span> <span class="action">REVOKE</span> 'GITHUB_PAT' <span class="ip">[Admin UI]</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sec-vis" id="vis-rotation">
+                            <div class="vis-wrapper rotate-vis">
+                                <div class="gyroscope">
+                                    <div class="ring outer"></div>
+                                    <div class="ring middle"></div>
+                                    <div class="ring inner"></div>
+                                    <div class="core-key">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                                    </div>
+                                    <div class="sync-arrows">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(14, 165, 233, 0.4)" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. Pricing -->
+        <section id="pricing" style="padding: 6rem 0;">
+            <div style="max-width: 700px; margin: 0 auto; padding: 0 32px; text-align: center;">
+                <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 700; color: #f1f5f9; margin-bottom: 1rem;">Free. Seriously.</h2>
+                <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 3rem;">API Locker is completely free while in beta. Uncompromising security with unlimited usage.</p>
+
+                <div style="background: rgba(15,15,20,0.95); border: 1px solid rgba(59,130,246,0.3); border-radius: 24px; padding: 3rem; text-align: left; box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 80px rgba(59,130,246,0.1);">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="font-size: 4rem; font-weight: 800; color: #f1f5f9; line-height: 1;"><span style="font-size: 1.5rem; vertical-align: top; color: #94a3b8;">$</span>0<span style="font-size: 1rem; color: #94a3b8; font-weight: 400;">/mo</span></div>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: #f1f5f9; margin-top: 4px;">API Locker — Free during beta</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-bottom: 2rem;">
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> AES-256 encryption</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Unlimited credentials</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Unlimited scoped tokens</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Unlimited proxy calls</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 34 provider templates</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Smart proxy + SSE</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Auto-rotating tokens</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Zero-downtime rotation</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Pause / resume keys</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Audit logs + geolocation</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Device-bound auth</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Device revocation</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Vault health checks</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> OAuth multi-field storage</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> OAuth orchestration</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> CLI + Web + MCP</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> VS Code extension</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> .env import</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Tags + search + filtering</div>
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#cbd5e1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> No credit card required</div>
+                    </div>
+
+                    <a href="/signup" style="display:block; text-align:center; padding: 14px 32px; background: linear-gradient(135deg, #3B82F6, #1E3A8A); color: white; border-radius: 12px; font-weight: 600; font-size: 1rem; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 24px rgba(59,130,246,0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">Get Started Free</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 12. Final CTA -->
+        <section class="section final-cta-section">
+            <div class="cta-glow"></div>
+            <div class="section-container text-center">
+                <h2 class="final-title slide-up-element">Your keys deserve better than a <span class="highlight-code">.env</span> file.</h2>
+                
+                <div class="terminal-steps slide-up-element delay-1">
+                    <div class="terminal-command">
+                        <div class="term-dots"><i></i><i></i><i></i></div>
+                        <div class="term-step-label">1. Install</div>
+                        <code>npm install -g apilocker</code>
+                        <button class="copy-btn" data-copy="npm install -g apilocker" aria-label="Copy install command">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        </button>
+                    </div>
+                    <div class="terminal-command">
+                        <div class="term-dots"><i></i><i></i><i></i></div>
+                        <div class="term-step-label">2. Register</div>
+                        <code>apilocker register</code>
+                        <button class="copy-btn" data-copy="apilocker register" aria-label="Copy register command">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        </button>
+                    </div>
+                    <div class="terminal-command">
+                        <div class="term-dots"><i></i><i></i><i></i></div>
+                        <div class="term-step-label">3. Run</div>
+                        <code>apilocker run -- npm start</code>
+                        <button class="copy-btn" data-copy="apilocker run -- npm start" aria-label="Copy run command">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 13. Footer -->
+    <footer class="footer">
+        <div class="section-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>API Locker</h3>
+                    <p>The modern secrets vault.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#solution">Features</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="/changelog">Changelog</a>
+                    <a href="/docs/mcp">MCP Docs</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <a href="https://github.com/apilocker/apilocker">GitHub</a>
+                    <a href="https://www.npmjs.com/package/apilocker">npm</a>
+                    <a href="mailto:feedback@apilocker.app">Feedback</a>
+                    <a href="#security">Security</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="/privacy">Privacy</a>
+                    <a href="/terms">Terms</a>
+                    <a href="mailto:support@apilocker.app">Contact</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 API Locker. All rights reserved.</p>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </footer>
 
-  <!-- ===================== SPLIT 2 : PROXY ===================== -->
-  <section class="section" id="proxy">
-    <div class="container">
-      <div class="split reverse">
-        <div class="split-text reveal delay-1">
-          <span class="label">Smart proxy</span>
-          <h3>Stream responses without exposing the key.</h3>
-          <p>Your app hits the proxy. The proxy injects the real credential, forwards to the provider, and streams the response back — SSE and all. Your raw key never leaves the vault.</p>
-          <div class="split-ctas">
-            <a href="#" class="btn btn-primary btn-sm">See providers</a>
-            <a href="#" class="btn btn-secondary btn-sm">Integration guide</a>
-          </div>
-        </div>
-        <div class="ui-card reveal">
-          <div class="ui-card-head">
-            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
-            <span class="ui-card-title">proxy.request</span>
-          </div>
-          <div class="flow">
-            <div class="flow-row"><span class="flow-num">1</span> Receiving inbound request</div>
-            <div class="flow-row"><span class="flow-num">2</span> Validating <code>scoped_token</code></div>
-            <div class="flow-row"><span class="flow-num">3</span> Injecting <code>api_key</code> from vault</div>
-            <div class="flow-row"><span class="flow-num">4</span> Forwarding to <code>provider</code></div>
-            <div class="flow-row"><span class="flow-num">5</span> Streaming <code>response</code></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    <script src="script.js?v=2"></script>
+    <script>
+        // Copy button handler — inline to avoid cache issues with script.js
+        document.querySelectorAll('.copy-btn[data-copy]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var text = btn.getAttribute('data-copy');
+                if (!text) return;
+                navigator.clipboard.writeText(text).then(function() {
+                    var orig = btn.innerHTML;
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                    setTimeout(function() { btn.innerHTML = orig; }, 2000);
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cursor Halo Follower
+            const halo = document.getElementById('cursor-halo');
+            let mouseX = 0, mouseY = 0;
+            let haloX = 0, haloY = 0;
 
-  <!-- ===================== SPLIT 3 : MCP ===================== -->
-  <section class="section">
-    <div class="container">
-      <div class="split">
-        <div class="split-text reveal">
-          <span class="label">MCP ready</span>
-          <h3>Built for AI agents from day one.</h3>
-          <p>Expose your vault to Claude, Cursor, or any MCP-compatible client. Agents call real APIs without ever seeing the underlying credentials — and every call is logged, scoped, and revocable.</p>
-          <div class="split-ctas">
-            <a href="#" class="btn btn-primary btn-sm">MCP setup</a>
-            <a href="#" class="btn btn-secondary btn-sm">Example configs</a>
-          </div>
-        </div>
-        <div class="ui-card reveal delay-1">
-          <div class="ui-card-head">
-            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
-            <span class="ui-card-title">.mcp.json</span>
-          </div>
-          <div class="code-body">
-<span class="c-muted">{</span><br>
-&nbsp;&nbsp;<span class="c-blue">"mcpServers"</span>: <span class="c-muted">{</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"apilocker"</span>: <span class="c-muted">{</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"command"</span>: <span class="c-green">"apilocker"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"args"</span>: <span class="c-muted">[</span><span class="c-green">"mcp"</span>, <span class="c-green">"serve"</span><span class="c-muted">]</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-blue">"scope"</span>: <span class="c-green">"openai,anthropic"</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-muted">}</span><br>
-&nbsp;&nbsp;<span class="c-muted">}</span><br>
-<span class="c-muted">}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
 
-  <!-- ===================== FINAL CTA ===================== -->
-  <section class="container final-cta">
-    <div class="final-cta-inner reveal">
-      <h2>Your keys.<br>Your proxy.<br>Your control.</h2>
-      <p>Free plan — unlimited keys, unlimited tokens, unlimited calls. Sign up in 10 seconds.</p>
-      <div class="install-cmd">
-        <span class="install-prompt">$</span>
-        <code>npm install -g apilocker</code>
-        <button class="install-copy" id="install-copy-btn" title="Copy">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        </button>
-      </div>
-      <div class="cta-row">
-        <a href="/signup" class="btn btn-white">
-          Get started free
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <a href="https://www.npmjs.com/package/apilocker" class="btn btn-white">
-          View on npm
-        </a>
-      </div>
-    </div>
-  </section>
+            function animateHalo() {
+                haloX += (mouseX - haloX) * 0.15;
+                haloY += (mouseY - haloY) * 0.15;
+                halo.style.transform = `translate3d(${haloX}px, ${haloY}px, 0)`;
+                requestAnimationFrame(animateHalo);
+            }
+            animateHalo();
+            const secTabs = document.querySelectorAll('.sec-tab');
+            const secVisElems = document.querySelectorAll('.sec-vis');
 
-  <!-- ===================== FOOTER ===================== -->
-  <footer>
-    <div class="container footer-inner">
-      <div class="logo">
-        <span class="logo-mark">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </span>
-        API Locker
-      </div>
-      <div class="footer-links">
-        <a href="/docs/mcp">Docs</a>
-        <a href="https://github.com/apilocker/apilocker">GitHub</a>
-        <a href="https://www.npmjs.com/package/apilocker">npm</a>
-          <a href="mailto:feedback@apilocker.app">Feedback</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-      </div>
-      <div class="footer-copy">© 2026 API Locker</div>
-    </div>
-  </footer>
-
-  <script>
-    // Nav scroll state
-    const nav = document.getElementById('nav');
-    const onScroll = () => {
-      if (window.scrollY > 8) nav.classList.add('scrolled');
-      else nav.classList.remove('scrolled');
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-
-    // Reveal on scroll
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('in');
-          io.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-    // Copy install command
-    const copyBtn = document.getElementById('install-copy-btn');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', async () => {
-        await navigator.clipboard.writeText('npm install -g apilocker');
-        copyBtn.classList.add('copied');
-        copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-        setTimeout(() => {
-          copyBtn.classList.remove('copied');
-          copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-        }, 2000);
-      });
-    }
-  </script>
+            secTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active from all tabs
+                    secTabs.forEach(t => t.classList.remove('active'));
+                    // Remove active from all visuals
+                    secVisElems.forEach(v => v.classList.remove('active'));
+                    
+                    // Add active to clicked tab
+                    tab.classList.add('active');
+                    // Add active to corresponding visual
+                    const targetId = tab.getAttribute('data-target');
+                    const targetVis = document.getElementById(targetId);
+                    if(targetVis) {
+                        targetVis.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

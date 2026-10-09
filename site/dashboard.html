@@ -11,9 +11,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/style.css?v=10">
 
   <style>
-    /* Dashboard-page-specific layout (everything else lives in /styles.css) */
+    /* Dashboard-page-specific layout */
+    .nav .container.nav-inner {
+      max-width: 100%;
+      padding: 0 48px;
+    }
     .dash-shell {
       min-height: 100vh;
       display: flex;
@@ -51,20 +56,18 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 56px;
-      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: nowrap;
     }
     .dash-greeting h1 {
-      font-size: clamp(32px, 4.4vw, 44px);
-      font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -0.028em;
-      margin: 6px 0 8px;
-      background: linear-gradient(180deg, #0F172A 0%, #334155 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      margin: 0;
+      color: #f1f5f9;
+      white-space: nowrap;
     }
     .dash-greeting p {
       color: var(--muted);
@@ -1429,6 +1432,721 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.4; }
     }
+
+    /* ====================================================================
+       DARK THEME + PILL-TAB LAYOUT OVERRIDE
+       ==================================================================== */
+
+    /* --- Dark-mode color tokens --- */
+    :root {
+      --ink: #f1f5f9;
+      --ink-2: #cbd5e1;
+      --muted: #94a3b8;
+      --bg: #0b0d14;
+      --surface: rgba(255,255,255,0.04);
+      --card: rgba(255,255,255,0.03);
+      --line: rgba(255,255,255,0.08);
+      --line-strong: rgba(255,255,255,0.12);
+      --blue: #3B82F6;
+      --blue-deep: #1E3A8A;
+      --glow: rgba(59,130,246,0.35);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15);
+      --shadow-lg: 0 24px 60px -20px rgba(0,0,0,0.5), 0 8px 24px -12px rgba(0,0,0,0.3);
+      --shadow-glow: 0 20px 60px -15px var(--glow);
+    }
+
+    /* --- Base dark background & text --- */
+    body {
+      background: #0b0d14 !important;
+      color: #f1f5f9 !important;
+    }
+
+    /* --- No-scroll viewport lock --- */
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* --- Nav: dark translucent, full width, proper layout --- */
+    .nav {
+      padding: 4px 0 !important;
+      background: rgba(11,13,20,0.82) !important;
+      backdrop-filter: saturate(180%) blur(20px) !important;
+      -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    .nav.scrolled {
+      background: rgba(11,13,20,0.92) !important;
+      border-bottom-color: rgba(255,255,255,0.08) !important;
+    }
+    .nav .logo { color: #f1f5f9; }
+    .nav-inner {
+      max-width: 100% !important;
+      width: 100% !important;
+      padding: 0 48px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+    }
+    .nav .logo {
+      flex-shrink: 0 !important;
+      margin-right: auto !important;
+    }
+    #nav-user {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      flex-shrink: 0 !important;
+    }
+
+    /* --- Nav feedback button: dark --- */
+    .nav-feedback-btn {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.1);
+      color: #cbd5e1;
+    }
+    .nav-feedback-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    /* --- User chip: dark pill --- */
+    .user-chip {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .user-chip img { background: rgba(255,255,255,0.06); }
+    .user-chip .uc-name { color: #f1f5f9; }
+    .user-chip .uc-email { color: #94a3b8; }
+
+    /* --- Dash shell: viewport fill, no scroll --- */
+    .dash-shell {
+      height: 100vh;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .dash-shell::before,
+    .dash-shell::after {
+      display: none !important;
+    }
+
+    /* --- Main: flex fill below nav --- */
+    .dash-main {
+      flex: 1;
+      padding: 80px 0 0 !important;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .dash-main > .container {
+      max-width: 1400px !important;
+      width: 100% !important;
+      margin: 0 auto !important;
+      padding: 24px 40px !important;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background: rgba(15,15,20,0.6) !important;
+      backdrop-filter: blur(24px) !important;
+      -webkit-backdrop-filter: blur(24px) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      border-radius: 20px !important;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+      margin-top: 16px !important;
+      margin-bottom: 16px !important;
+    }
+
+    /* --- Header: welcome + sign out, horizontally, clear of stats --- */
+    .dash-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 20px !important;
+      padding: 0 !important;
+      flex-shrink: 0 !important;
+      flex-wrap: nowrap !important;
+      gap: 16px !important;
+    }
+    .dash-greeting { flex-shrink: 0 !important; }
+    .dash-greeting .eyebrow { display: none !important; }
+    .dash-greeting p { display: none !important; }
+    .dash-greeting h1 {
+      font-size: 20px !important;
+      font-weight: 600 !important;
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+      -webkit-text-fill-color: #f1f5f9 !important;
+      color: #f1f5f9 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+    }
+
+    /* --- Stat row: compact grid, all 4 visible --- */
+    .stat-row {
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 12px !important;
+      margin-bottom: 16px !important;
+    }
+    .stat-card {
+      padding: 12px 16px !important;
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .stat-card::after {
+      box-shadow: none !important;
+    }
+    .stat-icon { display: none !important; }
+    .stat-label { color: #94a3b8; }
+    .stat-value { color: #f1f5f9; }
+
+    /* --- Hide elements --- */
+    .nav-links { display: none !important; }
+    .cli-nudge { display: none !important; }
+    /* Show CLI nudge only when MCP panel is active */
+    #mcp.active-panel ~ .cli-nudge,
+    .panel.active-panel + .cli-nudge { display: none !important; }
+
+    /* Sign out button — show it in the header */
+    .signout-btn {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: #94a3b8 !important;
+      padding: 8px 16px !important;
+      border-radius: 10px !important;
+      font-size: 13px !important;
+      cursor: pointer !important;
+    }
+    .signout-btn:hover {
+      background: rgba(220,38,38,0.1) !important;
+      border-color: rgba(220,38,38,0.25) !important;
+      color: #f87171 !important;
+    }
+    footer { display: none !important; }
+
+    /* --- Pill tabs container --- */
+    .pill-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      margin-bottom: 16px;
+      width: fit-content;
+      flex-shrink: 0;
+    }
+
+    /* --- Individual pill tab buttons --- */
+    .pill-tab {
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #94a3b8;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: none;
+      transition: all 0.15s var(--ease);
+      font-family: inherit;
+    }
+    .pill-tab:hover {
+      color: #f1f5f9;
+      background: rgba(255,255,255,0.04);
+    }
+    .pill-tab.active {
+      color: #f1f5f9;
+      background: rgba(59,130,246,0.15);
+      border-color: rgba(59,130,246,0.25);
+    }
+
+    /* --- Panels: hidden by default, shown when active --- */
+    .panel {
+      display: none;
+    }
+    .panel.active-panel {
+      display: block;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    /* Strip the card wrapper */
+    .panel {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+    }
+    .panel::after {
+      display: none !important;
+    }
+
+    /* MCP panel same treatment */
+    #mcp,
+    #mcp {
+      display: none;
+    }
+    #mcp.active-panel,
+    #mcp.active-panel {
+      display: block;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    #mcp,
+    #mcp {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* Keep panel-head visible */
+    .panel-head { display: flex; }
+    .panel-head h2 { color: #f1f5f9; }
+    .panel-head p { color: #94a3b8; }
+
+    /* --- All cards/panels: dark semi-transparent --- */
+    .key-bucket { background: transparent; }
+    .bucket-head { border-bottom-color: rgba(255,255,255,0.08); }
+    .bucket-title { color: #f1f5f9; }
+    .bucket-sub { color: #94a3b8; }
+    .bucket-count {
+      background: rgba(255,255,255,0.06);
+      color: #94a3b8;
+    }
+    .bucket-add {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.1);
+      color: #cbd5e1;
+    }
+    .bucket-add:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .bucket-empty {
+      background: rgba(255,255,255,0.03);
+      color: #94a3b8;
+    }
+
+    /* --- Row list items: dark --- */
+    .row {
+      background: rgba(255,255,255,0.03) !important;
+      border-color: rgba(255,255,255,0.06) !important;
+    }
+    .row:hover {
+      background: rgba(255,255,255,0.05) !important;
+    }
+    .row-title { color: #f1f5f9 !important; }
+    .row-sub { color: #94a3b8 !important; }
+
+    /* --- All text: light colors --- */
+    h1, h2, h3, h4 { color: #f1f5f9; }
+
+    /* --- All borders: white low opacity --- */
+
+    /* --- Inputs: dark background, light text, blue focus --- */
+    .field input,
+    .field select,
+    .field textarea,
+    .filter-input,
+    .filter-select {
+      background: rgba(255,255,255,0.04) !important;
+      border-color: rgba(255,255,255,0.1) !important;
+      color: #f1f5f9 !important;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus,
+    .filter-input:focus,
+    .filter-select:focus {
+      border-color: var(--blue) !important;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2) !important;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder,
+    .filter-input::placeholder {
+      color: #64748b !important;
+    }
+    .field label { color: #cbd5e1 !important; }
+    .field-hint { color: #64748b !important; }
+
+    /* --- Buttons: dark secondary, blue gradient primary --- */
+    .btn-secondary,
+    .modal-foot .btn-secondary {
+      background: rgba(255,255,255,0.06) !important;
+      border-color: rgba(255,255,255,0.1) !important;
+      color: #cbd5e1 !important;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.09) !important;
+      border-color: rgba(255,255,255,0.15) !important;
+    }
+    .btn-primary,
+    .modal-foot .btn-primary {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%) !important;
+      color: white !important;
+    }
+    .panel-action {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-deep) 100%);
+      color: white;
+    }
+
+    /* --- Modals: dark overlay, dark card --- */
+    .modal-backdrop {
+      background: rgba(0,0,0,0.7) !important;
+    }
+    .modal {
+      background: #12141c !important;
+      border-color: rgba(255,255,255,0.08) !important;
+    }
+    .modal-head {
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+    .modal-title { color: #f1f5f9 !important; }
+    .modal-sub { color: #94a3b8 !important; }
+    .modal-icon {
+      background: rgba(59,130,246,0.12) !important;
+      border-color: rgba(59,130,246,0.2) !important;
+      color: var(--blue) !important;
+    }
+    .modal-error {
+      background: rgba(239,68,68,0.1) !important;
+      border-color: rgba(239,68,68,0.25) !important;
+      color: #fca5a5 !important;
+    }
+
+    /* --- Provider tiles in Add Key modal: dark --- */
+    .provider-tile {
+      background: rgba(255,255,255,0.03) !important;
+      border-color: rgba(255,255,255,0.06) !important;
+      color: #cbd5e1 !important;
+    }
+    .provider-tile:hover {
+      border-color: rgba(255,255,255,0.12) !important;
+      background: rgba(255,255,255,0.05) !important;
+    }
+    .provider-tile.selected {
+      border-color: var(--blue) !important;
+      background: rgba(59,130,246,0.1) !important;
+    }
+    .provider-tile-icon {
+      background: rgba(255,255,255,0.04) !important;
+      border-color: rgba(255,255,255,0.08) !important;
+    }
+    .provider-tile.selected .provider-tile-icon {
+      border-color: rgba(59,130,246,0.35) !important;
+    }
+    .provider-tile-name { color: #cbd5e1 !important; }
+
+    /* --- Add key tabs: dark --- */
+    .add-key-tabs {
+      background: rgba(255,255,255,0.03);
+    }
+    .add-key-tab {
+      color: #94a3b8;
+    }
+    .add-key-tab:hover { color: #f1f5f9; }
+    .add-key-tab.active {
+      background: rgba(255,255,255,0.06);
+      color: #f1f5f9;
+    }
+    .add-key-tab-sub { color: #64748b; }
+
+    /* --- Badges: dark tinted backgrounds with colored text --- */
+    .eyebrow {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+      color: #cbd5e1;
+    }
+    .row-tag-chip {
+      background: rgba(59,130,246,0.12);
+      color: #60a5fa;
+      border-color: rgba(59,130,246,0.2);
+    }
+    .row.paused .row-title::after {
+      background: rgba(217,119,6,0.18);
+      color: #fbbf24;
+    }
+    .row-oauth .row-title::before {
+      background: rgba(16,185,129,0.15);
+      color: #34d399;
+    }
+
+    /* --- Code blocks: dark background --- */
+    .mcp-code-block {
+      background: #0a0c12;
+    }
+    .empty-state p code {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      color: #cbd5e1;
+    }
+
+    /* --- Empty states: dark --- */
+    .empty-state {
+      border-color: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+    }
+    .empty-state h3 { color: #f1f5f9; }
+    .empty-state p { color: #94a3b8; }
+    .empty-state-hint { color: #64748b; }
+
+    /* --- Filter row: dark --- */
+    .filter-row {
+      background: rgba(255,255,255,0.02);
+      border-color: rgba(255,255,255,0.06);
+    }
+
+    /* --- Doctor findings: dark --- */
+    .doctor-finding {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.06);
+    }
+    .doctor-finding.severity-warn {
+      border-color: rgba(217,119,6,0.3);
+      background: linear-gradient(135deg, rgba(217,119,6,0.08) 0%, rgba(255,255,255,0.03) 70%);
+    }
+    .doctor-finding.severity-info {
+      border-color: rgba(59,130,246,0.25);
+      background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(255,255,255,0.03) 70%);
+    }
+    .doctor-finding.severity-ok {
+      border-color: rgba(16,185,129,0.25);
+      background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(255,255,255,0.03) 70%);
+    }
+    .doctor-finding-body h4 { color: #f1f5f9; }
+    .doctor-finding-body p { color: #94a3b8; }
+    .doctor-finding-remedy {
+      background: rgba(255,255,255,0.04);
+      color: #cbd5e1;
+    }
+    .doctor-summary {
+      background: rgba(255,255,255,0.03);
+      color: #94a3b8;
+    }
+
+    /* --- MCP panel dark overrides --- */
+    .mcp-status-card {
+      background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(16,185,129,0.02) 100%);
+      border-color: rgba(16,185,129,0.2);
+    }
+    .mcp-status-label { color: #34d399; }
+    .mcp-status-url { color: #cbd5e1; }
+    .mcp-test-btn {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.1);
+      color: #cbd5e1;
+    }
+    .mcp-test-btn:hover {
+      background: #10B981;
+      color: white;
+      border-color: #10B981;
+    }
+    .mcp-section-head h3 { color: #f1f5f9; }
+    .mcp-section-head p { color: #94a3b8; }
+    .mcp-tabs {
+      background: rgba(255,255,255,0.03);
+    }
+    .mcp-tab { color: #94a3b8; }
+    .mcp-tab:hover { color: #f1f5f9; }
+    .mcp-tab.active {
+      background: rgba(255,255,255,0.06);
+      color: #f1f5f9;
+    }
+    .mcp-tab-intro { color: #cbd5e1; }
+    .mcp-tab-intro code,
+    .mcp-tab-hint code {
+      background: rgba(255,255,255,0.06);
+      color: #cbd5e1;
+    }
+    .mcp-tab-hint { color: #94a3b8; }
+    .mcp-activity-feed {
+      background: rgba(255,255,255,0.02);
+    }
+    .mcp-activity-empty { color: #94a3b8; }
+    .mcp-activity-row + .mcp-activity-row {
+      border-top-color: rgba(255,255,255,0.06);
+    }
+    .mcp-activity-time { color: #64748b; }
+    .mcp-activity-op { color: #f1f5f9; }
+    .mcp-prereq-note {
+      background: rgba(59,130,246,0.06);
+      border-color: rgba(59,130,246,0.15);
+      color: #cbd5e1;
+    }
+    .mcp-prereq-note strong { color: #f1f5f9; }
+    .mcp-prereq-note code {
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* --- OAuth grants: dark --- */
+    .oauth-grant {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.06);
+    }
+    .oauth-grant-logo { background: rgba(255,255,255,0.04); color: #94a3b8; }
+    .oauth-grant-name { color: #f1f5f9; }
+    .oauth-grant-meta { color: #94a3b8; }
+    .oauth-grant-meta .scope-chip {
+      background: rgba(59,130,246,0.1);
+      color: #60a5fa;
+    }
+    .oauth-grant-revoke {
+      background: rgba(255,255,255,0.03);
+      color: #f87171;
+      border-color: rgba(248,113,113,0.25);
+    }
+    .oauth-grant-revoke:hover {
+      background: rgba(248,113,113,0.08);
+      border-color: #f87171;
+    }
+    .oauth-grants-loading,
+    .oauth-grants-empty {
+      background: rgba(255,255,255,0.02);
+      border-color: rgba(255,255,255,0.06);
+      color: #94a3b8;
+    }
+    .oauth-grants-empty strong { color: #f1f5f9; }
+
+    /* --- OAuth reveal / rotate modals: dark --- */
+    .oauth-field {
+      background: rgba(255,255,255,0.03);
+    }
+    .oauth-field-label { color: #cbd5e1; }
+    .oauth-field-value { color: #94a3b8; }
+    .oauth-field-btn {
+      color: #94a3b8;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .oauth-field-btn:hover {
+      color: #f1f5f9;
+      border-color: rgba(255,255,255,0.2);
+    }
+    .rotate-target {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.06);
+    }
+    .rotate-target-name { color: #f1f5f9; }
+    .rotate-target-meta { color: #94a3b8; }
+    .rename-info {
+      background: rgba(59,130,246,0.06);
+      border-color: rgba(59,130,246,0.15);
+      color: #cbd5e1;
+    }
+    .rename-info code { background: rgba(255,255,255,0.06); }
+
+    /* --- Welcome modal: dark --- */
+    .welcome-title {
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+      -webkit-text-fill-color: #f1f5f9 !important;
+    }
+    .welcome-pillar {
+      background: rgba(255,255,255,0.03);
+    }
+    .welcome-pillar-name { color: #f1f5f9; }
+    .welcome-pillar-desc { color: #94a3b8; }
+    .welcome-mcp-callout {
+      background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, rgba(30,58,138,0.04) 100%);
+      border-color: rgba(59,130,246,0.15);
+    }
+    .welcome-mcp-callout p { color: #cbd5e1; }
+    .welcome-mcp-callout strong { color: #f1f5f9; }
+
+    /* --- Live toggle: dark --- */
+    .live-toggle {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.06);
+      color: #94a3b8;
+    }
+    .live-toggle input {
+      background: rgba(255,255,255,0.12);
+    }
+    .live-toggle input::before {
+      background: #cbd5e1;
+    }
+
+    /* --- World map background --- */
+    .world-map-bg {
+      position: fixed;
+      inset: -10%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background: url('/assets/world-dot-map.svg') center center / cover no-repeat;
+    }
+
+    /* --- Loading screen: dark --- */
+    #loading {
+      background: #0b0d14 !important;
+    }
+    .loading-shell {
+      background: #0b0d14;
+    }
+
+    /* --- Scrollbar inside panels: thin, dark --- */
+    .panel.active-panel::-webkit-scrollbar,
+    #mcp.active-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    .panel.active-panel::-webkit-scrollbar-track,
+    #mcp.active-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .panel.active-panel::-webkit-scrollbar-thumb,
+    #mcp.active-panel::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+    }
+    .panel.active-panel::-webkit-scrollbar-thumb:hover,
+    #mcp.active-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.14);
+    }
+    .panel.active-panel,
+    #mcp.active-panel {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.08) transparent;
+    }
+
+    /* --- Token rows: dark --- */
+    .token-row,
+    .device-row {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.06);
+    }
+
+    /* --- Misc dark overrides --- */
+    .mcp-test-result.ok {
+      background: rgba(16,185,129,0.08);
+      border-color: rgba(16,185,129,0.2);
+      color: #34d399;
+    }
+    .mcp-test-result.err {
+      background: rgba(239,68,68,0.08);
+      border-color: rgba(239,68,68,0.2);
+      color: #fca5a5;
+    }
+    .row-rotated.stale { color: #fbbf24; }
+    .filter-count { color: #94a3b8; }
+
+    /* ====================================================================
+       END DARK THEME + PILL-TAB LAYOUT OVERRIDE
+       ==================================================================== */
   </style>
 
   <!-- API Locker brand assets (mascot logo) -->
@@ -1444,6 +2162,7 @@
 <body>
 
   <div class="dash-shell">
+    <div class="world-map-bg"></div>
 
     <!-- ===================== NAV ===================== -->
     <nav class="nav" id="nav">
@@ -1468,6 +2187,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             Feedback
           </a>
+          <button class="signout-btn" id="signout-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </button>
           <div class="user-chip">
             <img id="user-avatar" src="" alt="" />
             <div>
@@ -1494,10 +2217,6 @@
             <h1>Welcome back, <span id="greet-name">friend</span>.</h1>
             <p>Here's what's in your vault today.</p>
           </div>
-          <button class="signout-btn" id="signout-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Sign out
-          </button>
         </div>
 
         <!-- Stat row -->
@@ -1787,7 +2506,7 @@ apilocker register</pre>
 }</pre>
               <button class="mcp-copy-btn" data-mcp-copy="claude-desktop">Copy</button>
             </div>
-            <p class="mcp-tab-hint">Once Claude Desktop restarts, all 21 API Locker tools become available in the tool picker — list_keys, reveal_key, run_doctor, proxy_request, and more.</p>
+            <p class="mcp-tab-hint">Once Claude Desktop restarts, all 25 API Locker tools become available in the tool picker — list_keys, reveal_key, run_doctor, proxy_get, and more.</p>
           </div>
 
           <div class="mcp-tab-panel" data-mcp-panel="claude-code">
@@ -2043,7 +2762,7 @@ apilocker register</pre>
         <img src="/brand/logo-128.png" alt="API Locker mascot" class="welcome-mascot" />
         <div class="welcome-badge">NEW · v1.0.3</div>
         <h3 id="welcome-title" class="modal-title welcome-title">Welcome to API Locker.</h3>
-        <p class="welcome-sub">One vault for every credential — plus a 21-tool MCP server so your AI agents can use them.</p>
+        <p class="welcome-sub">One vault for every credential — plus a 25-tool MCP server so your AI agents can use them.</p>
       </div>
       <div class="modal-body">
         <div class="welcome-pillars">
@@ -2081,7 +2800,7 @@ apilocker register</pre>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z"/></svg>
             <span>Let your AI agent handle credentials</span>
           </div>
-          <p>API Locker's 21-tool MCP server is live. Connect <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, <strong>Claude on claude.ai</strong>, <strong>Cursor</strong>, <strong>Zed</strong>, or <strong>Continue</strong> and your agent can list, reveal, rotate, pause, and proxy through your credentials — with safety prompts for every write operation.</p>
+          <p>API Locker's 25-tool MCP server is live. Connect <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, <strong>Claude on claude.ai</strong>, <strong>Cursor</strong>, <strong>Zed</strong>, or <strong>Continue</strong> and your agent can list, reveal, rotate, pause, and proxy through your credentials — with safety prompts for every write operation.</p>
           <a href="#mcp" class="welcome-mcp-link">Set it up in the MCP panel below →</a>
         </div>
 
@@ -3016,6 +3735,37 @@ func main() {
       $('loading').classList.add('hidden');
       $('main').classList.remove('hidden');
       $('nav-user').classList.remove('hidden');
+
+      // ── PILL TABS ──
+      (function() {
+        var tabs = [
+          { id: 'keys', label: 'Keys' },
+          { id: 'tokens', label: 'Tokens' },
+          { id: 'activity', label: 'Activity' },
+          { id: 'devices', label: 'Devices' },
+          { id: 'doctor', label: 'Health' },
+          { id: 'mcp', label: 'MCP' }
+        ];
+        var bar = document.createElement('div');
+        bar.className = 'pill-tabs';
+        tabs.forEach(function(t, i) {
+          var btn = document.createElement('button');
+          btn.className = 'pill-tab' + (i === 0 ? ' active' : '');
+          btn.textContent = t.label;
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.pill-tab').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active-panel'); });
+            var target = document.getElementById(t.id);
+            if (target) target.classList.add('active-panel');
+          });
+          bar.appendChild(btn);
+        });
+        var statRow = document.querySelector('.stat-row');
+        if (statRow) statRow.after(bar);
+        var firstPanel = document.getElementById('keys');
+        if (firstPanel) firstPanel.classList.add('active-panel');
+      })();
     }
 
     $('signout-btn').addEventListener('click', async () => {

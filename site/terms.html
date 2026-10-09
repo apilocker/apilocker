@@ -9,8 +9,165 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=8">
+
+  <style>
+    /* Legal page styles — dark theme */
+    .legal-main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 140px 28px 80px;
+    }
+    .legal-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-solid);
+      margin-bottom: 16px;
+    }
+    .legal-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-solid);
+    }
+    .legal-h1 {
+      font-size: clamp(36px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin: 0 0 12px;
+      background: linear-gradient(180deg, #fff 0%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .legal-updated {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+    .legal-lede {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 32px;
+    }
+    .legal-prose h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #f1f5f9;
+      margin: 40px 0 14px;
+      line-height: 1.3;
+    }
+    .legal-prose p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+    .legal-prose ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+    .legal-prose li {
+      position: relative;
+      padding: 5px 0 5px 22px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #cbd5e1;
+    }
+    .legal-prose li::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 14px;
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--accent-solid);
+    }
+    .legal-prose li strong {
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+    .legal-prose li em {
+      color: #e2e8f0;
+    }
+    .legal-prose a {
+      color: var(--accent-solid);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .legal-prose a:hover {
+      color: #60a5fa;
+    }
+    .legal-prose code {
+      font-family: var(--font-mono);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+    .legal-note {
+      margin-top: 48px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      font-size: 14px;
+      line-height: 1.65;
+      color: #94a3b8;
+    }
+
+    /* Footer */
+    .page-footer {
+      border-top: 1px solid var(--border-light);
+      padding: 48px 28px 32px;
+      max-width: 720px;
+      margin: 60px auto 0;
+    }
+    .page-footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .page-footer-brand {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-main);
+    }
+    .page-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .page-footer-links a {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .page-footer-links a:hover { color: #fff; }
+    .page-footer-copy {
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+  </style>
 
   <!-- API Locker brand assets (mascot logo) -->
   <link rel="icon" type="image/png" sizes="32x32" href="/brand/logo-32.png">
@@ -23,140 +180,137 @@
   <meta name="twitter:image" content="https://www.apilocker.app/brand/og-image.png">
 </head>
 <body>
+  <div id="cursor-halo"></div>
 
-  <div class="auth-shell">
+  <!-- Nav -->
+  <nav id="floating-nav" class="nav">
+    <div class="nav-brand">API Locker</div>
+    <div class="nav-links">
+      <a href="/#problem">Problem</a>
+      <a href="/#solution">Solution</a>
+      <a href="/#how-it-works">How It Works</a>
+      <a href="/changelog">Changelog</a>
+    </div>
+    <div class="nav-cta">
+      <a href="/login" class="btn btn-secondary btn-small">Sign In</a>
+      <a href="/signup" class="btn btn-primary btn-small">Get Started Free</a>
+    </div>
+  </nav>
 
-    <nav class="nav" id="nav">
-      <div class="container nav-inner">
-        <a href="/" class="logo">
-          <span class="logo-mark">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          API Locker
-        </a>
-        <div class="nav-links">
-          <a href="/#features">Features</a>
-          <a href="/#vault">Vault</a>
-          <a href="/#proxy">Proxy</a>
-          <a href="/#pricing">Pricing</a>
-        </div>
-        <div style="display: flex; align-items: center; gap: 18px;">
-          <a href="/login" class="nav-signin">Log in</a>
-          <a href="/signup" class="nav-cta">
-            Sign up
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </a>
-        </div>
+  <main class="legal-main">
+    <span class="legal-eyebrow"><span class="legal-eyebrow-dot"></span> Legal</span>
+    <h1 class="legal-h1">Terms of Service</h1>
+    <p class="legal-updated">Last updated: April 9, 2026</p>
+
+    <div class="legal-prose">
+      <p class="legal-lede">These terms describe the deal between you and API Locker. By creating an account or using the service, you agree to them. If you don't agree, don't use the service.</p>
+
+      <h2>1. What the service is</h2>
+      <p>API Locker is a credential vault, an outbound proxy, and a Model Context Protocol (MCP) server. You store API keys, service credentials, and OAuth credentials with us; we encrypt them; your apps and agents proxy requests through our service to the underlying API providers, and we inject your credentials into those requests automatically. You can also connect MCP-compatible AI clients (Claude, Cursor, Zed, Continue, and any other client that speaks MCP) so they can read, manage, and act on your vault on your behalf. You can manage, rotate, pause, and revoke credentials through your dashboard, and you can revoke any connected MCP client at any time.</p>
+
+      <h2>2. Your account</h2>
+      <p>You must sign in with a supported OAuth provider (currently Google or GitHub). You are responsible for all activity under your account, including any actions taken by AI agents you have connected via MCP. Keep your refresh tokens and master tokens safe — if they leak, the attacker can reach anything your tokens are scoped to until you revoke them. We provide tools for rotation, pausing, revocation, and hard deletion; use them.</p>
+
+      <h2>3. Acceptable use</h2>
+      <p>Don't use API Locker to:</p>
+      <ul>
+        <li>Store credentials you don't have the right to use</li>
+        <li>Proxy traffic that violates the terms of the downstream provider (e.g. using a Stripe key you don't own, or abusing an OpenAI API against its usage policies)</li>
+        <li>Generate, distribute, or facilitate illegal content</li>
+        <li>Attempt to compromise the service, bypass rate limits, or extract credentials other than your own</li>
+        <li>Authorize MCP clients you don't recognize or trust — the consent screen exists for a reason; don't click Approve on a client you can't identify</li>
+        <li>Use the MCP server to coordinate automated abuse against downstream providers (e.g. running a scripted agent through the proxy tools to circumvent OpenAI or Stripe rate limits)</li>
+        <li>Build a competing service that wraps API Locker without permission, or expose API Locker's functionality to your own users without a reseller agreement</li>
+        <li>Resell the service to third parties without a reseller agreement</li>
+      </ul>
+
+      <h2>4. MCP server &amp; AI agent connections</h2>
+      <p>API Locker exposes a Model Context Protocol server at <code>https://api.apilocker.app/v1/mcp</code> with 25 tools mirroring the dashboard and CLI. Two connection paths are supported:</p>
+      <ul>
+        <li><strong>Local MCP (stdio bridge):</strong> the <code>apilocker mcp</code> command in our CLI authenticates with a per-device master token stored at <code>~/.apilocker/config.json</code>. Anyone with that file has the same vault access you do; treat the file as you would an SSH private key.</li>
+        <li><strong>Remote MCP (OAuth 2.1):</strong> third-party MCP clients (e.g. Claude on claude.ai) can authenticate via the OAuth 2.1 authorization code flow with PKCE. When you click <strong>Approve</strong> on the API Locker consent screen, you are granting that specific client an access token (1-hour lifetime) and a refresh token (90-day lifetime, rotated on use) scoped to the permissions you approved.</li>
+      </ul>
+      <p><strong>Your responsibility when approving an OAuth client:</strong> the consent screen displays the client's self-declared name and the scopes it is requesting. We do not verify the identity of third-party clients beyond their ability to complete the OAuth handshake. <em>If you approve a client you don't recognize, you may give it the ability to read every credential in your vault, make API calls on your behalf, or modify vault state.</em> You are solely responsible for vetting any client you authorize. We strongly recommend only approving clients from organizations you know and trust (Anthropic for Claude, your IDE vendor for Cursor / Zed / Continue, etc.).</p>
+      <p><strong>Revocation:</strong> you can revoke any connected client at any time from your dashboard. Revocation invalidates both the current access token and its refresh token; the client must re-authorize to reconnect. If you suspect a client has been compromised, revoke immediately and rotate any credentials it had access to.</p>
+      <p><strong>Tool calls and audit logging:</strong> every MCP tool call (read, write, proxy) is audit-logged in your dashboard with timestamp, source IP, country, status code, and latency. You can review what any connected client has done in real time via <code>apilocker activity --follow</code> or the dashboard's activity feed.</p>
+      <p><strong>Refresh token theft protection:</strong> our refresh tokens rotate on every use. If we detect that an old refresh token is reused (a strong indicator of token theft), we revoke the entire grant family — both the current and the leaked tokens — and the client must re-authorize through the consent screen.</p>
+
+      <h2>5. Pricing and billing</h2>
+      <p>API Locker is currently free. We will notify you in advance of any move to paid plans, and you'll have the option to export your data or close your account before any charges apply.</p>
+
+      <h2>6. Service availability</h2>
+      <p>We do our best to keep the service running, but there is currently no uptime SLA. API Locker runs on Cloudflare's global edge network. If Cloudflare has an incident, we probably do too. We recommend monitoring the health of your critical workflows independently.</p>
+
+      <h2>7. Downstream providers</h2>
+      <p>When you proxy a request, API Locker forwards it to the provider you chose (OpenAI, Stripe, etc.). We are not responsible for the availability, pricing, accuracy, or conduct of those providers. Their terms apply to the portion of your workflow that lives on their infrastructure.</p>
+
+      <h2>8. Data</h2>
+      <p>You own your data. We process it on your behalf to provide the service. See our <a href="/privacy">Privacy Policy</a> for details on what we collect, how we store it, and your rights. You can delete your data through the dashboard or by contacting us.</p>
+
+      <h2>9. Termination</h2>
+      <p>You can close your account at any time. We can suspend or terminate accounts that violate these terms, abuse the service, or put other users at risk. In an emergency we may suspend first and investigate after.</p>
+
+      <h2>10. Warranties and liability</h2>
+      <p>API Locker is provided "as is". We make no warranties beyond what's legally required. To the maximum extent allowed by law, our liability for any claim arising from your use of the service is limited to the amount you paid us in the 12 months preceding the claim (which on the free plan is zero).</p>
+      <p>API Locker stores and proxies credentials, and the security properties we provide depend on the secrets you store with us being handled correctly on your end. Don't paste your refresh token into public code or unsafe environments.</p>
+
+      <h2>11. Changes</h2>
+      <p>We may update these terms as the service evolves. We'll notify signed-in users about material changes via email or in the dashboard before they take effect. Continued use after an update means you accept the new terms.</p>
+
+      <h2>12. Contact</h2>
+      <p>The right address depends on what you want to talk about:</p>
+      <ul>
+        <li><strong>Legal &amp; terms questions:</strong> <a href="mailto:legal@apilocker.app">legal@apilocker.app</a></li>
+        <li><strong>Privacy questions:</strong> <a href="mailto:privacy@apilocker.app">privacy@apilocker.app</a></li>
+        <li><strong>Security disclosures:</strong> <a href="mailto:security@apilocker.app">security@apilocker.app</a> — please don't open public GitHub issues for security findings</li>
+        <li><strong>General support:</strong> <a href="mailto:support@apilocker.app">support@apilocker.app</a></li>
+        <li><strong>Product feedback &amp; feature requests:</strong> <a href="mailto:feedback@apilocker.app">feedback@apilocker.app</a></li>
+        <li><strong>Bug reports:</strong> <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a></li>
+      </ul>
+
+      <p class="legal-note">These terms are a starting point for a credential-vault product. If you need a custom agreement (DPA, MSA, vendor assessment, etc.), contact us before rolling API Locker out across your organization.</p>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <div class="page-footer-inner">
+      <div class="page-footer-brand">API Locker</div>
+      <div class="page-footer-links">
+        <a href="/docs/mcp">Docs</a>
+        <a href="https://github.com/apilocker/apilocker">GitHub</a>
+        <a href="https://www.npmjs.com/package/apilocker">npm</a>
+        <a href="mailto:feedback@apilocker.app">Feedback</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
       </div>
-    </nav>
-
-    <main class="legal-main">
-      <div class="legal-container">
-        <span class="eyebrow"><span class="eyebrow-dot"></span> Legal</span>
-        <h1 class="legal-h1">Terms of Service</h1>
-        <p class="legal-updated">Last updated: April 9, 2026</p>
-
-        <div class="legal-prose">
-          <p class="legal-lede">These terms describe the deal between you and API Locker. By creating an account or using the service, you agree to them. If you don't agree, don't use the service.</p>
-
-          <h2>1. What the service is</h2>
-          <p>API Locker is a credential vault, an outbound proxy, and a Model Context Protocol (MCP) server. You store API keys, service credentials, and OAuth credentials with us; we encrypt them; your apps and agents proxy requests through our service to the underlying API providers, and we inject your credentials into those requests automatically. You can also connect MCP-compatible AI clients (Claude, Cursor, Zed, Continue, and any other client that speaks MCP) so they can read, manage, and act on your vault on your behalf. You can manage, rotate, pause, and revoke credentials through your dashboard, and you can revoke any connected MCP client at any time.</p>
-
-          <h2>2. Your account</h2>
-          <p>You must sign in with a supported OAuth provider (currently Google or GitHub). You are responsible for all activity under your account, including any actions taken by AI agents you have connected via MCP. Keep your refresh tokens and master tokens safe — if they leak, the attacker can reach anything your tokens are scoped to until you revoke them. We provide tools for rotation, pausing, revocation, and hard deletion; use them.</p>
-
-          <h2>3. Acceptable use</h2>
-          <p>Don't use API Locker to:</p>
-          <ul>
-            <li>Store credentials you don't have the right to use</li>
-            <li>Proxy traffic that violates the terms of the downstream provider (e.g. using a Stripe key you don't own, or abusing an OpenAI API against its usage policies)</li>
-            <li>Generate, distribute, or facilitate illegal content</li>
-            <li>Attempt to compromise the service, bypass rate limits, or extract credentials other than your own</li>
-            <li>Authorize MCP clients you don't recognize or trust — the consent screen exists for a reason; don't click Approve on a client you can't identify</li>
-            <li>Use the MCP server to coordinate automated abuse against downstream providers (e.g. running a scripted agent through proxy_request to circumvent OpenAI or Stripe rate limits)</li>
-            <li>Build a competing service that wraps API Locker without permission, or expose API Locker's functionality to your own users without a reseller agreement</li>
-            <li>Resell the service to third parties without a reseller agreement</li>
-          </ul>
-
-          <h2>4. MCP server &amp; AI agent connections</h2>
-          <p>API Locker exposes a Model Context Protocol server at <code>https://api.apilocker.app/v1/mcp</code> with 21 tools mirroring the dashboard and CLI. Two connection paths are supported:</p>
-          <ul>
-            <li><strong>Local MCP (stdio bridge):</strong> the <code>apilocker mcp</code> command in our CLI authenticates with a per-device master token stored at <code>~/.apilocker/config.json</code>. Anyone with that file has the same vault access you do; treat the file as you would an SSH private key.</li>
-            <li><strong>Remote MCP (OAuth 2.1):</strong> third-party MCP clients (e.g. Claude on claude.ai) can authenticate via the OAuth 2.1 authorization code flow with PKCE. When you click <strong>Approve</strong> on the API Locker consent screen, you are granting that specific client an access token (1-hour lifetime) and a refresh token (90-day lifetime, rotated on use) scoped to the permissions you approved.</li>
-          </ul>
-          <p><strong>Your responsibility when approving an OAuth client:</strong> the consent screen displays the client's self-declared name and the scopes it is requesting. We do not verify the identity of third-party clients beyond their ability to complete the OAuth handshake. <em>If you approve a client you don't recognize, you may give it the ability to read every credential in your vault, make API calls on your behalf, or modify vault state.</em> You are solely responsible for vetting any client you authorize. We strongly recommend only approving clients from organizations you know and trust (Anthropic for Claude, your IDE vendor for Cursor / Zed / Continue, etc.).</p>
-          <p><strong>Revocation:</strong> you can revoke any connected client at any time from your dashboard. Revocation invalidates both the current access token and its refresh token; the client must re-authorize to reconnect. If you suspect a client has been compromised, revoke immediately and rotate any credentials it had access to.</p>
-          <p><strong>Tool calls and audit logging:</strong> every MCP tool call (read, write, proxy) is audit-logged in your dashboard with timestamp, source IP, country, status code, and latency. You can review what any connected client has done in real time via <code>apilocker activity --follow</code> or the dashboard's activity feed.</p>
-          <p><strong>Refresh token theft protection:</strong> our refresh tokens rotate on every use. If we detect that an old refresh token is reused (a strong indicator of token theft), we revoke the entire grant family — both the current and the leaked tokens — and the client must re-authorize through the consent screen.</p>
-
-          <h2>5. Pricing and billing</h2>
-          <p>API Locker is currently free. We will notify you in advance of any move to paid plans, and you'll have the option to export your data or close your account before any charges apply.</p>
-
-          <h2>6. Service availability</h2>
-          <p>We do our best to keep the service running, but there is currently no uptime SLA. API Locker runs on Cloudflare's global edge network. If Cloudflare has an incident, we probably do too. We recommend monitoring the health of your critical workflows independently.</p>
-
-          <h2>7. Downstream providers</h2>
-          <p>When you proxy a request, API Locker forwards it to the provider you chose (OpenAI, Stripe, etc.). We are not responsible for the availability, pricing, accuracy, or conduct of those providers. Their terms apply to the portion of your workflow that lives on their infrastructure.</p>
-
-          <h2>8. Data</h2>
-          <p>You own your data. We process it on your behalf to provide the service. See our <a href="/privacy">Privacy Policy</a> for details on what we collect, how we store it, and your rights. You can delete your data through the dashboard or by contacting us.</p>
-
-          <h2>9. Termination</h2>
-          <p>You can close your account at any time. We can suspend or terminate accounts that violate these terms, abuse the service, or put other users at risk. In an emergency we may suspend first and investigate after.</p>
-
-          <h2>10. Warranties and liability</h2>
-          <p>API Locker is provided "as is". We make no warranties beyond what's legally required. To the maximum extent allowed by law, our liability for any claim arising from your use of the service is limited to the amount you paid us in the 12 months preceding the claim (which on the free plan is zero).</p>
-          <p>API Locker stores and proxies credentials, and the security properties we provide depend on the secrets you store with us being handled correctly on your end. Don't paste your refresh token into public code or unsafe environments.</p>
-
-          <h2>11. Changes</h2>
-          <p>We may update these terms as the service evolves. We'll notify signed-in users about material changes via email or in the dashboard before they take effect. Continued use after an update means you accept the new terms.</p>
-
-          <h2>12. Contact</h2>
-          <p>The right address depends on what you want to talk about:</p>
-          <ul>
-            <li><strong>Legal &amp; terms questions:</strong> <a href="mailto:legal@apilocker.app">legal@apilocker.app</a></li>
-            <li><strong>Privacy questions:</strong> <a href="mailto:privacy@apilocker.app">privacy@apilocker.app</a></li>
-            <li><strong>Security disclosures:</strong> <a href="mailto:security@apilocker.app">security@apilocker.app</a> — please don't open public GitHub issues for security findings</li>
-            <li><strong>General support:</strong> <a href="mailto:support@apilocker.app">support@apilocker.app</a></li>
-            <li><strong>Product feedback &amp; feature requests:</strong> <a href="mailto:feedback@apilocker.app">feedback@apilocker.app</a></li>
-            <li><strong>Bug reports:</strong> <a href="https://github.com/apilocker/apilocker/issues">github.com/apilocker/apilocker/issues</a></li>
-          </ul>
-
-          <p class="legal-note">These terms are a starting point for a credential-vault product. If you need a custom agreement (DPA, MSA, vendor assessment, etc.), contact us before rolling API Locker out across your organization.</p>
-        </div>
-      </div>
-    </main>
-
-    <footer>
-      <div class="container footer-inner">
-        <div class="logo">
-          <span class="logo-mark">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          API Locker
-        </div>
-        <div class="footer-links">
-          <a href="/docs/mcp">Docs</a>
-          <a href="https://github.com/apilocker/apilocker">GitHub</a>
-          <a href="https://www.npmjs.com/package/apilocker">npm</a>
-          <a href="mailto:feedback@apilocker.app">Feedback</a>
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
-        </div>
-        <div class="footer-copy">© 2026 API Locker</div>
-      </div>
-    </footer>
-
-  </div>
+      <div class="page-footer-copy">&copy; 2026 API Locker</div>
+    </div>
+  </footer>
 
   <script>
-    const nav = document.getElementById('nav');
+    const nav = document.getElementById('floating-nav');
     const onScroll = () => {
       if (window.scrollY > 8) nav.classList.add('scrolled');
       else nav.classList.remove('scrolled');
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+
+    // Cursor halo
+    const halo = document.getElementById('cursor-halo');
+    let mouseX = 0, mouseY = 0;
+    let haloX = 0, haloY = 0;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+    function animateHalo() {
+      haloX += (mouseX - haloX) * 0.15;
+      haloY += (mouseY - haloY) * 0.15;
+      halo.style.transform = `translate3d(${haloX}px, ${haloY}px, 0)`;
+      requestAnimationFrame(animateHalo);
+    }
+    animateHalo();
   </script>
 </body>
 </html>
